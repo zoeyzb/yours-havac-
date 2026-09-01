@@ -9,6 +9,7 @@ import {
   Clock3,
   Flame,
   Gauge,
+  ImageOff,
   MapPin,
   Phone,
   ShieldCheck,
@@ -37,6 +38,38 @@ const serviceIcons: Record<ServiceKey, typeof Snowflake> = {
 
 const phoneHref = `tel:${siteConfig.brand.phoneHref}`
 
+function ImageFrame({
+  src,
+  alt,
+  className = "",
+  imageClassName = "",
+}: {
+  src: string
+  alt: string
+  className?: string
+  imageClassName?: string
+}) {
+  return (
+    <div className={`relative overflow-hidden bg-[#e8ddd2] ${className}`}>
+      <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_top_left,#f8f1e9,#dfcfc0)] text-[#8a6f61]">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <ImageOff size={24} />
+          <span className="text-xs font-black uppercase tracking-[.14em]">Photo unavailable</span>
+        </div>
+      </div>
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        className={`absolute inset-0 h-full w-full object-cover ${imageClassName}`}
+        onError={(event) => {
+          event.currentTarget.style.display = "none"
+        }}
+      />
+    </div>
+  )
+}
+
 function Header({ currentPage }: { currentPage: Page }) {
   return (
     <header className="sticky top-0 z-50 border-b border-[#e7ddd3] bg-[#fbf7f2]/95 backdrop-blur-xl">
@@ -45,6 +78,7 @@ function Header({ currentPage }: { currentPage: Page }) {
           <div className="text-lg font-black tracking-[-0.035em] text-[#241914] md:text-xl">{siteConfig.brand.name}</div>
           <div className="mt-0.5 hidden text-xs font-semibold text-[#76645b] sm:block">{siteConfig.brand.tagline}</div>
         </Link>
+
         <nav className="hidden items-center gap-8 text-sm font-semibold text-[#66544b] lg:flex">
           <Link href="/" className={currentPage === "home" ? "text-[#241914]" : "transition hover:text-[#a55332]"}>Home</Link>
           <Link href="/services" className={currentPage === "services" ? "text-[#241914]" : "transition hover:text-[#a55332]"}>Services</Link>
@@ -52,6 +86,7 @@ function Header({ currentPage }: { currentPage: Page }) {
           <a href="#service-areas" className="transition hover:text-[#a55332]">Service Areas</a>
           <Link href="/quote" className={currentPage === "quote" ? "text-[#241914]" : "transition hover:text-[#a55332]"}>Contact</Link>
         </nav>
+
         <div className="flex items-center gap-2">
           <a href={phoneHref} className="hidden items-center gap-2 rounded-full border border-[#d8cbc0] bg-white px-4 py-2.5 text-sm font-black text-[#241914] transition hover:border-[#a55332] md:inline-flex">
             <Phone size={15} /> {siteConfig.brand.phoneDisplay}
@@ -68,15 +103,16 @@ function Header({ currentPage }: { currentPage: Page }) {
 function Hero() {
   return (
     <section className="overflow-hidden bg-[#f4ede4]">
-      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:px-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:py-16">
-        <div className="relative z-10 py-4 lg:py-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#d8cbc0] bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[.14em] text-[#76564a] shadow-sm">
+      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 md:px-8 lg:grid-cols-[.92fr_1.08fr] lg:items-center lg:py-14">
+        <div className="relative z-10 py-4 lg:py-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#d8cbc0] bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[.14em] text-[#76564a] shadow-sm">
             <Star size={14} fill="currentColor" className="text-[#b45a34]" /> {siteConfig.hero.eyebrow}
           </div>
           <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[.92] tracking-[-.055em] text-[#241914] sm:text-6xl lg:text-[5rem]">
             Comfort back.<br /><span className="text-[#a55332]">Without the runaround.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-8 text-[#66544b]">{siteConfig.hero.body}</p>
+
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/quote" className="inline-flex items-center gap-2 rounded-full bg-[#a55332] px-6 py-3.5 text-sm font-black text-white shadow-[0_16px_36px_rgba(165,83,50,.22)] transition hover:-translate-y-0.5 hover:bg-[#8f452a]">
               Schedule Service <ArrowRight size={16} />
@@ -85,6 +121,7 @@ function Hero() {
               <Phone size={16} /> Call Now
             </a>
           </div>
+
           <div className="mt-8 grid max-w-2xl grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-4">
             {siteConfig.trust.map((item) => (
               <div key={item} className="flex items-start gap-2 text-xs font-semibold leading-5 text-[#6e5b51]">
@@ -95,17 +132,17 @@ function Hero() {
           </div>
         </div>
 
-        <div className="relative min-h-[520px] overflow-hidden rounded-[2.4rem] bg-[#2a1c17] shadow-[0_35px_90px_rgba(37,25,20,.2)] lg:min-h-[610px]">
-          <div className="absolute inset-0 bg-cover bg-center transition duration-700 hover:scale-[1.025]" style={{ backgroundImage: `url(${siteConfig.hero.image})` }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#241914]/80 via-[#241914]/15 to-transparent" />
-          <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-2 text-xs font-black uppercase tracking-[.14em] text-white backdrop-blur-xl">Residential HVAC service</div>
-          <div className="absolute inset-x-6 bottom-6 rounded-[1.8rem] border border-white/15 bg-[#241914]/75 p-6 text-white backdrop-blur-xl">
+        <div className="relative min-h-[500px] overflow-hidden rounded-[2.4rem] bg-[#2a1c17] shadow-[0_35px_90px_rgba(37,25,20,.18)] lg:min-h-[590px]">
+          <ImageFrame src={siteConfig.hero.image} alt={siteConfig.hero.imageAlt} className="absolute inset-0" imageClassName="transition duration-700 hover:scale-[1.025]" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#241914]/80 via-[#241914]/10 to-transparent" />
+          <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-2 text-xs font-black uppercase tracking-[.14em] text-white backdrop-blur-xl">Residential comfort, handled</div>
+          <div className="absolute inset-x-6 bottom-6 rounded-[1.8rem] border border-white/15 bg-[#241914]/78 p-6 text-white backdrop-blur-xl">
             <div className="flex items-end justify-between gap-5">
               <div>
                 <div className="text-xs font-bold uppercase tracking-[.16em] text-white/55">Home comfort</div>
                 <div className="mt-1 text-5xl font-black tracking-[-.05em]">72°</div>
               </div>
-              <div className="max-w-[220px] text-right text-sm leading-6 text-white/75">Quiet. Even. Comfortable. Exactly how the house should feel.</div>
+              <div className="max-w-[220px] text-right text-sm leading-6 text-white/75">Quiet. Even. Comfortable. Exactly how home should feel.</div>
             </div>
           </div>
         </div>
@@ -129,38 +166,47 @@ function Stats() {
   )
 }
 
+function ServiceCard({ service, index }: { service: (typeof siteConfig.services)[number]; index: number }) {
+  const Icon = serviceIcons[service.key]
+  const wide = index === 0 || index === 5
+
+  return (
+    <article className={`group overflow-hidden rounded-[2rem] border border-[#e6dbd1] bg-white shadow-[0_14px_45px_rgba(52,35,27,.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(52,35,27,.11)] ${wide ? "lg:col-span-2" : ""}`}>
+      <div className={`grid h-full ${wide ? "md:grid-cols-[1.1fr_.9fr]" : ""}`}>
+        <ImageFrame src={service.image} alt={service.imageAlt} className={`${wide ? "min-h-[250px]" : "h-52"}`} imageClassName="transition duration-700 group-hover:scale-[1.04]" />
+        <div className="flex flex-col justify-between p-6 md:p-7">
+          <div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f3e7dd] text-[#a55332]"><Icon size={22} /></span>
+              <span className="text-[11px] font-black uppercase tracking-[.16em] text-[#a38d81]">0{index + 1}</span>
+            </div>
+            <h3 className="mt-6 text-2xl font-black tracking-[-.035em] text-[#241914]">{service.title}</h3>
+            <p className="mt-3 text-sm leading-6 text-[#6d5b52]">{service.copy}</p>
+          </div>
+          <Link href="/quote" className="mt-6 inline-flex items-center gap-2 text-sm font-black text-[#a55332]">Get service <ArrowRight size={15} className="transition group-hover:translate-x-1" /></Link>
+        </div>
+      </div>
+    </article>
+  )
+}
+
 function ServicesPreview({ all = false }: { all?: boolean }) {
   const services = all ? siteConfig.services : siteConfig.services.slice(0, 6)
   return (
-    <section className="bg-[#fbf7f2] py-16 md:py-22">
+    <section className="bg-[#fbf7f2] py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
             <div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">What we handle</div>
-            <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[1] tracking-[-.05em] text-[#241914] md:text-6xl">The HVAC problems homeowners actually call about.</h2>
+            <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[1] tracking-[-.05em] text-[#241914] md:text-6xl">The problems that make a home uncomfortable.</h2>
           </div>
-          <p className="max-w-md text-base leading-7 text-[#6d5b52]">Repair, replacement, maintenance, airflow, and indoor comfort — explained without a wall of jargon.</p>
+          <p className="max-w-md text-base leading-7 text-[#6d5b52]">Cooling, heating, airflow, maintenance, and replacement help with a clear next step.</p>
         </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service, index) => {
-            const Icon = serviceIcons[service.key]
-            return (
-              <article key={`${service.title}-${index}`} className="group overflow-hidden rounded-[2rem] border border-[#e6dbd1] bg-white shadow-[0_14px_45px_rgba(52,35,27,.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(52,35,27,.1)]">
-                <div className="relative h-48 overflow-hidden bg-[#eee4d9]">
-                  <div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.04]" style={{ backgroundImage: `url(${service.image})` }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                  <div className="absolute left-4 top-4 grid h-11 w-11 place-items-center rounded-2xl border border-white/30 bg-[#fbf7f2]/90 text-[#a55332] shadow-sm backdrop-blur"><Icon size={22} /></div>
-                  <div className="absolute bottom-4 right-4 rounded-full bg-black/45 px-3 py-1.5 text-[11px] font-black uppercase tracking-[.14em] text-white backdrop-blur">Service 0{index + 1}</div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-black tracking-[-.035em] text-[#241914]">{service.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[#6d5b52]">{service.copy}</p>
-                  <Link href="/quote" className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[#a55332]">Get help <ArrowRight size={15} className="transition group-hover:translate-x-1" /></Link>
-                </div>
-              </article>
-            )
-          })}
+
+        <div className="mt-10 grid gap-5 lg:grid-cols-3">
+          {services.map((service, index) => <ServiceCard key={`${service.title}-${index}`} service={service} index={index} />)}
         </div>
+
         {!all && <div className="mt-8"><Link href="/services" className="inline-flex items-center gap-2 rounded-full border border-[#d7c8bc] bg-white px-5 py-3 text-sm font-black text-[#241914] transition hover:border-[#a55332]">See all services <ArrowRight size={15} /></Link></div>}
       </div>
     </section>
@@ -171,16 +217,17 @@ function WhyChooseUs() {
   const items = [
     [ShieldCheck, "Professional in your home", "Prepared technicians, clean work, and respect for the space they are working in."],
     [Gauge, "Clear choices", "Understand what is wrong and what the options are before the work starts."],
-    [Clock3, "Built for urgent calls", "A fast route from ‘something is wrong’ to getting service scheduled."],
+    [Clock3, "Built for urgent calls", "A fast route from something-is-wrong to getting service scheduled."],
     [Phone, "Easy to reach", "Call or request service without hunting around the site."],
   ] as const
+
   return (
     <section className="bg-[#281a15] py-16 text-white md:py-20">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 md:px-8 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
         <div>
           <div className="text-xs font-black uppercase tracking-[.2em] text-[#d28b68]">Why homeowners call</div>
           <h2 className="mt-3 text-4xl font-black leading-[1] tracking-[-.05em] md:text-6xl">Good HVAC service should feel straightforward.</h2>
-          <p className="mt-5 max-w-lg text-base leading-7 text-white/65">No mystery, no endless phone tag, and no feeling like you have to understand the equipment before asking for help.</p>
+          <p className="mt-5 max-w-lg text-base leading-7 text-white/65">You should know who is coming, what they found, what your choices are, and what happens next.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {items.map(([Icon, title, copy]) => (
@@ -198,23 +245,24 @@ function WhyChooseUs() {
 
 function ServiceInAction() {
   return (
-    <section className="bg-[#fffdf9] py-16 md:py-22">
+    <section className="bg-[#fffdf9] py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
-            <div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">Service in Action</div>
-            <h2 className="mt-3 text-4xl font-black tracking-[-.05em] text-[#241914] md:text-6xl">HVAC work that actually looks like HVAC work.</h2>
+            <div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">On the job</div>
+            <h2 className="mt-3 max-w-3xl text-4xl font-black tracking-[-.05em] text-[#241914] md:text-6xl">The work happens where comfort breaks down.</h2>
           </div>
-          <p className="max-w-md text-base leading-7 text-[#6d5b52]">Real service context: outdoor equipment, furnace diagnostics, and in-home cooling work — not random real-estate or office stock photos.</p>
+          <p className="max-w-md text-base leading-7 text-[#6d5b52]">Outdoor equipment, heating systems, and in-home cooling all need a careful diagnosis before the right fix is clear.</p>
         </div>
+
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
           {siteConfig.projects.map((project) => (
             <article key={project.title} className="group overflow-hidden rounded-[2rem] border border-[#e6dbd1] bg-white shadow-[0_15px_45px_rgba(52,35,27,.07)]">
-              <div className="relative h-[280px] overflow-hidden bg-[#ece1d7]">
-                <div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.035]" style={{ backgroundImage: `url(${project.image})` }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
+              <ImageFrame src={project.image} alt={project.imageAlt} className="h-[285px]" imageClassName="transition duration-700 group-hover:scale-[1.035]" />
+              <div className="p-6">
+                <h3 className="text-xl font-black text-[#241914]">{project.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#6d5b52]">{project.copy}</p>
               </div>
-              <div className="p-6"><h3 className="text-xl font-black text-[#241914]">{project.title}</h3><p className="mt-2 text-sm leading-6 text-[#6d5b52]">{project.copy}</p></div>
             </article>
           ))}
         </div>
@@ -229,6 +277,7 @@ function Process() {
     ["02", "Get a clear visit", "Confirm the appointment and know what happens next."],
     ["03", "Choose the right fix", "Get the problem explained clearly with repair or replacement options."],
   ] as const
+
   return (
     <section className="bg-[#f4ede4] py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
@@ -250,21 +299,25 @@ function Process() {
 
 function Reviews() {
   return (
-    <section id="reviews" className="bg-[#fffdf9] py-16 md:py-22">
+    <section id="reviews" className="bg-[#fffdf9] py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
-        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div className="grid gap-6 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#dfd1c5] bg-[#fbf7f2] px-3 py-2 text-xs font-black uppercase tracking-[.14em] text-[#76564a]"><Star size={14} fill="currentColor" className="text-[#b45a34]" /> 4.9 average rating</div>
-            <h2 className="mt-4 text-4xl font-black tracking-[-.05em] text-[#241914] md:text-6xl">Reviews that sound like real service.</h2>
+            <h2 className="mt-4 text-4xl font-black tracking-[-.05em] text-[#241914] md:text-6xl">What homeowners remember.</h2>
           </div>
-          <p className="max-w-md text-base leading-7 text-[#6d5b52]">Clear communication, fast response, clean work, and technicians people feel comfortable calling again.</p>
+          <p className="max-w-xl text-base leading-7 text-[#6d5b52] lg:justify-self-end">Showing up, explaining the problem clearly, respecting the home, and leaving the system working the way it should.</p>
         </div>
+
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {siteConfig.reviews.slice(0, 6).map((review) => (
-            <article key={review.name} className="rounded-[2rem] border border-[#e6dbd1] bg-white p-6 shadow-[0_12px_35px_rgba(52,35,27,.05)]">
-              <div className="flex gap-1 text-[#b45a34]">{[0,1,2,3,4].map((star) => <Star key={star} size={16} fill="currentColor" />)}</div>
-              <p className="mt-5 text-base font-semibold leading-7 text-[#3d2d26]">“{review.quote}”</p>
-              <div className="mt-6 border-t border-[#eee4db] pt-4"><div className="font-black text-[#241914]">{review.name}</div><div className="mt-1 text-sm text-[#89766c]">{review.location}</div></div>
+          {siteConfig.reviews.slice(0, 6).map((review, index) => (
+            <article key={review.name} className={`rounded-[2rem] border border-[#e6dbd1] p-6 ${index === 1 || index === 4 ? "bg-[#2b1d18] text-white" : "bg-white text-[#241914]"} shadow-[0_12px_35px_rgba(52,35,27,.05)]`}>
+              <div className="flex gap-1 text-[#b45a34]">{[0, 1, 2, 3, 4].map((star) => <Star key={star} size={16} fill="currentColor" />)}</div>
+              <p className={`mt-5 text-base font-semibold leading-7 ${index === 1 || index === 4 ? "text-white/85" : "text-[#3d2d26]"}`}>“{review.quote}”</p>
+              <div className={`mt-6 border-t pt-4 ${index === 1 || index === 4 ? "border-white/10" : "border-[#eee4db]"}`}>
+                <div className="font-black">{review.name}</div>
+                <div className={`mt-1 text-sm ${index === 1 || index === 4 ? "text-white/45" : "text-[#89766c]"}`}>{review.location}</div>
+              </div>
             </article>
           ))}
         </div>
@@ -293,7 +346,7 @@ function FAQ() {
     <section className="bg-[#fffdf9] py-16 md:py-20">
       <div className="mx-auto max-w-5xl px-5 md:px-8">
         <div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">Frequently Asked Questions</div>
-        <h2 className="mt-3 text-4xl font-black tracking-[-.05em] text-[#241914] md:text-5xl">The questions homeowners ask before they book.</h2>
+        <h2 className="mt-3 text-4xl font-black tracking-[-.05em] text-[#241914] md:text-5xl">A few things worth knowing before you book.</h2>
         <div className="mt-8 divide-y divide-[#e6dbd1] border-y border-[#e6dbd1]">
           {siteConfig.faqs.map((faq) => <details key={faq.question} className="group py-5"><summary className="cursor-pointer list-none pr-8 text-lg font-black text-[#241914]">{faq.question}</summary><p className="mt-3 max-w-3xl text-sm leading-6 text-[#6d5b52]">{faq.answer}</p></details>)}
         </div>
@@ -307,8 +360,15 @@ function FinalCTA() {
     <section className="bg-[#fffdf9] px-5 pb-20 md:px-8">
       <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[#281a15] px-7 py-12 text-white shadow-[0_25px_70px_rgba(37,25,20,.16)] md:px-12 md:py-16">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div><div className="text-xs font-black uppercase tracking-[.2em] text-[#d28b68]">One call from comfortable</div><h2 className="mt-4 max-w-4xl text-4xl font-black leading-[.98] tracking-[-.05em] md:text-6xl">Your comfort problem can end today.</h2><p className="mt-5 max-w-xl text-base leading-7 text-white/65">Tell us what is happening. We’ll help you figure out the next best step.</p></div>
-          <div className="flex flex-wrap gap-3"><Link href="/quote" className="inline-flex items-center gap-2 rounded-full bg-[#b65b35] px-6 py-3.5 text-sm font-black text-white transition hover:bg-[#c86940]">Schedule Service <ArrowRight size={16} /></Link><a href={phoneHref} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-black text-white"><Phone size={16} /> Call Now</a></div>
+          <div>
+            <div className="text-xs font-black uppercase tracking-[.2em] text-[#d28b68]">One call from comfortable</div>
+            <h2 className="mt-4 max-w-4xl text-4xl font-black leading-[.98] tracking-[-.05em] md:text-6xl">Your comfort problem can end today.</h2>
+            <p className="mt-5 max-w-xl text-base leading-7 text-white/65">Tell us what is happening. We’ll help you figure out the next best step.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/quote" className="inline-flex items-center gap-2 rounded-full bg-[#b65b35] px-6 py-3.5 text-sm font-black text-white transition hover:bg-[#c86940]">Schedule Service <ArrowRight size={16} /></Link>
+            <a href={phoneHref} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-black text-white"><Phone size={16} /> Call Now</a>
+          </div>
         </div>
       </div>
     </section>
@@ -323,8 +383,12 @@ function ServicesPage() {
   return (
     <main className="bg-[#fbf7f2]">
       <section className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:px-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:py-16">
-        <div><div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">Our services</div><h1 className="mt-3 text-5xl font-black leading-[.95] tracking-[-.055em] text-[#241914] md:text-7xl">Heating and cooling help, without the catalog feel.</h1><p className="mt-6 max-w-xl text-lg leading-8 text-[#6d5b52]">The services homeowners need most, with clear language and real HVAC imagery instead of generic stock photos.</p></div>
-        <div className="relative min-h-[420px] overflow-hidden rounded-[2.2rem] bg-[#281a15] shadow-[0_30px_75px_rgba(37,25,20,.18)]"><div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${siteConfig.services[0].image})` }} /><div className="absolute inset-0 bg-gradient-to-t from-[#241914]/70 to-transparent" /><div className="absolute bottom-5 left-5 rounded-full bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[.14em] text-[#6b4a3d]">Residential HVAC service</div></div>
+        <div>
+          <div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">Our services</div>
+          <h1 className="mt-3 text-5xl font-black leading-[.95] tracking-[-.055em] text-[#241914] md:text-7xl">Heating and cooling help for the whole home.</h1>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-[#6d5b52]">From no-cool calls to replacement systems, each service starts with understanding what the home is doing and what it actually needs.</p>
+        </div>
+        <ImageFrame src={siteConfig.services[0].image} alt={siteConfig.services[0].imageAlt} className="min-h-[420px] rounded-[2.2rem] shadow-[0_30px_75px_rgba(37,25,20,.18)]" />
       </section>
       <ServicesPreview all />
       <FinalCTA />
@@ -337,7 +401,17 @@ function QuotePage() {
   return (
     <main className="bg-[#f4ede4] px-5 py-14 md:px-8">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[.85fr_1.15fr] lg:items-start">
-        <div className="pt-5"><div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">Get comfortable again</div><h1 className="mt-3 text-5xl font-black leading-[.95] tracking-[-.05em] text-[#241914] md:text-7xl">Tell us what’s going on.</h1><p className="mt-5 max-w-lg text-lg leading-8 text-[#6d5b52]">A simple service request. No giant form and no need to diagnose the equipment yourself.</p><div className="mt-8 rounded-[2rem] bg-[#281a15] p-6 text-white"><div className="flex gap-1 text-[#d28b68]">{[0,1,2,3,4].map((star) => <Star key={star} size={15} fill="currentColor" />)}</div><div className="mt-3 text-xl font-black">4.9 average rating</div><p className="mt-2 text-sm leading-6 text-white/60">Fast response, clear communication, and professional service.</p></div></div>
+        <div className="pt-5">
+          <div className="text-xs font-black uppercase tracking-[.2em] text-[#a55332]">Get comfortable again</div>
+          <h1 className="mt-3 text-5xl font-black leading-[.95] tracking-[-.05em] text-[#241914] md:text-7xl">Tell us what’s going on.</h1>
+          <p className="mt-5 max-w-lg text-lg leading-8 text-[#6d5b52]">A simple service request. No giant form and no need to diagnose the equipment yourself.</p>
+          <div className="mt-8 rounded-[2rem] bg-[#281a15] p-6 text-white">
+            <div className="flex gap-1 text-[#d28b68]">{[0, 1, 2, 3, 4].map((star) => <Star key={star} size={15} fill="currentColor" />)}</div>
+            <div className="mt-3 text-xl font-black">4.9 average rating</div>
+            <p className="mt-2 text-sm leading-6 text-white/60">Clear communication, careful work, and an easy path to getting comfortable again.</p>
+          </div>
+        </div>
+
         <form className="grid gap-4 rounded-[2.2rem] border border-[#dfd1c5] bg-white p-6 shadow-[0_24px_65px_rgba(52,35,27,.08)] md:grid-cols-2 md:p-8">
           {fields.map(([label, type]) => <label key={label} className="text-xs font-black uppercase tracking-[.12em] text-[#745f55]">{label}<input type={type} className="mt-2 w-full rounded-2xl border border-[#e5d9cf] bg-[#fbf7f2] px-4 py-4 text-base font-medium normal-case tracking-normal text-[#241914] outline-none transition focus:border-[#a55332]" /></label>)}
           <label className="text-xs font-black uppercase tracking-[.12em] text-[#745f55] md:col-span-2">Service needed<select className="mt-2 w-full rounded-2xl border border-[#e5d9cf] bg-[#fbf7f2] px-4 py-4 text-base font-medium normal-case tracking-normal text-[#241914] outline-none focus:border-[#a55332]"><option>AC repair</option><option>Heating repair</option><option>Installation / replacement</option><option>Maintenance</option><option>Not sure</option></select></label>
@@ -352,7 +426,11 @@ function QuotePage() {
 function Footer() {
   return (
     <footer className="border-t border-[#e0d2c6] bg-[#eee3d7] pb-20 md:pb-0">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-11 md:grid-cols-[1.2fr_.8fr_.8fr] md:px-8"><div><div className="text-xs font-black uppercase tracking-[.22em] text-[#a55332]">{siteConfig.brand.shortName}</div><p className="mt-3 max-w-sm text-sm leading-6 text-[#6d5b52]">Heating, cooling, repair, replacement, maintenance, and indoor comfort for local homeowners.</p></div><div className="text-sm font-semibold leading-7 text-[#6d5b52]"><Link href="/">Home</Link><br /><Link href="/services">Services</Link><br /><a href="#reviews">Reviews</a><br /><Link href="/quote">Contact</Link></div><div className="text-sm font-semibold leading-7 text-[#6d5b52]"><a href={phoneHref}>{siteConfig.brand.phoneDisplay}</a><br /><a href={`mailto:${siteConfig.brand.email}`}>{siteConfig.brand.email}</a><br />{siteConfig.brand.city}</div></div>
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-11 md:grid-cols-[1.2fr_.8fr_.8fr] md:px-8">
+        <div><div className="text-xs font-black uppercase tracking-[.22em] text-[#a55332]">{siteConfig.brand.shortName}</div><p className="mt-3 max-w-sm text-sm leading-6 text-[#6d5b52]">Heating, cooling, repair, replacement, maintenance, and indoor comfort for local homeowners.</p></div>
+        <div className="text-sm font-semibold leading-7 text-[#6d5b52]"><Link href="/">Home</Link><br /><Link href="/services">Services</Link><br /><a href="#reviews">Reviews</a><br /><Link href="/quote">Contact</Link></div>
+        <div className="text-sm font-semibold leading-7 text-[#6d5b52]"><a href={phoneHref}>{siteConfig.brand.phoneDisplay}</a><br /><a href={`mailto:${siteConfig.brand.email}`}>{siteConfig.brand.email}</a><br />{siteConfig.brand.city}</div>
+      </div>
     </footer>
   )
 }
