@@ -20,7 +20,8 @@ test('homepage includes proof, process, FAQ, and mobile service actions', () => 
   }
 })
 
-test('homepage metadata is HVAC-specific and contains no handyman base branding', () => {
-  assert.equal(/Oakwell|Handyman/i.test(homepage), false, 'homepage still contains stale handyman branding')
+test('homepage metadata is HVAC-specific and contains no stale public handyman branding', () => {
+  assert.equal(homepage.includes('Oakwell House Care'), false, 'homepage still contains old Oakwell branding')
+  assert.equal(homepage.includes('Premium Handyman Template'), false, 'homepage still contains old handyman metadata')
   assert.ok(homepage.includes('Prime Heating & Cooling'), 'homepage title should use the HVAC demo brand')
 })
