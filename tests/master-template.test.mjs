@@ -6,6 +6,10 @@ const config = readFileSync(new URL('../lib/site-config.ts', import.meta.url), '
 const component = readFileSync(new URL('../components/handyman-site.tsx', import.meta.url), 'utf8')
 const homepage = readFileSync(new URL('../app/page.tsx', import.meta.url), 'utf8')
 
+function quotedValues(block, key) {
+  return [...block.matchAll(new RegExp(`${key}:\\s*"([^"]+)"`, 'g'))].map((match) => match[1])
+}
+
 test('universal HVAC master has broad services and no financing assumption', () => {
   const servicesBlock = config.match(/services:\s*\[(.*?)\],\n\s*reviews:/s)?.[1] ?? ''
   const serviceCount = (servicesBlock.match(/title:\s*"/g) ?? []).length
@@ -13,12 +17,44 @@ test('universal HVAC master has broad services and no financing assumption', () 
   assert.equal(/financing/i.test(config), false, 'universal master should not assume financing')
 })
 
-test('premium visual contract avoids SaaS blue and demo-template language', () => {
+test('service photography is unique, descriptive, and not recycled into proof cards', () => {
+  const servicesBlock = config.match(/services:\s*\[(.*?)\],\n\s*reviews:/s)?.[1] ?? ''
+  const projectsBlock = config.match(/projects:\s*\[(.*?)\],\n\s*faqs:/s)?.[1] ?? ''
+  const serviceImages = quotedValues(servicesBlock, 'image')
+  const serviceAlts = quotedValues(servicesBlock, 'imageAlt')
+  const projectImages = quotedValues(projectsBlock, 'image')
+
+  assert.ok(serviceImages.length >= 8, 'each service should have its own image')
+  assert.equal(new Set(serviceImages).size, serviceImages.length, 'service image URLs must be unique')
+  assert.equal(serviceAlts.length, serviceImages.length, 'each service image needs useful alt text')
+  for (const image of projectImages) {
+    assert.equal(serviceImages.includes(image), false, `proof image is recycled from a service card: ${image}`)
+  }
+})
+
+test('public copy never talks about templates, stock photos, or sounding real', () => {
+  const publicSource = `${component}\n${config}`.toLowerCase()
+  for (const banned of [
+    'reviews that sound like real service',
+    'looks like hvac work',
+    'stock photos',
+    'master site',
+    'template itself',
+    'demo-template',
+  ]) {
+    assert.equal(publicSource.includes(banned), false, `public-facing implementation language leaked into site: ${banned}`)
+  }
+})
+
+test('image cards have a designed fallback instead of blank empty panels', () => {
+  assert.ok(component.includes('onError'), 'image elements need an error fallback')
+  assert.ok(component.includes('Photo unavailable'), 'image fallback should remain informative instead of blank')
+})
+
+test('premium visual contract avoids SaaS blue and fake before-after proof', () => {
   assert.equal(component.includes('bg-blue-600'), false, 'primary actions still use cheap SaaS blue')
   assert.equal(component.includes('text-blue-600'), false, 'section accents still use cheap SaaS blue')
-  assert.equal(component.includes('master site'), false, 'public copy still describes the template itself')
   assert.equal(component.includes('Before & After'), false, 'fake before/after proof should be removed')
-  assert.ok(component.includes('Service in Action'), 'missing HVAC-specific visual proof section')
 })
 
 test('homepage keeps trust, reviews, rating, process, FAQ, and mobile service actions', () => {
