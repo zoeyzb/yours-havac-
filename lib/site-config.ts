@@ -109,10 +109,10 @@ export const siteConfig = {
       copy: "Hands-on diagnosis where cooling problems start, followed by a clear explanation of the fix.",
     },
     {
-      title: "Heating diagnostics",
+      title: "Equipment inspection",
       image: "https://cdn.prod.website-files.com/66d218c3666112b4c63d51b3/674f36761720484094617838_ac-service-img%20copy.webp",
       imageAlt: "HVAC technician inspecting equipment during a service visit",
-      copy: "Heating troubleshooting at the equipment before repair or replacement decisions are made.",
+      copy: "A careful equipment check before repair, maintenance, or replacement decisions are made.",
     },
     {
       title: "Comfort controls",
