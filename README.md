@@ -1,92 +1,79 @@
-# Handyman Premium Home Services
+# Yours HVAC — Premium Master
 
-A Vercel-ready Next.js handyman template with a softer, more premium residential feel for home-maintenance businesses that want stronger trust and better presentation.
+A reusable, Vercel-ready HVAC website built for fast prospect personalization without redesigning the site every time.
 
-## What This Template Is For
+## The idea
 
-This starter is designed for:
+Keep the premium layout fixed. Change the business-specific facts in one file:
 
-- premium handyman businesses
-- residential maintenance teams
-- home-improvement service brands
-- businesses targeting homeowners who care about presentation and trust
+`lib/site-config.ts`
 
-## Stack
+That config controls:
 
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- Vercel-ready deployment
+- company name and tagline
+- city and service areas
+- phone and email
+- hero copy and hero image
+- trust points
+- HVAC services
+- ratings/stats
+- reviews
+- financing language
 
-## Pages Included
+The homepage, services page, quote page, metadata, footer, and mobile actions read from that master setup.
 
-- Home
-- Services
-- Quote
+## Pages
 
-## Features
+- `/` — premium conversion-focused HVAC homepage
+- `/services` — clear heating and cooling services
+- `/quote` — polished service-request flow ready to connect to a real form/CRM
 
-- calmer editorial hero structure
-- premium residential service positioning
-- multi-page local SEO-ready layout
-- built-in footer attribution
+## Homepage sections
 
-## Getting Started
+- image-led hero with primary call/book CTAs
+- immediate trust strip
+- AC / heating / installation / maintenance cards
+- proof/stat section
+- homeowner reviews
+- financing CTA
+- local service areas
+- final booking CTA
+- sticky mobile Call / Book actions
 
-1. Install dependencies:
+## Personalize a prospect
+
+Edit `lib/site-config.ts` and replace the placeholders with the real business data. The highest-impact fields are:
+
+1. `brand.name`
+2. `brand.city`
+3. `brand.phoneDisplay` / `brand.phoneHref`
+4. `hero.image`
+5. `reviews`
+6. `serviceAreas`
+7. financing language
+
+Do not invent ratings, reviews, licensing claims, financing, or availability for a real business. Only use facts you can support.
+
+## Run
 
 ```bash
 pnpm install
-```
-
-2. Run locally:
-
-```bash
 pnpm dev
 ```
 
-3. Build for production:
+## Verify
 
 ```bash
-pnpm build
+pnpm run typecheck
+pnpm run build
 ```
 
-## Deploy On Vercel
+GitHub Actions also runs both checks on every push and pull request.
 
-- import this repository into Vercel
-- set `NEXT_PUBLIC_SITE_URL`
-- deploy
+## Deploy on Vercel
 
-If you want a one-click Vercel button, add one after publishing this repo to your own GitHub organization so the repository URL points at your canonical source.
+Import the repository into Vercel, set `NEXT_PUBLIC_SITE_URL`, and deploy.
 
-## Environment Variables
+## Foundation
 
-See `.env.example`.
-
-Required:
-
-- `NEXT_PUBLIC_SITE_URL`
-
-## Forking And Rebranding
-
-Before launching publicly, update:
-
-- site name, copy, phone numbers, and email addresses
-- metadata in `app/layout.tsx`
-- any placeholder service areas and trust content
-- branding assets, colors, and imagery
-
-## Attribution
-
-This template keeps the footer credit:
-
-`Website Developed by TwoSquares`
-
-linked to:
-
-`https://twosquares.co.uk`
-
-## License
-
-Licensed under Apache-2.0. See [LICENSE](./LICENSE).
+This project began from the Apache-2.0 `handyman-premium-home-services` template by TwoSquaresHQ and was adapted into a reusable HVAC master experience. See `LICENSE` for the repository license.
