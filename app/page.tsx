@@ -2,11 +2,10 @@ import type { Metadata } from "next"
 import HandymanPremiumSite from "../components/handyman-site"
 
 export const metadata: Metadata = {
-  title: "Oakwell House Care | Premium Handyman Template",
-  description: "Premium handyman homepage template for residential trust, polished presentation, and local home-service lead generation.",
+  title: "Prime Heating & Cooling | HVAC Service",
+  description: "Professional heating, cooling, repair, installation, maintenance, and indoor comfort service for local homeowners.",
 }
 
 export default function HomePage() {
   return <HandymanPremiumSite currentPage="home" />
 }
-
