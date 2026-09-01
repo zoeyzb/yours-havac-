@@ -5,20 +5,25 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  title: `${siteConfig.brand.name} | Heating & Cooling in ${siteConfig.brand.city}`,
-  description: `Heating, cooling, installation, and maintenance from ${siteConfig.brand.name}. Clear options, dependable service, and comfort-first HVAC help in ${siteConfig.brand.city}.`,
+  title: `${siteConfig.brand.name} | Heating & Cooling`,
+  description: `Heating, cooling, maintenance, repair, replacement, and indoor comfort service from ${siteConfig.brand.name}. Clear answers and dependable HVAC help for local homeowners.`,
   keywords: [
     "HVAC service",
     "AC repair",
     "heating repair",
-    "HVAC installation",
+    "HVAC replacement",
     "HVAC maintenance",
-    `${siteConfig.brand.city} HVAC`,
+    "indoor air quality",
   ],
   openGraph: {
     title: `${siteConfig.brand.name} | Heating & Cooling`,
-    description: `Comfort-first HVAC service in ${siteConfig.brand.city}. Heating, cooling, installation, and maintenance.`,
+    description: "Clear, dependable heating and cooling service for local homeowners.",
     type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: `${siteConfig.brand.name} | Heating & Cooling`,
+    description: "Clear, dependable heating and cooling service for local homeowners.",
   },
 }
 
