@@ -13,7 +13,7 @@ export const siteConfig = {
     eyebrow: "4.9★ rated local HVAC team",
     heading: "Comfort back. Without the runaround.",
     body: "Fast HVAC help. Clear answers. Careful work.",
-    image: "https://hvacetobicoke.ca/_site/hvac/sections/about-2/img/hvac-about-2.webp",
+    image: "/hvac/prime-hero.jpg",
     imageAlt: "Smiling HVAC technician beside residential air conditioning equipment",
   },
   trust: [
