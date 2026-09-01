@@ -23,5 +23,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: node --test tests/master-template.test.mjs
       - run: pnpm run typecheck
       - run: pnpm run build
