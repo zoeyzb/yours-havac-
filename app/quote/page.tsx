@@ -1,12 +1,11 @@
 import type { Metadata } from "next"
-import HandymanPremiumSite from "../../components/handyman-site"
+import HVACSite from "../../components/hvac-site"
 
 export const metadata: Metadata = {
-  title: "Request A Quote | Oakwell House Care",
-  description: "Premium residential handyman quote page template with a calmer enquiry flow and polished local positioning.",
+  title: "Request HVAC Service | Prime Heating & Cooling",
+  description: "Request local heating and cooling service or call Prime Heating & Cooling for help with your HVAC system.",
 }
 
 export default function QuotePage() {
-  return <HandymanPremiumSite currentPage="quote" />
+  return <HVACSite currentPage="quote" />
 }
-
