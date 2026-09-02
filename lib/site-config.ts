@@ -13,7 +13,7 @@ export const siteConfig = {
     eyebrow: "4.9★ rated local HVAC team",
     heading: "Comfort back. Without the runaround.",
     body: "Fast HVAC help. Clear answers. Careful work.",
-    image: "/hvac/prime-hero.jpg?v=4",
+    image: "/hvac/prime-hero.webp?v=5",
     imageAlt: "Smiling HVAC technician beside residential air conditioning equipment",
   },
   trust: [
