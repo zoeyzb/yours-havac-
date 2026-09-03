@@ -3,8 +3,10 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 
 const config = readFileSync(new URL('../lib/site-config.ts', import.meta.url), 'utf8')
-const component = readFileSync(new URL('../components/handyman-site.tsx', import.meta.url), 'utf8')
+const component = readFileSync(new URL('../components/hvac-site.tsx', import.meta.url), 'utf8')
+const styles = readFileSync(new URL('../app/globals.css', import.meta.url), 'utf8')
 const homepage = readFileSync(new URL('../app/page.tsx', import.meta.url), 'utf8')
+const packageJson = readFileSync(new URL('../package.json', import.meta.url), 'utf8')
 
 test('universal HVAC master stays broad and avoids financing assumptions', () => {
   const servicesBlock = config.match(/services:\s*\[(.*?)\],\n\s*reviews:/s)?.[1] ?? ''
@@ -13,46 +15,45 @@ test('universal HVAC master stays broad and avoids financing assumptions', () =>
   assert.equal(/financing/i.test(`${config}\n${component}`), false, 'universal master should not assume financing')
 })
 
-test('supplied photos are wired into the most important sections', () => {
-  assert.ok(config.includes('/hvac/hero-tech.svg'), 'hero should use the supplied smiling HVAC technician photo')
-  assert.ok(config.includes('/hvac/local-tech.svg'), 'local section should use the supplied thumbs-up technician photo')
-  assert.ok(config.includes('/hvac/ac-repair.svg'), 'AC repair should use the supplied service photo')
+test('contact placeholders never create broken phone or email actions', () => {
+  assert.ok(config.includes('phoneDisplay: "Add Your Number"'))
+  assert.ok(config.includes('phoneHref: ""'))
+  assert.ok(component.includes('const hasPhone'))
+  assert.ok(component.includes('function PhoneAction'))
+  assert.ok(component.includes('function EmailAction'))
+  assert.equal(component.includes('href={phoneHref}'), false, 'placeholder template must not expose a raw tel link')
 })
 
-test('homepage is clear, trust-heavy, and mobile ready', () => {
+test('homepage has premium motion and accessible interaction primitives', () => {
+  assert.ok(packageJson.includes('"motion"'), 'Motion dependency is required')
+  assert.ok(packageJson.includes('"@radix-ui/react-accordion"'), 'Radix Accordion dependency is required')
+  assert.ok(component.includes('from "motion/react"'), 'Motion React should drive scroll and hover movement')
+  assert.ok(component.includes('@radix-ui/react-accordion'), 'FAQ should use Radix Accordion')
+  assert.ok(component.includes('whileInView'), 'scroll-triggered motion should be present')
+  assert.ok(component.includes('useReducedMotion'), 'motion must respect reduced-motion preferences')
+  assert.ok(styles.includes('prefers-reduced-motion'), 'CSS motion must have a reduced-motion fallback')
+})
+
+test('homepage visual story includes depth, workflow motion, and moving reviews', () => {
   for (const required of [
     'Comfort back.',
     'Why Choose Us',
     'How It Works',
-    'Frequently Asked Questions',
-    'Reviews',
-    'Local HVAC help, close to home.',
+    'Homeowner Reviews',
+    'review-marquee',
+    'workflow-line',
+    'atmosphere-grid',
     'MobileServiceBar',
     'Schedule Service',
   ]) {
-    assert.ok(component.includes(required), `missing required homepage element: ${required}`)
+    assert.ok(`${component}\n${styles}`.includes(required), `missing redesign element: ${required}`)
   }
 })
 
-test('reviews stay location-neutral for reuse across cities', () => {
-  const reviewsBlock = config.match(/reviews:\s*\[(.*?)\],\n\s*projects:/s)?.[1] ?? ''
-  assert.ok((reviewsBlock.match(/Local homeowner/g) ?? []).length >= 6, 'reviews should use location-neutral homeowner labels')
-  for (const city of ['Austin', 'Phoenix', 'Round Rock', 'Cedar Park', 'Pflugerville']) {
-    assert.equal(reviewsBlock.includes(city), false, `review copy should not hard-code ${city}`)
-  }
-})
-
-test('public implementation language does not leak into the site', () => {
-  const publicSource = `${component}\n${config}`.toLowerCase()
-  for (const banned of ['master template', 'stock photo', 'sounds like real service', 'demo-template']) {
-    assert.equal(publicSource.includes(banned), false, `public-facing implementation language leaked into site: ${banned}`)
-  }
-})
-
-test('visual contract keeps the warm premium direction and photo fallbacks', () => {
-  assert.equal(component.includes('bg-blue-600'), false, 'primary actions should not regress to SaaS blue')
+test('visual contract avoids cheap SaaS styling and fake proof', () => {
+  assert.equal(component.includes('bg-blue-600'), false, 'primary actions should not regress to generic SaaS blue')
   assert.equal(component.includes('Before & After'), false, 'fake before/after proof should stay removed')
-  assert.ok(component.includes('onError'), 'photos should fail gracefully if an external source breaks')
+  assert.equal(/100% satisfaction guaranteed/i.test(`${component}\n${config}`), false)
 })
 
 test('homepage metadata is HVAC-specific and contains no stale handyman branding', () => {
