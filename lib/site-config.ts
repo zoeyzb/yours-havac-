@@ -13,8 +13,8 @@ export const siteConfig = {
     eyebrow: "4.9★ rated local HVAC team",
     heading: "Comfort back. Without the runaround.",
     body: "Fast HVAC help. Clear answers. Careful work.",
-    image: "https://images.pexels.com/photos/7347538/pexels-photo-7347538.jpeg?auto=compress&dpr=1&h=1000&w=1600",
-    imageAlt: "HVAC technician repairing an outdoor air conditioning unit",
+    image: "https://www.ahs.com/contentassets/822a024146c14668895c33d3ba5eb40b/ac_resolved.png",
+    imageAlt: "HVAC technician talking with a homeowner beside an outdoor air conditioning unit",
   },
   trust: [
     "Fast appointment options",
