@@ -61,8 +61,8 @@ export const siteConfig = {
       key: "thermostat",
       title: "Thermostats & Smart Controls",
       copy: "Setup, replacement, and control troubleshooting without the technical headache.",
-      image: "/hvac/thermostat.svg",
-      imageAlt: "Technician helping a homeowner with a smart thermostat",
+      image: "https://images.pexels.com/photos/32737485/pexels-photo-32737485/free-photo-of-modern-air-conditioner-control-panel-close-up.jpeg?auto=compress&dpr=1&h=900&w=1400",
+      imageAlt: "Close-up of a modern HVAC temperature control panel",
     },
     {
       key: "maintenance",
