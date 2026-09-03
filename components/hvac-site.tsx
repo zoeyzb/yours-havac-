@@ -1,120 +1,461 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
-import { ArrowRight, Check, ChevronDown, Clock3, MapPin, Phone, ShieldCheck, Star, Wrench } from "lucide-react"
+import * as Accordion from "@radix-ui/react-accordion"
+import { motion, MotionConfig, useReducedMotion } from "motion/react"
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Clock3,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Wind,
+  Wrench,
+  Zap,
+} from "lucide-react"
 import { siteConfig } from "../lib/site-config"
 
 type Page = "home" | "services" | "quote"
-const phoneHref = `tel:${siteConfig.brand.phoneHref}`
+
+const hasPhone = Boolean(siteConfig.brand.phoneHref.trim())
+const hasEmail = siteConfig.brand.email.includes("@")
 
 function Photo({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
-  return <img src={src} alt={alt} loading="lazy" className={`h-full w-full object-cover ${className}`} />
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className={`h-full w-full object-cover ${className}`}
+      onError={(event) => {
+        event.currentTarget.style.opacity = "0"
+      }}
+    />
+  )
+}
+
+function PhoneAction({ className = "", compact = false }: { className?: string; compact?: boolean }) {
+  const label = hasPhone ? siteConfig.brand.phoneDisplay : compact ? "Add number" : "Add Your Number"
+  if (hasPhone) {
+    return (
+      <a href={`tel:${siteConfig.brand.phoneHref}`} className={className} aria-label={`Call ${siteConfig.brand.name}`}>
+        <Phone size={16} />{label}
+      </a>
+    )
+  }
+  return (
+    <Link href="/quote#contact-details" className={className} aria-label="Add or confirm the business phone number">
+      <Phone size={16} />{label}
+    </Link>
+  )
+}
+
+function EmailAction({ className = "" }: { className?: string }) {
+  if (hasEmail) {
+    return <a href={`mailto:${siteConfig.brand.email}`} className={className}><Mail size={15} />{siteConfig.brand.email}</a>
+  }
+  return <Link href="/quote#contact-details" className={className}><Mail size={15} />Add Your Email</Link>
+}
+
+function BrandMark() {
+  return (
+    <span className="brand-mark" aria-hidden="true">
+      <span className="brand-mark__ring" />
+      <Wind size={19} strokeWidth={2.3} />
+    </span>
+  )
+}
+
+function SectionIntro({ eyebrow, title, body, dark = false }: { eyebrow: string; title: string; body?: string; dark?: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      className="max-w-3xl"
+    >
+      <div className={dark ? "section-kicker section-kicker--dark" : "section-kicker"}>{eyebrow}</div>
+      <h2 className={dark ? "section-title text-white" : "section-title text-[#102630]"}>{title}</h2>
+      {body && <p className={dark ? "section-copy text-white/68" : "section-copy"}>{body}</p>}
+    </motion.div>
+  )
 }
 
 function Header({ currentPage }: { currentPage: Page }) {
-  return <header className="sticky top-0 z-50 border-b border-[#e5ddd5] bg-[#fffdf9]/95 backdrop-blur-xl">
-    <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-      <Link href="/" className="min-w-0">
-        <div className="truncate text-[17px] font-extrabold tracking-[-.035em] text-[#201714] sm:text-xl">{siteConfig.brand.name}</div>
-        <div className="mt-0.5 hidden text-[11px] font-medium text-[#75665f] sm:block">{siteConfig.brand.tagline}</div>
-      </Link>
-      <nav className="hidden items-center gap-6 text-sm font-semibold text-[#65564f] lg:flex">
-        <Link href="/" className={currentPage === "home" ? "text-[#201714]" : "hover:text-[#ad512f]"}>Home</Link>
-        <Link href="/services" className={currentPage === "services" ? "text-[#201714]" : "hover:text-[#ad512f]"}>Services</Link>
-        <a href="/#reviews" className="hover:text-[#ad512f]">Reviews</a>
-        <a href="/#service-areas" className="hover:text-[#ad512f]">Service Areas</a>
-        <Link href="/quote" className="hover:text-[#ad512f]">Contact</Link>
-      </nav>
-      <div className="flex items-center gap-2">
-        <a href={phoneHref} className="hidden items-center gap-2 rounded-full border border-[#d9ccc1] bg-white px-4 py-2.5 text-sm font-bold text-[#201714] md:inline-flex"><Phone size={15}/>{siteConfig.brand.phoneDisplay}</a>
-        <Link href="/quote" className="rounded-full bg-[#ad512f] px-4 py-2.5 text-xs font-extrabold text-white shadow-[0_10px_25px_rgba(173,81,47,.18)] sm:px-5 sm:text-sm">Schedule Service</Link>
+  return (
+    <header className="sticky top-0 z-50 border-b border-white/50 bg-[#f7f8f5]/82 backdrop-blur-2xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" className="flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ef7046]">
+          <BrandMark />
+          <div className="min-w-0">
+            <div className="truncate text-[16px] font-black tracking-[-.035em] text-[#102630] sm:text-xl">{siteConfig.brand.name}</div>
+            <div className="mt-0.5 hidden text-[10px] font-bold uppercase tracking-[.15em] text-[#60727a] sm:block">{siteConfig.brand.tagline}</div>
+          </div>
+        </Link>
+        <nav className="hidden items-center gap-6 text-sm font-bold text-[#546970] lg:flex" aria-label="Primary navigation">
+          <Link href="/" className={currentPage === "home" ? "text-[#102630]" : "transition hover:text-[#e55e37]"}>Home</Link>
+          <Link href="/services" className={currentPage === "services" ? "text-[#102630]" : "transition hover:text-[#e55e37]"}>Services</Link>
+          <a href="/#reviews" className="transition hover:text-[#e55e37]">Reviews</a>
+          <a href="/#service-areas" className="transition hover:text-[#e55e37]">Service Areas</a>
+          <Link href="/quote" className="transition hover:text-[#e55e37]">Contact</Link>
+        </nav>
+        <div className="flex items-center gap-2">
+          <PhoneAction className="hidden items-center gap-2 rounded-full border border-[#dce3e2] bg-white/85 px-4 py-2.5 text-sm font-extrabold text-[#17323c] shadow-[0_8px_24px_rgba(16,38,48,.06)] transition hover:-translate-y-0.5 hover:border-[#f1b29d] md:inline-flex" />
+          <Link href="/quote" className="btn-primary text-xs sm:text-sm">Schedule Service <ArrowRight size={15} /></Link>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
+  )
 }
 
 function Hero() {
-  return <section className="bg-[radial-gradient(circle_at_80%_10%,#fff9f3_0,#f3e9df_42%,#efe3d8_100%)]">
-    <div className="mx-auto grid max-w-7xl gap-7 px-4 py-8 sm:px-6 md:py-11 lg:grid-cols-[.88fr_1.12fr] lg:items-center lg:px-8">
-      <div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#ddcfc3] bg-white/90 px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-[.11em] text-[#72584d] shadow-sm"><Star size={13} fill="currentColor" className="text-[#c26039]"/>{siteConfig.hero.eyebrow}</div>
-        <h1 className="mt-5 max-w-xl text-[2.9rem] font-black leading-[.98] tracking-[-.05em] text-[#211814] sm:text-[3.8rem] lg:text-[4.25rem]">Comfort back.<br/><span className="text-[#ad512f]">Without the runaround.</span></h1>
-        <p className="mt-5 max-w-xl text-base font-medium leading-7 text-[#66564f] sm:text-lg">{siteConfig.hero.body}</p>
-        <div className="mt-5 grid max-w-xl gap-2 sm:grid-cols-2">
-          {siteConfig.trust.map((item)=><div key={item} className="flex items-center gap-2 rounded-xl border border-[#dfd3c9] bg-white/70 px-3 py-2.5 text-sm font-semibold text-[#50433d]"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#f4e5dc] text-[#ad512f]"><Check size={13} strokeWidth={3}/></span>{item}</div>)}
-        </div>
-        <div className="mt-7 flex flex-wrap gap-3"><Link href="/quote" className="inline-flex items-center gap-2 rounded-full bg-[#ad512f] px-6 py-3.5 text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(173,81,47,.22)] transition hover:-translate-y-0.5">Schedule Service <ArrowRight size={16}/></Link><a href={phoneHref} className="inline-flex items-center gap-2 rounded-full border border-[#d7c8bc] bg-white px-6 py-3.5 text-sm font-extrabold text-[#211814]"><Phone size={16}/>Call Now</a></div>
+  const reduceMotion = useReducedMotion()
+  return (
+    <section className="relative isolate overflow-hidden bg-[#edf2ef]">
+      <div className="atmosphere-grid absolute inset-0 -z-20" />
+      <div className="atmosphere-orb atmosphere-orb--one -z-10" />
+      <div className="atmosphere-orb atmosphere-orb--two -z-10" />
+      <div className="mx-auto grid max-w-7xl gap-9 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:px-8 lg:py-16">
+        <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
+          <div className="eyebrow-pill"><Star size={13} fill="currentColor" />{siteConfig.hero.eyebrow}</div>
+          <h1 className="mt-6 max-w-2xl text-[3rem] font-black leading-[.93] tracking-[-.058em] text-[#102630] sm:text-[4rem] lg:text-[4.8rem]">
+            Comfort back.<br /><span className="text-gradient">Without the runaround.</span>
+          </h1>
+          <p className="mt-5 max-w-xl text-base font-semibold leading-7 text-[#536a72] sm:text-lg">{siteConfig.hero.body}</p>
+          <div className="mt-6 grid max-w-xl gap-3 sm:grid-cols-2">
+            {siteConfig.trust.map((item, index) => (
+              <motion.div
+                key={item}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 + index * 0.06, duration: 0.45 }}
+                whileHover={reduceMotion ? undefined : { y: -5, rotateX: 2, rotateY: index % 2 ? -2 : 2 }}
+                className="trust-tile"
+              >
+                <span className="trust-tile__icon"><Check size={13} strokeWidth={3} /></span>
+                <span>{item}</span>
+              </motion.div>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={16} /></Link>
+            <PhoneAction className="btn-secondary" />
+          </div>
+          <p className="mt-3 text-xs font-semibold text-[#6b7e84]">Template contact details stay inactive until the business number or email is added.</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.965, y: 18 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          whileHover={reduceMotion ? undefined : { y: -7, rotateX: 1.5, rotateY: -1.5 }}
+          className="hero-stage"
+        >
+          <div className="hero-stage__glow" />
+          <div className="hero-stage__frame">
+            <Photo src={siteConfig.hero.image} alt={siteConfig.hero.imageAlt} className="hero-stage__image" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#081a22]/82 via-[#0a1d24]/5 to-transparent" />
+            <motion.div animate={reduceMotion ? undefined : { y: [0, -6, 0] }} transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }} className="hero-chip left-4 top-4 sm:left-6 sm:top-6">
+              <ShieldCheck size={14} /> Residential HVAC service
+            </motion.div>
+            <motion.div animate={reduceMotion ? undefined : { y: [0, 5, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} className="hero-status bottom-5 left-5 right-5 sm:bottom-7 sm:left-7 sm:right-7">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-[.15em] text-white/55">Home comfort</div>
+                <div className="mt-1 text-4xl font-black tracking-[-.05em]">72°</div>
+              </div>
+              <div className="max-w-[220px] text-right text-xs font-semibold leading-5 text-white/76 sm:text-sm">Quiet. Even. Comfortable.<br />Exactly how home should feel.</div>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
-      <div className="relative min-h-[390px] overflow-hidden rounded-[1.8rem] bg-[#2a1c17] shadow-[0_28px_65px_rgba(48,30,22,.18)] sm:min-h-[500px] lg:min-h-[555px]">
-        <Photo src={siteConfig.hero.image} alt={siteConfig.hero.imageAlt} className="absolute inset-0"/>
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#1e1410]/70 via-transparent to-transparent"/>
-        <div className="absolute left-4 top-4 rounded-full border border-white/25 bg-black/30 px-3.5 py-2 text-[10px] font-extrabold uppercase tracking-[.12em] text-white backdrop-blur-lg sm:left-5 sm:top-5">Residential HVAC service</div>
-        <div className="absolute inset-x-4 bottom-4 rounded-[1.35rem] border border-white/15 bg-[#211915]/80 p-4 text-white backdrop-blur-xl sm:inset-x-5 sm:bottom-5 sm:p-5">
-          <div className="flex items-end justify-between gap-4"><div><div className="text-[10px] font-bold uppercase tracking-[.14em] text-white/55">Home comfort</div><div className="mt-1 text-4xl font-black">72°</div></div><div className="max-w-[210px] text-right text-xs font-medium leading-5 text-white/80 sm:text-sm">Quiet. Even. Comfortable.<br/>Exactly how home should feel.</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
+  )
 }
 
 function ProofStrip() {
-  return <section className="border-y border-[#e4dad1] bg-[#fffdf9]"><div className="mx-auto grid max-w-7xl grid-cols-2 px-4 sm:px-6 md:grid-cols-4 lg:px-8">{siteConfig.stats.map((s,i)=><div key={s.label} className={`px-3 py-5 sm:px-5 ${i%2===1?"border-l border-[#e4dad1]":""} ${i>1?"border-t md:border-t-0":""} md:border-l md:first:border-l-0`}><div className="text-xl font-black tracking-[-.03em] text-[#211814] sm:text-2xl">{s.value}</div><div className="mt-1 text-xs font-semibold leading-5 text-[#77675f] sm:text-sm">{s.label}</div></div>)}</div></section>
+  const icons = [Star, Zap, Sparkles, MapPin]
+  return (
+    <section className="relative z-10 -mt-1 bg-[#edf2ef] px-4 pb-14 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 md:grid-cols-4">
+        {siteConfig.stats.map((stat, index) => {
+          const Icon = icons[index]
+          return (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 24, scale: 0.97 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ delay: index * 0.06, duration: 0.45 }}
+              whileHover={{ y: -6, scale: 1.015 }}
+              className="proof-card"
+            >
+              <span className="proof-card__icon"><Icon size={16} /></span>
+              <div className="mt-5 text-xl font-black tracking-[-.04em] text-[#102630] sm:text-2xl">{stat.value}</div>
+              <div className="mt-1 text-xs font-bold leading-5 text-[#6a7d83] sm:text-sm">{stat.label}</div>
+            </motion.div>
+          )
+        })}
+      </div>
+    </section>
+  )
 }
 
-function Services({ all=false }: { all?: boolean }) {
-  const services=all?siteConfig.services:siteConfig.services.slice(0,8)
-  return <section className="bg-[#f8f3ed] py-14 md:py-20"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div className="max-w-3xl"><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]">Our Services</div><h2 className="mt-3 text-3xl font-black leading-[1.03] tracking-[-.04em] text-[#211814] sm:text-4xl md:text-5xl">The HVAC help homeowners call for most.</h2><p className="mt-3 max-w-2xl text-base leading-7 text-[#6a5b54]">Repair, maintenance, airflow, controls, replacement, and urgent service — with clear answers before the work starts.</p></div>
-    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{services.map((s)=><article key={s.key} className="group overflow-hidden rounded-[1.45rem] border border-[#e0d5cb] bg-white shadow-[0_10px_28px_rgba(45,28,20,.055)] transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(45,28,20,.1)]"><div className="h-44 overflow-hidden bg-[#e5ddd5]"><Photo src={s.image} alt={s.imageAlt} className="transition duration-500 group-hover:scale-[1.03]"/></div><div className="p-4.5 p-5"><h3 className="text-[17px] font-extrabold tracking-[-.02em] text-[#211814]">{s.title}</h3><p className="mt-2 text-sm leading-6 text-[#6a5a53]">{s.copy}</p><Link href="/quote" className="mt-4 inline-flex items-center gap-1.5 text-sm font-extrabold text-[#ad512f]">Request service <ArrowRight size={14}/></Link></div></article>)}</div>
-    {!all&&<div className="mt-7"><Link href="/services" className="inline-flex items-center gap-2 rounded-full border border-[#d7c9bd] bg-white px-5 py-3 text-sm font-extrabold text-[#211814]">See all services <ArrowRight size={15}/></Link></div>}
-  </div></section>
+function Services({ all = false }: { all?: boolean }) {
+  const reduceMotion = useReducedMotion()
+  const services = all ? siteConfig.services : siteConfig.services.slice(0, 8)
+  return (
+    <section className="section-shell bg-[#f8f9f6]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionIntro eyebrow="Our Services" title="The HVAC help homeowners call for most." body="Repair, maintenance, airflow, controls, replacement, and urgent service — with clear answers before the work starts." />
+        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((service, index) => (
+            <motion.article
+              key={service.key}
+              initial={{ opacity: 0, y: 28, scale: 0.985 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ delay: Math.min(index * 0.04, 0.2), duration: 0.5 }}
+              whileHover={reduceMotion ? undefined : { y: -8, rotateX: 1.2 }}
+              className="service-card group"
+            >
+              <div className="relative h-44 overflow-hidden bg-[#dce5e2]">
+                <Photo src={service.image} alt={service.imageAlt} className="transition duration-700 group-hover:scale-[1.055]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#09202a]/24 via-transparent to-transparent" />
+              </div>
+              <div className="p-5">
+                <h3 className="text-[17px] font-black tracking-[-.025em] text-[#102630]">{service.title}</h3>
+                <p className="mt-2 text-sm font-medium leading-6 text-[#64767c]">{service.copy}</p>
+                <Link href="/quote" className="mt-4 inline-flex items-center gap-1.5 text-sm font-black text-[#d95531] transition group-hover:gap-2.5">Request service <ArrowRight size={14} /></Link>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+        {!all && <div className="mt-8"><Link href="/services" className="btn-secondary">See all services <ArrowRight size={15} /></Link></div>}
+      </div>
+    </section>
+  )
 }
 
 function WhyChooseUs() {
-  const items=[
-    [ShieldCheck,"Licensed & Insured","Professional service with the basics homeowners expect."],
-    [Wrench,"Experienced Technicians","Careful diagnosis before parts or repairs are recommended."],
-    [Check,"Quality Workmanship","Clean work, proper testing, and attention to the details."],
-    [Clock3,"Reliable Service","Clear scheduling and a team that stays reachable."],
-    [ShieldCheck,"Warranty Support","Workmanship and equipment coverage explained clearly."],
-    [Check,"Straight Answers","Know what is wrong and what your options are first."],
+  const reduceMotion = useReducedMotion()
+  const items = [
+    [ShieldCheck, "Licensed & Insured", "Professional service with the basics homeowners expect."],
+    [Wrench, "Experienced Technicians", "Careful diagnosis before parts or repairs are recommended."],
+    [Check, "Quality Workmanship", "Clean work, proper testing, and attention to the details."],
+    [Clock3, "Reliable Service", "Clear scheduling and a team that stays reachable."],
+    [ShieldCheck, "Warranty Support", "Workmanship and equipment coverage explained clearly."],
+    [Sparkles, "Straight Answers", "Know what is wrong and what your options are first."],
   ] as const
-  return <section className="bg-[#251915] py-14 text-white md:py-18"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="max-w-3xl"><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#dd936f]">Why Choose Us</div><h2 className="mt-3 text-3xl font-black tracking-[-.04em] sm:text-4xl md:text-5xl">Good HVAC service should feel straightforward.</h2><p className="mt-3 max-w-2xl text-base leading-7 text-white/65">Qualified people, reliable work, and clear communication from the first call through the final test.</p></div><div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{items.map(([Icon,t,c])=><div key={t} className="rounded-[1.3rem] border border-white/10 bg-white/[.055] p-5 transition hover:bg-white/[.085]"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10 text-[#e69a76]"><Icon size={18}/></span><h3 className="font-extrabold">{t}</h3></div><p className="mt-3 text-sm leading-6 text-white/62">{c}</p></div>)}</div></div></section>
+  return (
+    <section className="relative isolate overflow-hidden bg-[#0b2029] py-16 text-white md:py-22">
+      <div className="dark-atmosphere absolute inset-0 -z-10" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionIntro dark eyebrow="Why Choose Us" title="Good HVAC service should feel straightforward." body="Qualified people, reliable work, and clear communication from the first call through the final test." />
+        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map(([Icon, title, copy], index) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 26 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ delay: index * 0.055, duration: 0.48 }}
+              whileHover={reduceMotion ? undefined : { y: -7, scale: 1.012 }}
+              className="credibility-card"
+            >
+              <span className="credibility-card__icon"><Icon size={19} /></span>
+              <h3 className="mt-5 text-lg font-black tracking-[-.025em]">{title}</h3>
+              <p className="mt-2 text-sm font-medium leading-6 text-white/62">{copy}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function Work() {
-  return <section className="bg-[#fffdf9] py-14 md:py-20"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="max-w-3xl"><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]">Work in action</div><h2 className="mt-3 text-3xl font-black tracking-[-.04em] text-[#211814] sm:text-4xl md:text-5xl">Real equipment. Real service visits.</h2><p className="mt-3 text-base leading-7 text-[#6a5a53]">A few examples of the hands-on work behind a comfortable home.</p></div><div className="mt-8 grid gap-4 lg:grid-cols-3">{siteConfig.projects.map(p=><article key={p.title} className="overflow-hidden rounded-[1.5rem] border border-[#e0d5cb] bg-white shadow-sm"><div className="h-56 overflow-hidden"><Photo src={p.image} alt={p.imageAlt}/></div><div className="p-5"><h3 className="text-lg font-extrabold text-[#211814]">{p.title}</h3><p className="mt-2 text-sm leading-6 text-[#6a5a53]">{p.copy}</p></div></article>)}</div></div></section>
+  return (
+    <section className="section-shell bg-[#f8f9f6]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionIntro eyebrow="Work in action" title="Real equipment. Real service visits." body="A few examples of the hands-on work behind a comfortable home." />
+        <div className="mt-9 grid gap-4 lg:grid-cols-3">
+          {siteConfig.projects.map((project, index) => (
+            <motion.article
+              key={project.title}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ delay: index * 0.08, duration: 0.5 }}
+              className="project-card group"
+            >
+              <div className="h-60 overflow-hidden"><Photo src={project.image} alt={project.imageAlt} className="transition duration-700 group-hover:scale-[1.045]" /></div>
+              <div className="p-5"><h3 className="text-lg font-black text-[#102630]">{project.title}</h3><p className="mt-2 text-sm font-medium leading-6 text-[#65787e]">{project.copy}</p></div>
+            </motion.article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function HowItWorks() {
-  const steps=[["01","Tell us what’s wrong","Call or send a quick service request."],["02","Get a clear diagnosis","We inspect the system and explain the options."],["03","Get comfortable again","We complete the work and test the system."]]
-  return <section className="bg-[#f2e9e0] py-14 md:py-16"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="text-center"><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]">How It Works</div><h2 className="mt-3 text-3xl font-black tracking-[-.04em] text-[#211814] sm:text-4xl">Three simple steps.</h2></div><div className="mx-auto mt-7 grid max-w-5xl gap-3 md:grid-cols-3">{steps.map(([n,t,c])=><div key={n} className="rounded-[1.35rem] border border-[#dacbc0] bg-[#fffdf9] p-5 shadow-sm"><div className="flex items-start gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ad512f] text-xs font-black text-white">{n}</span><div><div className="font-extrabold text-[#211814]">{t}</div><div className="mt-1 text-sm leading-5 text-[#6a5a53]">{c}</div></div></div></div>)}</div></div></section>
+  const steps = [
+    ["01", Phone, "Tell us what’s wrong", "Call or send a quick service request."],
+    ["02", Wrench, "Get a clear diagnosis", "We inspect the system and explain the options."],
+    ["03", Check, "Get comfortable again", "We complete the work and test the system."],
+  ] as const
+  return (
+    <section className="relative isolate overflow-hidden bg-[#eaf0ed] py-16 md:py-20">
+      <div className="atmosphere-grid absolute inset-0 -z-10 opacity-45" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="section-kicker">How It Works</div>
+          <h2 className="section-title">Three simple steps. One clear path.</h2>
+          <p className="section-copy mx-auto">A service flow that keeps the homeowner informed instead of guessing what happens next.</p>
+        </div>
+        <div className="relative mx-auto mt-10 max-w-5xl">
+          <motion.div className="workflow-line" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
+          <div className="grid gap-4 md:grid-cols-3">
+            {steps.map(([number, Icon, title, copy], index) => (
+              <motion.div key={number} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.45 }} transition={{ delay: 0.14 + index * 0.13, duration: 0.5 }} className="workflow-card">
+                <div className="flex items-center justify-between"><span className="workflow-card__number">{number}</span><span className="workflow-card__icon"><Icon size={18} /></span></div>
+                <h3 className="mt-6 text-lg font-black tracking-[-.025em] text-[#102630]">{title}</h3>
+                <p className="mt-2 text-sm font-medium leading-6 text-[#65787e]">{copy}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ReviewCard({ quote, name }: { quote: string; name: string }) {
+  return (
+    <article className="review-card">
+      <div className="flex gap-1 text-[#ef7046]">{[1, 2, 3, 4, 5].map((n) => <Star key={n} size={14} fill="currentColor" />)}</div>
+      <p className="mt-4 text-base font-bold leading-7 text-[#203944]">“{quote}”</p>
+      <div className="mt-5 border-t border-[#e7ece9] pt-4"><div className="font-black text-[#102630]">{name}</div><div className="mt-0.5 text-xs font-bold text-[#7a8a8f]">Homeowner</div></div>
+    </article>
+  )
 }
 
 function Reviews() {
-  return <section id="reviews" className="bg-[#fffdf9] py-14 md:py-20"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]">Homeowner Reviews</div><h2 className="mt-3 text-3xl font-black tracking-[-.04em] text-[#211814] sm:text-4xl md:text-5xl">Trusted by homeowners.</h2></div><div className="w-fit rounded-2xl border border-[#e0d5cb] bg-white px-4 py-3 shadow-sm"><div className="flex gap-1 text-[#d66835]">{[1,2,3,4,5].map(n=><Star key={n} size={14} fill="currentColor"/>)}</div><div className="mt-1 text-sm font-extrabold text-[#211814]">4.9 average rating</div></div></div><div className="mt-7 flex snap-x gap-4 overflow-x-auto pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">{siteConfig.reviews.map(r=><article key={`${r.name}-${r.quote}`} className="min-w-[88%] snap-start rounded-[1.4rem] border border-[#e1d6cc] bg-white p-5 shadow-sm sm:min-w-[55%] lg:min-w-0"><div className="flex gap-1 text-[#d66835]">{[1,2,3,4,5].map(n=><Star key={n} size={14} fill="currentColor"/>)}</div><p className="mt-4 text-base font-semibold leading-7 text-[#30241f]">“{r.quote}”</p><div className="mt-5 border-t border-[#eee5dd] pt-4"><div className="font-extrabold text-[#211814]">{r.name}</div><div className="mt-0.5 text-xs font-medium text-[#86736a]">Homeowner</div></div></article>)}</div></div></section>
+  const repeated = [...siteConfig.reviews, ...siteConfig.reviews]
+  return (
+    <section id="reviews" className="section-shell overflow-hidden bg-[#f8f9f6]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <SectionIntro eyebrow="Homeowner Reviews" title="Trusted when comfort matters." />
+          <motion.div whileHover={{ y: -4 }} className="rating-card"><div className="flex gap-1 text-[#ef7046]">{[1, 2, 3, 4, 5].map((n) => <Star key={n} size={14} fill="currentColor" />)}</div><div className="mt-1 text-sm font-black text-[#102630]">4.9 average rating</div></motion.div>
+        </div>
+      </div>
+      <div className="review-fade mt-9">
+        <div className="review-marquee" aria-label="Homeowner reviews">
+          {repeated.map((review, index) => <ReviewCard key={`${review.name}-${index}`} quote={review.quote} name={review.name} />)}
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function LocalService() {
-  return <section id="service-areas" className="bg-[#f2e9e0] py-14 md:py-20"><div className="mx-auto grid max-w-7xl gap-7 px-4 sm:px-6 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:px-8"><div className="overflow-hidden rounded-[1.6rem] border border-[#daccc1] bg-white shadow-[0_16px_45px_rgba(48,31,24,.08)]"><Photo src={siteConfig.local.image} alt={siteConfig.local.imageAlt} className="aspect-[4/3]"/></div><div><div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]"><MapPin size={14}/>Local HVAC service</div><h2 className="mt-3 text-3xl font-black leading-[1.02] tracking-[-.04em] text-[#211814] sm:text-4xl md:text-5xl">A local team homeowners can actually reach.</h2><p className="mt-4 max-w-xl text-base leading-7 text-[#6a5a53]">Serving homes throughout the service area and nearby communities. Call to confirm your address and the earliest appointment.</p><div className="mt-5 grid gap-2 sm:grid-cols-2">{siteConfig.local.badges.map(b=><div key={b} className="flex items-center gap-2 rounded-xl border border-[#d9cabd] bg-[#fffdf9] px-4 py-3 text-sm font-semibold text-[#4f413b]"><Check size={14} className="text-[#ad512f]" strokeWidth={3}/>{b}</div>)}</div></div></div></section>
+  return (
+    <section id="service-areas" className="section-shell bg-[#edf2ef]">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.92fr_1.08fr] lg:items-center lg:px-8">
+        <motion.div initial={{ opacity: 0, x: -28, rotateY: -3 }} whileInView={{ opacity: 1, x: 0, rotateY: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.65 }} className="local-photo"><Photo src={siteConfig.local.image} alt={siteConfig.local.imageAlt} className="aspect-[4/3]" /><div className="absolute inset-0 bg-gradient-to-t from-[#09202a]/30 via-transparent to-transparent" /></motion.div>
+        <div>
+          <div className="section-kicker flex items-center gap-2"><MapPin size={14} />Local HVAC service</div>
+          <h2 className="section-title">A local team homeowners can actually reach.</h2>
+          <p className="section-copy max-w-xl">Serving homes throughout the service area and nearby communities. Add the actual service area before sending this page to a customer.</p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {siteConfig.local.badges.map((badge, index) => <motion.div key={badge} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }} className="local-badge"><Check size={14} strokeWidth={3} />{badge}</motion.div>)}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function FAQ() {
-  const [open,setOpen]=useState(0)
-  return <section className="bg-[#fffdf9] py-14 md:py-20"><div className="mx-auto grid max-w-7xl gap-7 px-4 sm:px-6 lg:grid-cols-[.72fr_1.28fr] lg:px-8"><div><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]">Helpful answers</div><h2 className="mt-3 text-3xl font-black tracking-[-.04em] text-[#211814] sm:text-4xl md:text-5xl">Common HVAC questions.</h2></div><div className="divide-y divide-[#e8ddd4] rounded-[1.4rem] border border-[#e0d5cb] bg-white px-5 sm:px-6">{siteConfig.faqs.map((f,i)=><button key={f.question} type="button" onClick={()=>setOpen(open===i?-1:i)} className="w-full py-4 text-left"><div className="flex items-center justify-between gap-4"><span className="font-extrabold text-[#211814]">{f.question}</span><ChevronDown size={18} className={`shrink-0 text-[#8a766c] transition ${open===i?"rotate-180":""}`}/></div>{open===i&&<p className="max-w-2xl pt-3 text-sm leading-6 text-[#6a5a53]">{f.answer}</p>}</button>)}</div></div></section>
+  return (
+    <section className="section-shell bg-[#f8f9f6]">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.72fr_1.28fr] lg:px-8">
+        <SectionIntro eyebrow="Helpful answers" title="Common HVAC questions." body="Clear answers without turning the page into a wall of text." />
+        <Accordion.Root type="single" collapsible defaultValue="faq-0" className="faq-shell">
+          {siteConfig.faqs.map((faq, index) => (
+            <Accordion.Item key={faq.question} value={`faq-${index}`} className="faq-item">
+              <Accordion.Header asChild><h3>
+                <Accordion.Trigger className="faq-trigger"><span>{faq.question}</span><ChevronDown size={18} className="faq-chevron" /></Accordion.Trigger>
+              </h3></Accordion.Header>
+              <Accordion.Content className="faq-content"><div className="pb-5 pr-8 text-sm font-medium leading-6 text-[#61747a]">{faq.answer}</div></Accordion.Content>
+            </Accordion.Item>
+          ))}
+        </Accordion.Root>
+      </div>
+    </section>
+  )
 }
 
 function FinalCta() {
-  return <section className="bg-[#fffdf9] px-4 pb-20 pt-3 sm:px-6 md:pb-24 lg:px-8"><div className="mx-auto max-w-7xl overflow-hidden rounded-[1.7rem] bg-[#251915] px-6 py-11 text-white shadow-[0_22px_55px_rgba(40,25,19,.14)] sm:px-9 md:px-12"><div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end"><div><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#e49a75]">Need HVAC help?</div><h2 className="mt-3 max-w-3xl text-3xl font-black leading-[1.03] tracking-[-.04em] sm:text-4xl md:text-5xl">Tell us the problem. We’ll help with the next step.</h2><p className="mt-3 max-w-xl text-base leading-7 text-white/65">Call for service or send a quick request online.</p></div><div className="flex flex-wrap gap-3"><a href={phoneHref} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3.5 text-sm font-extrabold text-[#211814]"><Phone size={15}/>Call Now</a><Link href="/quote" className="inline-flex items-center gap-2 rounded-full bg-[#ad512f] px-5 py-3.5 text-sm font-extrabold text-white">Schedule Service <ArrowRight size={15}/></Link></div></div></div></section>
+  return (
+    <section className="bg-[#f8f9f6] px-4 pb-20 pt-3 sm:px-6 md:pb-24 lg:px-8">
+      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} className="final-cta mx-auto max-w-7xl">
+        <div className="final-cta__grid" />
+        <div className="relative z-10 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
+          <div><div className="section-kicker section-kicker--dark">Need HVAC help?</div><h2 className="mt-3 max-w-3xl text-3xl font-black leading-[1.02] tracking-[-.045em] text-white sm:text-4xl md:text-5xl">Tell us the problem. We’ll help you find the next step.</h2><p className="mt-4 max-w-xl text-base font-medium leading-7 text-white/65">Add the business contact details, then let homeowners call or send a quick service request.</p></div>
+          <div className="flex flex-wrap gap-3"><PhoneAction className="btn-light" /><Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={15} /></Link></div>
+        </div>
+      </motion.div>
+    </section>
+  )
 }
 
-function Footer(){return <footer className="border-t border-[#e4d9cf] bg-[#f5eee7] pb-20 md:pb-0"><div className="mx-auto grid max-w-7xl gap-7 px-4 py-9 sm:px-6 md:grid-cols-3 lg:px-8"><div><div className="text-lg font-extrabold text-[#211814]">{siteConfig.brand.name}</div><p className="mt-2 max-w-sm text-sm leading-6 text-[#74635b]">Heating, cooling, maintenance, repair, replacement, and indoor comfort service.</p></div><div className="text-sm font-semibold text-[#66554d]"><Link className="block py-1" href="/">Home</Link><Link className="block py-1" href="/services">Services</Link><Link className="block py-1" href="/quote">Schedule Service</Link></div><div className="text-sm text-[#74635b] md:text-right"><a href={phoneHref} className="block py-1 font-extrabold text-[#211814]">{siteConfig.brand.phoneDisplay}</a><a href={`mailto:${siteConfig.brand.email}`} className="block py-1">{siteConfig.brand.email}</a><div className="py-1">Local service area</div></div></div></footer>}
+function Footer() {
+  return (
+    <footer className="border-t border-[#dfe7e4] bg-[#eef2ef] pb-20 md:pb-0">
+      <div className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
+        <div><div className="flex items-center gap-3"><BrandMark /><div className="text-lg font-black text-[#102630]">{siteConfig.brand.name}</div></div><p className="mt-3 max-w-sm text-sm font-medium leading-6 text-[#687b81]">Heating, cooling, maintenance, repair, replacement, and indoor comfort service.</p></div>
+        <div className="text-sm font-bold text-[#5c7077]"><Link className="block py-1.5 hover:text-[#d95531]" href="/">Home</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/services">Services</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/quote">Schedule Service</Link></div>
+        <div className="flex flex-col items-start gap-2 text-sm font-bold text-[#65787e] md:items-end"><PhoneAction className="inline-flex items-center gap-2 hover:text-[#d95531]" /><EmailAction className="inline-flex items-center gap-2 hover:text-[#d95531]" /><div>Local service area</div></div>
+      </div>
+    </footer>
+  )
+}
 
-function MobileBar(){return <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 gap-2 border-t border-[#dfd3c9] bg-[#fffdf9]/96 p-2.5 shadow-[0_-8px_25px_rgba(31,22,18,.08)] backdrop-blur-xl md:hidden"><a href={phoneHref} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d9c9bd] bg-white px-3 py-3 text-sm font-extrabold text-[#211814]"><Phone size={15}/>Call Now</a><Link href="/quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#ad512f] px-3 py-3 text-sm font-extrabold text-white">Schedule <ArrowRight size={15}/></Link></div>}
+function MobileServiceBar() {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 gap-2 border-t border-white/60 bg-[#f7f8f5]/92 p-2.5 shadow-[0_-12px_35px_rgba(16,38,48,.1)] backdrop-blur-2xl md:hidden">
+      <PhoneAction compact className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d7e0dd] bg-white px-3 py-3 text-sm font-black text-[#15303a]" />
+      <Link href="/quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#e7613b] px-3 py-3 text-sm font-black text-white shadow-[0_10px_24px_rgba(231,97,59,.24)]">Schedule <ArrowRight size={15} /></Link>
+    </div>
+  )
+}
 
-function HomePage(){return <><Header currentPage="home"/><Hero/><ProofStrip/><Services/><WhyChooseUs/><Work/><HowItWorks/><Reviews/><LocalService/><FAQ/><FinalCta/><Footer/><MobileBar/></>}
-function ServicesPage(){return <><Header currentPage="services"/><section className="bg-[#f1e8df] py-12 md:py-16"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]">Heating · Cooling · Indoor Comfort</div><h1 className="mt-3 max-w-4xl text-4xl font-black leading-[1] tracking-[-.045em] text-[#211814] sm:text-5xl md:text-6xl">HVAC service for the problems homeowners actually deal with.</h1><p className="mt-4 max-w-2xl text-base leading-7 text-[#66564f] sm:text-lg">Choose the closest service below. If you are not sure, call and describe what the system is doing.</p></div></section><Services all/><FinalCta/><Footer/><MobileBar/></>}
-function QuotePage(){return <><Header currentPage="quote"/><section className="bg-[#f1e8df] py-10 md:py-14"><div className="mx-auto grid max-w-7xl gap-7 px-4 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:px-8"><div className="lg:py-7"><div className="text-xs font-extrabold uppercase tracking-[.18em] text-[#ad512f]">Request Service</div><h1 className="mt-3 text-4xl font-black leading-[1] tracking-[-.045em] text-[#211814] sm:text-5xl md:text-6xl">Tell us what’s going on.</h1><p className="mt-4 max-w-lg text-base leading-7 text-[#66564f] sm:text-lg">A short request is enough. We can sort out the details with you.</p><div className="mt-6 space-y-2.5 text-sm font-semibold text-[#55463f]"><div className="flex items-center gap-2"><Check size={15} className="text-[#ad512f]"/>No long questionnaire</div><div className="flex items-center gap-2"><Check size={15} className="text-[#ad512f]"/>Tell us the main problem</div><div className="flex items-center gap-2"><Check size={15} className="text-[#ad512f]"/>Or call {siteConfig.brand.phoneDisplay}</div></div></div><form className="rounded-[1.6rem] border border-[#ded1c6] bg-[#fffdf9] p-5 shadow-[0_18px_45px_rgba(48,31,24,.08)] sm:p-7"><div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-bold text-[#4e4039]">Name<input className="mt-2 w-full rounded-xl border border-[#d9c9bd] bg-white px-4 py-3 font-normal outline-none focus:border-[#ad512f]" placeholder="Your name"/></label><label className="text-sm font-bold text-[#4e4039]">Phone<input className="mt-2 w-full rounded-xl border border-[#d9c9bd] bg-white px-4 py-3 font-normal outline-none focus:border-[#ad512f]" placeholder="Best number"/></label><label className="text-sm font-bold text-[#4e4039] sm:col-span-2">Email<input className="mt-2 w-full rounded-xl border border-[#d9c9bd] bg-white px-4 py-3 font-normal outline-none focus:border-[#ad512f]" placeholder="you@example.com"/></label><label className="text-sm font-bold text-[#4e4039] sm:col-span-2">What do you need help with?<textarea className="mt-2 min-h-28 w-full resize-y rounded-xl border border-[#d9c9bd] bg-white px-4 py-3 font-normal outline-none focus:border-[#ad512f]" placeholder="AC not cooling, furnace issue, maintenance, replacement..."/></label></div><button type="submit" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ad512f] px-5 py-3.5 text-sm font-extrabold text-white">Request Service <ArrowRight size={15}/></button></form></div></section><Footer/><MobileBar/></>}
+function HomePage() {
+  return <><Header currentPage="home" /><Hero /><ProofStrip /><Services /><WhyChooseUs /><Work /><HowItWorks /><Reviews /><LocalService /><FAQ /><FinalCta /><Footer /><MobileServiceBar /></>
+}
 
-export default function HVACSite({ currentPage="home" }: { currentPage?: Page }){if(currentPage==="services")return <ServicesPage/>;if(currentPage==="quote")return <QuotePage/>;return <HomePage/>}
+function ServicesPage() {
+  return <><Header currentPage="services" /><section className="relative isolate overflow-hidden bg-[#edf2ef] py-14 md:py-20"><div className="atmosphere-grid absolute inset-0 -z-10" /><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="section-kicker">Heating · Cooling · Indoor Comfort</div><h1 className="mt-4 max-w-4xl text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl md:text-6xl">HVAC service for the problems homeowners actually deal with.</h1><p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#61747a] sm:text-lg">Choose the closest service below. If you are not sure, send a request and describe what the system is doing.</p></div></section><Services all /><FinalCta /><Footer /><MobileServiceBar /></>
+}
+
+function QuotePage() {
+  return (
+    <><Header currentPage="quote" /><section id="contact-details" className="relative isolate overflow-hidden bg-[#edf2ef] py-12 md:py-18"><div className="atmosphere-grid absolute inset-0 -z-10" /><div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8"><div className="lg:py-7"><div className="section-kicker">Request Service</div><h1 className="mt-4 text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl md:text-6xl">Tell us what’s going on.</h1><p className="mt-5 max-w-lg text-base font-medium leading-7 text-[#61747a] sm:text-lg">A short request is enough. Before sharing this template, replace the phone and email placeholders with the business’s real contact details.</p><div className="mt-7 space-y-3 text-sm font-bold text-[#536a72]"><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />No long questionnaire</div><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />Tell us the main problem</div><div className="flex items-center gap-2"><Phone size={15} className="text-[#e7613b]" />{siteConfig.brand.phoneDisplay}</div><div className="flex items-center gap-2"><Mail size={15} className="text-[#e7613b]" />Add Your Email</div></div></div><motion.form initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="quote-form" onSubmit={(event) => event.preventDefault()}><div className="grid gap-4 sm:grid-cols-2"><label className="form-label">Name<input className="form-input" placeholder="Your name" autoComplete="name" /></label><label className="form-label">Phone<input className="form-input" placeholder="Best number" inputMode="tel" autoComplete="tel" /></label><label className="form-label sm:col-span-2">Email<input className="form-input" placeholder="you@example.com" type="email" autoComplete="email" /></label><label className="form-label sm:col-span-2">What do you need help with?<textarea className="form-input min-h-28 resize-y" placeholder="AC not cooling, furnace issue, maintenance, replacement..." /></label></div><button type="submit" className="btn-primary mt-5 w-full justify-center">Request Service <ArrowRight size={15} /></button></motion.form></div></section><Footer /><MobileServiceBar /></>
+  )
+}
+
+export default function HVACSite({ currentPage = "home" }: { currentPage?: Page }) {
+  return (
+    <MotionConfig reducedMotion="user">
+      {currentPage === "services" ? <ServicesPage /> : currentPage === "quote" ? <QuotePage /> : <HomePage />}
+    </MotionConfig>
+  )
+}
