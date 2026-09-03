@@ -5,9 +5,9 @@ export const siteConfig = {
     tagline: "Heating · Cooling · Indoor Comfort",
     city: "Your Service Area",
     state: "",
-    phoneDisplay: "Call Now",
-    phoneHref: "+15555550100",
-    email: "service@primehvac.com",
+    phoneDisplay: "Add Your Number",
+    phoneHref: "",
+    email: "Email Us",
   },
   hero: {
     eyebrow: "4.9★ rated local HVAC team",
