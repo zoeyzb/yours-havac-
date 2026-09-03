@@ -13,8 +13,8 @@ export const siteConfig = {
     eyebrow: "4.9★ rated local HVAC team",
     heading: "Comfort back. Without the runaround.",
     body: "Fast HVAC help. Clear answers. Careful work.",
-    image: "https://cdn.prod.website-files.com/650def70d00462f63fded491/652f78c18a78cacb706555d7_emergency-hvac-services.webp",
-    imageAlt: "Smiling HVAC technician beside an outdoor residential air conditioning unit",
+    image: "https://images.pexels.com/photos/7347538/pexels-photo-7347538.jpeg?auto=compress&dpr=1&h=1000&w=1600",
+    imageAlt: "HVAC technician repairing an outdoor air conditioning unit",
   },
   trust: [
     "Fast appointment options",
@@ -122,8 +122,8 @@ export const siteConfig = {
     },
   ],
   local: {
-    image: "https://cdn.prod.website-files.com/650def70d00462f63fded491/652f78c18a78cacb706555d7_emergency-hvac-services.webp",
-    imageAlt: "Smiling local HVAC technician beside an outdoor air conditioning unit",
+    image: "https://images.pexels.com/photos/32497161/pexels-photo-32497161.jpeg?auto=compress&dpr=1&h=1000&w=1600",
+    imageAlt: "Local HVAC technician inspecting an outdoor residential unit",
     badges: [
       "Local technicians",
       "Fast response",
