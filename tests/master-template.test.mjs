@@ -103,3 +103,23 @@ test('conversion pass removes template leakage and adds outcome-focused proof', 
     assert.equal(component.includes(rejected), false, `public-facing template instruction should be removed: ${rejected}`)
   }
 })
+
+
+test('aggressive contractor redesign uses bold industrial hierarchy instead of subtle pale panels', () => {
+  const source = `${component}\n${styles}`
+  for (const required of [
+    'hero-industrial',
+    'hero-quick-actions',
+    'proof-ribbon',
+    'service-card--industrial',
+    'standards-rail',
+    'work-strip',
+    'faq-panel--dark',
+    'cta-panel--orange',
+  ]) {
+    assert.ok(source.includes(required), `missing bold contractor redesign element: ${required}`)
+  }
+
+  assert.equal(source.includes('service-standard-bar'), false, 'subtle standards bar should be replaced with a stronger rail')
+  assert.equal(source.includes('proof-board__grid'), false, 'subtle proof grid should be replaced with a bolder proof ribbon')
+})
