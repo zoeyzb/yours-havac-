@@ -873,3 +873,194 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .workflow-compact__step h3,
   .workflow-compact__step p { grid-column: 2; }
 }
+
+
+/* Conversion clarity pass */
+.service-card-link {
+  display: block;
+  color: inherit;
+  border-radius: 1.35rem;
+}
+.service-card-link:focus-visible {
+  outline: 3px solid rgba(231,97,59,.45);
+  outline-offset: 5px;
+}
+.service-card--outcome {
+  height: 100%;
+}
+.service-outcome {
+  position: absolute;
+  left: .75rem;
+  bottom: .75rem;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  background: rgba(8,31,40,.72);
+  padding: .38rem .6rem;
+  color: white;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+.service-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem .5rem;
+  margin-top: 1rem;
+  border-top: 1px solid #e5ebe8;
+  padding-top: .8rem;
+}
+.service-path span {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: #557078;
+  font-size: .68rem;
+  font-weight: 850;
+}
+.service-path svg { color: #e7613b; }
+.service-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-top: 1rem;
+  color: #d95531;
+  font-size: .82rem;
+  font-weight: 950;
+  transition: gap .2s ease;
+}
+.service-card-link:hover .service-card__action { gap: .7rem; }
+
+.service-standard-header--compact h2 {
+  max-width: 38rem;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+}
+.service-standard-bar {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  margin-top: 1.75rem;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: rgba(255,255,255,.035);
+}
+.service-standard-bar__item {
+  display: grid;
+  grid-template-columns: 2.3rem minmax(0,1fr);
+  gap: .7rem;
+  align-items: start;
+  min-height: 7.3rem;
+  padding: 1rem;
+  border-left: 1px solid rgba(255,255,255,.09);
+  transition: background .2s ease, transform .2s ease;
+}
+.service-standard-bar__item:first-child { border-left: 0; }
+.service-standard-bar__item:hover { background: rgba(255,255,255,.055); }
+.service-standard-bar__icon {
+  display: grid;
+  width: 2.3rem;
+  height: 2.3rem;
+  place-items: center;
+  border-radius: .55rem;
+  background: #1b4651;
+  color: #9ddfe5;
+}
+.service-standard-bar__item strong {
+  display: block;
+  color: #fff;
+  font-size: .88rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+.service-standard-bar__item small {
+  display: block;
+  margin-top: .35rem;
+  color: rgba(255,255,255,.58);
+  font-size: .72rem;
+  font-weight: 560;
+  line-height: 1.45;
+}
+
+.review-meta {
+  min-height: 3.5rem;
+}
+
+.faq-help-panel {
+  margin-top: 1.5rem;
+  border: 1px solid #d8e3df;
+  border-radius: 1.2rem;
+  background: #eef4f1;
+  padding: 1.2rem;
+  box-shadow: 0 12px 28px rgba(16,38,48,.05);
+}
+.faq-help-panel__icon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: .7rem;
+  background: #153640;
+  color: #a6e2e7;
+}
+.faq-help-panel__eyebrow {
+  margin-top: .9rem;
+  color: #d95531;
+  font-size: .65rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.faq-help-panel h3 {
+  margin-top: .35rem;
+  color: #102630;
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -.025em;
+}
+.faq-help-panel p {
+  margin-top: .45rem;
+  color: #62767d;
+  font-size: .82rem;
+  font-weight: 560;
+  line-height: 1.6;
+}
+.faq-help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1rem;
+}
+.faq-help-actions .btn-primary,
+.faq-help-actions .btn-secondary {
+  padding: .72rem .9rem;
+  font-size: .76rem;
+}
+
+.cta-outcome {
+  padding-block: 2.4rem;
+}
+.cta-outcome .section-kicker {
+  margin-bottom: .2rem;
+}
+
+@media (max-width: 900px) {
+  .service-standard-bar { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .service-standard-bar__item:nth-child(3) { border-left: 0; border-top: 1px solid rgba(255,255,255,.09); }
+  .service-standard-bar__item:nth-child(4) { border-top: 1px solid rgba(255,255,255,.09); }
+}
+
+@media (max-width: 640px) {
+  .service-path { gap: .3rem .4rem; }
+  .service-standard-bar { grid-template-columns: 1fr; }
+  .service-standard-bar__item {
+    min-height: 0;
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,.09);
+  }
+  .service-standard-bar__item:first-child { border-top: 0; }
+  .faq-help-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
