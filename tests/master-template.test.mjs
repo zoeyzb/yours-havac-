@@ -34,20 +34,27 @@ test('homepage has premium motion and accessible interaction primitives', () => 
   assert.ok(styles.includes('prefers-reduced-motion'), 'CSS motion must have a reduced-motion fallback')
 })
 
-test('homepage visual story includes depth, workflow motion, and moving reviews', () => {
+test('homepage visual story includes dimensional trust, proof motion, workflow motion, and moving reviews', () => {
   for (const required of [
     'Comfort back.',
-    'Why Choose Us',
+    'Why homeowners choose us',
     'How It Works',
     'Homeowner Reviews',
     'review-marquee',
-    'workflow-line',
-    'atmosphere-grid',
+    'hero-trust-stack',
+    'proof-scene',
+    'proof-orbit',
+    'workflow-track',
+    'workflow-progress',
+    'workflow-pulse',
+    'airflow-stream',
     'MobileServiceBar',
     'Schedule Service',
   ]) {
     assert.ok(`${component}\n${styles}`.includes(required), `missing redesign element: ${required}`)
   }
+  assert.equal(component.includes('className="workflow-card"'), false, 'how-it-works must not regress to three static cards')
+  assert.equal(styles.includes('.proof-band__stats'), false, 'proof should not regress to a flat segmented dashboard bar')
 })
 
 test('visual contract avoids cheap SaaS styling and fake proof', () => {
