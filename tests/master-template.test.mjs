@@ -78,3 +78,28 @@ test('homepage metadata is HVAC-specific and contains no stale handyman branding
   assert.equal(homepage.includes('Premium Handyman Template'), false, 'homepage still contains old handyman metadata')
   assert.ok(homepage.includes('Prime Heating & Cooling'), 'homepage title should use the HVAC demo brand')
 })
+
+
+test('conversion pass removes template leakage and adds outcome-focused proof', () => {
+  const source = `${component}\n${config}\n${styles}`
+  for (const required of [
+    'service-outcome',
+    'service-path',
+    'review-meta',
+    'faq-help-panel',
+    'faq-help-actions',
+    'service-standard-bar',
+    'Heating or AC problem?',
+  ]) {
+    assert.ok(source.includes(required), `missing conversion improvement: ${required}`)
+  }
+
+  for (const rejected of [
+    'Template contact details stay inactive',
+    'Add the actual service area before sending this page to a customer',
+    'Before sharing this template',
+    'Give homeowners one clear next step',
+  ]) {
+    assert.equal(component.includes(rejected), false, `public-facing template instruction should be removed: ${rejected}`)
+  }
+})
