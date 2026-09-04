@@ -128,21 +128,21 @@ function Hero() {
             Comfort back.<br /><span className="text-gradient">Without the runaround.</span>
           </h1>
           <p className="mt-5 max-w-xl text-base font-semibold leading-7 text-[#536a72] sm:text-lg">{siteConfig.hero.body}</p>
-          <div className="mt-6 grid max-w-xl gap-3 sm:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.16, duration: 0.5 }}
+            className="hero-trust-line"
+            aria-label="Service promises"
+          >
             {siteConfig.trust.map((item, index) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 + index * 0.06, duration: 0.45 }}
-                whileHover={reduceMotion ? undefined : { y: -5, rotateX: 2, rotateY: index % 2 ? -2 : 2 }}
-                className="trust-tile"
-              >
-                <span className="trust-tile__icon"><Check size={13} strokeWidth={3} /></span>
+              <div key={item} className="hero-trust-line__item">
+                <span className="hero-trust-line__dot"><Check size={11} strokeWidth={3.2} /></span>
                 <span>{item}</span>
-              </motion.div>
+                {index < siteConfig.trust.length - 1 && <span className="hero-trust-line__divider" aria-hidden="true" />}
+              </div>
             ))}
-          </div>
+          </motion.div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={16} /></Link>
             <PhoneAction className="btn-secondary" />
@@ -179,29 +179,31 @@ function Hero() {
 }
 
 function ProofStrip() {
-  const icons = [Star, Zap, Sparkles, MapPin]
   return (
-    <section className="relative z-10 -mt-1 bg-[#edf2ef] px-4 pb-14 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 md:grid-cols-4">
-        {siteConfig.stats.map((stat, index) => {
-          const Icon = icons[index]
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 24, scale: 0.97 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{ delay: index * 0.06, duration: 0.45 }}
-              whileHover={{ y: -6, scale: 1.015 }}
-              className="proof-card"
-            >
-              <span className="proof-card__icon"><Icon size={16} /></span>
-              <div className="mt-5 text-xl font-black tracking-[-.04em] text-[#102630] sm:text-2xl">{stat.value}</div>
-              <div className="mt-1 text-xs font-bold leading-5 text-[#6a7d83] sm:text-sm">{stat.label}</div>
-            </motion.div>
-          )
-        })}
-      </div>
+    <section className="relative z-10 bg-[#edf2ef] px-4 pb-16 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.55 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="proof-band mx-auto max-w-7xl"
+      >
+        <div className="proof-band__lead">
+          <div className="proof-band__pulse"><span /></div>
+          <div>
+            <div className="proof-band__eyebrow">Built around the homeowner</div>
+            <div className="proof-band__title">Fast help. Clear choices. Local accountability.</div>
+          </div>
+        </div>
+        <div className="proof-band__stats">
+          {siteConfig.stats.map((stat) => (
+            <div key={stat.label} className="proof-band__stat">
+              <div className="proof-band__value">{stat.value}</div>
+              <div className="proof-band__label">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </section>
   )
 }
@@ -245,33 +247,66 @@ function Services({ all = false }: { all?: boolean }) {
 function WhyChooseUs() {
   const reduceMotion = useReducedMotion()
   const items = [
-    [ShieldCheck, "Licensed & Insured", "Professional service with the basics homeowners expect."],
-    [Wrench, "Experienced Technicians", "Careful diagnosis before parts or repairs are recommended."],
-    [Check, "Quality Workmanship", "Clean work, proper testing, and attention to the details."],
-    [Clock3, "Reliable Service", "Clear scheduling and a team that stays reachable."],
-    [ShieldCheck, "Warranty Support", "Workmanship and equipment coverage explained clearly."],
-    [Sparkles, "Straight Answers", "Know what is wrong and what your options are first."],
+    [ShieldCheck, "Licensed & insured", "Professional service with the fundamentals already covered."],
+    [Wrench, "Diagnose before recommending", "We find the issue first, then explain the repair or replacement path."],
+    [Check, "Work that gets tested", "The job is not done until the system is checked and running the way it should."],
+    [Clock3, "Clear scheduling", "You know what happens next instead of wondering whether anyone is showing up."],
   ] as const
+
   return (
-    <section className="relative isolate overflow-hidden bg-[#0b2029] py-16 text-white md:py-22">
-      <div className="dark-atmosphere absolute inset-0 -z-10" />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionIntro dark eyebrow="Why Choose Us" title="Good HVAC service should feel straightforward." body="Qualified people, reliable work, and clear communication from the first call through the final test." />
-        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="credibility-section relative isolate overflow-hidden py-20 text-white md:py-28">
+      <div className="credibility-aurora" aria-hidden="true" />
+      <div className="airflow-field" aria-hidden="true">
+        {[0, 1, 2, 3, 4].map((lane) => (
+          <motion.span
+            key={lane}
+            className={`airflow-stream airflow-stream--${lane + 1}`}
+            animate={reduceMotion ? undefined : { x: ["-18%", "118%"], opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 5.5 + lane * 0.8, repeat: Infinity, ease: "linear", delay: lane * 0.72 }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[.86fr_1.14fr] lg:items-start lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, x: -28 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="lg:sticky lg:top-28"
+        >
+          <div className="credibility-kicker">Why homeowners choose us</div>
+          <h2 className="credibility-heading">
+            No guessing.<br />
+            <span>No vague answers.</span>
+          </h2>
+          <p className="credibility-copy">
+            HVAC service should feel calm, clear, and professional — from the first call to the final system check.
+          </p>
+          <div className="credibility-signal">
+            <span className="credibility-signal__pulse" />
+            Clear communication at every step
+          </div>
+        </motion.div>
+
+        <div className="credibility-list">
           {items.map(([Icon, title, copy], index) => (
-            <motion.div
+            <motion.article
               key={title}
-              initial={{ opacity: 0, y: 26 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ delay: index * 0.055, duration: 0.48 }}
-              whileHover={reduceMotion ? undefined : { y: -7, scale: 1.012 }}
-              className="credibility-card"
+              initial={{ opacity: 0, x: 34 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.35 }}
+              transition={{ delay: index * 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="credibility-row"
             >
-              <span className="credibility-card__icon"><Icon size={19} /></span>
-              <h3 className="mt-5 text-lg font-black tracking-[-.025em]">{title}</h3>
-              <p className="mt-2 text-sm font-medium leading-6 text-white/62">{copy}</p>
-            </motion.div>
+              <div className="credibility-row__number">0{index + 1}</div>
+              <div className="credibility-row__icon"><Icon size={20} /></div>
+              <div>
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </div>
+              <ArrowRight className="credibility-row__arrow" size={20} aria-hidden="true" />
+            </motion.article>
           ))}
         </div>
       </div>
