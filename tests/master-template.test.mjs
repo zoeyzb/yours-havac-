@@ -49,6 +49,9 @@ test('homepage visual story includes dimensional trust, proof motion, workflow m
     'workflow-path',
     'workflow-traveler',
     'airflow-stream',
+    'credibility-stage',
+    'credibility-core',
+    'credibility-callout',
     'MobileServiceBar',
     'Schedule Service',
   ]) {
@@ -56,6 +59,7 @@ test('homepage visual story includes dimensional trust, proof motion, workflow m
   }
   assert.equal(component.includes('className="workflow-card"'), false, 'how-it-works must not regress to three static cards')
   assert.equal(component.includes('className="workflow-stage"'), false, 'workflow must not be three card-like stages')
+  assert.equal(component.includes('className="credibility-row"'), false, 'credibility section must not remain a right-side list of rows')
   assert.equal(styles.includes('.proof-band__stats'), false, 'proof should not regress to a flat segmented dashboard bar')
   assert.equal(styles.includes('.proof-scene__nodes'), false, 'proof must not remain a grid of stat cards')
 })
