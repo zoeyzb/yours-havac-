@@ -448,7 +448,7 @@ function FAQ() {
 function FinalCta() {
   return (
     <section className="bg-[#f8f9f6] px-4 pb-20 pt-3 sm:px-6 md:pb-24 lg:px-8">
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} className="final-cta mx-auto max-w-7xl">
+      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} className="final-cta cta-outcome mx-auto max-w-7xl">
         <div className="final-cta__grid" />
         <div className="relative z-10 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
           <div><div className="section-kicker section-kicker--dark">Need HVAC help?</div><h2 className="mt-3 max-w-3xl text-3xl font-black leading-[1.02] tracking-[-.045em] text-white sm:text-4xl md:text-5xl">Need HVAC help? Tell us what’s happening.</h2><p className="mt-4 max-w-xl text-base font-medium leading-7 text-white/65">Give homeowners one clear next step: call, add the business number, or request service online.</p></div>
