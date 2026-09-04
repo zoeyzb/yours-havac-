@@ -612,6 +612,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   gap: 2.2rem;
 }
 .workflow-stage {
+  position: relative;
   min-height: 15rem;
   padding-top: .5rem;
   text-align: center;
@@ -791,9 +792,23 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (max-width: 767px) {
   .workflow-shell { padding-top: 0; }
-  .workflow-track { left: 2.25rem; right: auto; top: 2.3rem; bottom: 2.3rem; width: 4px; height: auto; }
+  .workflow-track { left: 2.25rem; right: auto; top: 2.3rem; bottom: 2.3rem; width: 4px; height: auto; overflow: visible; }
   .workflow-progress { transform-origin: top; }
-  .workflow-pulse { left: 50% !important; top: 0; }
+  .workflow-pulse { display: none; }
+  .workflow-track::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: .9rem;
+    height: .9rem;
+    margin-left: -.45rem;
+    border: 3px solid white;
+    border-radius: 999px;
+    background: #e7613b;
+    box-shadow: 0 0 0 7px rgba(231,97,59,.12), 0 0 24px rgba(231,97,59,.34);
+    animation: workflow-mobile-pulse 3.6s ease-in-out infinite;
+  }
   .workflow-stages { grid-template-columns: 1fr; gap: 1rem; }
   .workflow-stage { min-height: 8.5rem; padding-left: 5.8rem; text-align: left; }
   .workflow-stage__node { position: absolute; left: 0; margin: 0; }
@@ -803,6 +818,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .review-marquee { animation-duration: 48s; }
   .hero-stage__frame { min-height: 430px; }
   .section-title { font-size: clamp(2rem, 10vw, 2.65rem); }
+}
+
+@keyframes workflow-mobile-pulse {
+  0%, 8% { top: 0; }
+  92%, 100% { top: calc(100% - .9rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {
