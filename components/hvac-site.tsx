@@ -132,7 +132,7 @@ function Hero() {
             <Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={16} /></Link>
             <PhoneAction className="btn-secondary" />
           </div>
-          <p className="mt-3 text-xs font-semibold text-[#6b7e84]">Template contact details stay inactive until the business number or email is added.</p>
+          <p className="mt-3 text-xs font-semibold text-[#6b7e84]">Clear options before work starts. No pressure. No guessing.</p>
         </motion.div>
 
         <motion.div
@@ -226,32 +226,61 @@ function ProofStrip() {
 function Services({ all = false }: { all?: boolean }) {
   const reduceMotion = useReducedMotion()
   const services = all ? siteConfig.services : siteConfig.services.slice(0, 8)
+  const servicePaths: Record<string, [string, string, string]> = {
+    cooling: ["Not cooling", "Diagnose", "Repair & test"],
+    heating: ["No heat", "Diagnose", "Repair & test"],
+    air: ["Air feels off", "Check air", "Improve comfort"],
+    duct: ["Weak airflow", "Inspect ducts", "Restore airflow"],
+    thermostat: ["Control issue", "Test controls", "Set it right"],
+    maintenance: ["Prevent breakdowns", "Inspect system", "Tune & verify"],
+    installation: ["Old system", "Compare options", "Install & test"],
+    emergency: ["Urgent issue", "Find the cause", "Restore comfort"],
+    commercial: ["Business comfort", "Inspect equipment", "Repair & verify"],
+  }
+
   return (
     <section className="section-shell bg-[#f8f9f6]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionIntro eyebrow="Our Services" title="The HVAC help homeowners call for most." body="Repair, maintenance, airflow, controls, replacement, and urgent service — with clear answers before the work starts." />
+        <SectionIntro
+          eyebrow="Our Services"
+          title="HVAC help for the problems homeowners actually notice."
+          body="Start with the symptom. We diagnose the cause, explain the options, then test the work before we leave."
+        />
         <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, index) => (
-            <motion.article
-              key={service.key}
-              initial={{ opacity: 0, y: 28, scale: 0.985 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ delay: Math.min(index * 0.04, 0.2), duration: 0.5 }}
-              whileHover={reduceMotion ? undefined : { y: -8, rotateX: 1.2 }}
-              className="service-card group"
-            >
-              <div className="relative h-44 overflow-hidden bg-[#dce5e2]">
-                <Photo src={service.image} alt={service.imageAlt} className="transition duration-700 group-hover:scale-[1.055]" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#09202a]/24 via-transparent to-transparent" />
-              </div>
-              <div className="p-5">
-                <h3 className="text-[17px] font-black tracking-[-.025em] text-[#102630]">{service.title}</h3>
-                <p className="mt-2 text-sm font-medium leading-6 text-[#64767c]">{service.copy}</p>
-                <Link href="/quote" className="mt-4 inline-flex items-center gap-1.5 text-sm font-black text-[#d95531] transition group-hover:gap-2.5">Request service <ArrowRight size={14} /></Link>
-              </div>
-            </motion.article>
-          ))}
+          {services.map((service, index) => {
+            const path = servicePaths[service.key] ?? ["Tell us the issue", "Diagnose", "Fix & test"]
+            return (
+              <Link key={service.key} href="/quote" className="service-card-link group" aria-label={`Request ${service.title}`}>
+                <motion.article
+                  initial={{ opacity: 0, y: 24, scale: 0.99 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ delay: Math.min(index * 0.04, 0.2), duration: 0.45 }}
+                  whileHover={reduceMotion ? undefined : { y: -6 }}
+                  className="service-card service-card--outcome"
+                >
+                  <div className="relative h-44 overflow-hidden bg-[#dce5e2]">
+                    <Photo src={service.image} alt={service.imageAlt} className="transition duration-700 group-hover:scale-[1.045]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#09202a]/30 via-transparent to-transparent" />
+                    <div className="service-outcome">Common call</div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-[17px] font-black tracking-[-.025em] text-[#102630]">{service.title}</h3>
+                    <p className="mt-2 text-sm font-medium leading-6 text-[#64767c]">{service.copy}</p>
+                    <div className="service-path" aria-label={`${service.title} service path`}>
+                      {path.map((step, stepIndex) => (
+                        <span key={step}>
+                          {step}
+                          {stepIndex < path.length - 1 && <ArrowRight size={11} aria-hidden="true" />}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="service-card__action">Request service <ArrowRight size={14} /></div>
+                  </div>
+                </motion.article>
+              </Link>
+            )
+          })}
         </div>
         {!all && <div className="mt-8"><Link href="/services" className="btn-secondary">See all services <ArrowRight size={15} /></Link></div>}
       </div>
@@ -261,42 +290,40 @@ function Services({ all = false }: { all?: boolean }) {
 
 function WhyChooseUs() {
   const standards = [
-    [ShieldCheck, "Licensed & insured", "The basics are covered before anyone steps into the home."],
-    [Wrench, "Diagnose before recommending", "We find the issue first, then explain the repair or replacement options."],
-    [Check, "Test the work", "The system is checked before the job is called complete."],
-    [Clock3, "Clear scheduling", "Homeowners know what happens next and when to expect service."],
+    [ShieldCheck, "Licensed & insured", "Covered before the visit starts."],
+    [Wrench, "Diagnosis first", "Find the cause before recommending work."],
+    [Check, "Work tested", "Check the system before calling it complete."],
+    [Clock3, "Clear scheduling", "Know what happens next and when."],
   ] as const
 
   return (
-    <section className="service-standard-section bg-[#102630] py-18 text-white md:py-22">
+    <section className="service-standard-section bg-[#102630] py-14 text-white md:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="service-standard-header">
+        <div className="service-standard-header service-standard-header--compact">
           <div>
             <div className="section-kicker section-kicker--dark">Why homeowners choose us</div>
-            <h2>What homeowners can expect.</h2>
+            <h2>Four standards. Every service call.</h2>
           </div>
-          <p>Clear communication. Straight answers. Work that gets checked. That is the standard.</p>
+          <p>Clear communication, practical recommendations, and work that gets checked before the job is finished.</p>
         </div>
 
-        <div className="service-standard-grid">
+        <div className="service-standard-bar" aria-label="Service standards">
           {standards.map(([Icon, title, copy], index) => (
-            <motion.article
+            <motion.div
               key={title}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ delay: index * 0.07, duration: 0.4 }}
-              whileHover={{ y: -4 }}
-              className="service-standard-card"
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ delay: index * 0.06, duration: 0.35 }}
+              whileHover={{ y: -3 }}
+              className="service-standard-bar__item"
             >
-              <div className="service-standard-card__top">
-                <span className="service-standard-card__icon"><Icon size={20} /></span>
-                <span className="service-standard-card__number">0{index + 1}</span>
+              <span className="service-standard-bar__icon"><Icon size={18} /></span>
+              <div>
+                <strong>{title}</strong>
+                <small>{copy}</small>
               </div>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-              <Link href="/quote" className="service-standard-card__link">Request service <ArrowRight size={15} /></Link>
-            </motion.article>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -378,12 +405,15 @@ function HowItWorks() {
   )
 }
 
-function ReviewCard({ quote, name }: { quote: string; name: string }) {
+function ReviewCard({ quote, name, meta }: { quote: string; name: string; meta: string }) {
   return (
     <article className="review-card">
       <div className="flex gap-1 text-[#ef7046]">{[1, 2, 3, 4, 5].map((n) => <Star key={n} size={14} fill="currentColor" />)}</div>
       <p className="mt-4 text-base font-bold leading-7 text-[#203944]">“{quote}”</p>
-      <div className="mt-5 border-t border-[#e7ece9] pt-4"><div className="font-black text-[#102630]">{name}</div><div className="mt-0.5 text-xs font-bold text-[#7a8a8f]">Homeowner</div></div>
+      <div className="review-meta mt-5 border-t border-[#e7ece9] pt-4">
+        <div className="font-black text-[#102630]">{name}</div>
+        <div className="mt-0.5 text-xs font-bold text-[#7a8a8f]">{meta}</div>
+      </div>
     </article>
   )
 }
@@ -400,7 +430,7 @@ function Reviews() {
       </div>
       <div className="review-fade mt-9">
         <div className="review-marquee" aria-label="Homeowner reviews">
-          {repeated.map((review, index) => <ReviewCard key={`${review.name}-${index}`} quote={review.quote} name={review.name} />)}
+          {repeated.map((review, index) => <ReviewCard key={`${review.name}-${index}`} quote={review.quote} name={review.name} meta={review.location} />)}
         </div>
       </div>
     </section>
@@ -415,7 +445,7 @@ function LocalService() {
         <div>
           <div className="section-kicker flex items-center gap-2"><MapPin size={14} />Local HVAC service</div>
           <h2 className="section-title">A local team homeowners can actually reach.</h2>
-          <p className="section-copy max-w-xl">Serving homes throughout the service area and nearby communities. Add the actual service area before sending this page to a customer.</p>
+          <p className="section-copy max-w-xl">Serving homes throughout the local service area and nearby communities. Call or request service to confirm availability for your address.</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {siteConfig.local.badges.map((badge, index) => <motion.div key={badge} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }} className="local-badge"><Check size={14} strokeWidth={3} />{badge}</motion.div>)}
           </div>
@@ -428,8 +458,22 @@ function LocalService() {
 function FAQ() {
   return (
     <section className="section-shell bg-[#f8f9f6]">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.72fr_1.28fr] lg:px-8">
-        <SectionIntro eyebrow="Helpful answers" title="Common HVAC questions." body="Clear answers without turning the page into a wall of text." />
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8">
+        <div>
+          <SectionIntro eyebrow="Helpful answers" title="Common HVAC questions." body="Quick answers for the questions homeowners usually ask before booking." />
+          <div className="faq-help-panel">
+            <div className="faq-help-panel__icon"><Phone size={19} /></div>
+            <div>
+              <div className="faq-help-panel__eyebrow">Still need help?</div>
+              <h3>Tell us what the system is doing.</h3>
+              <p>You do not need to diagnose it yourself. Describe the problem and we’ll take it from there.</p>
+            </div>
+            <div className="faq-help-actions">
+              <PhoneAction className="btn-secondary" />
+              <Link href="/quote" className="btn-primary">Request service <ArrowRight size={14} /></Link>
+            </div>
+          </div>
+        </div>
         <Accordion.Root type="single" collapsible defaultValue="faq-0" className="faq-shell">
           {siteConfig.faqs.map((faq, index) => (
             <Accordion.Item key={faq.question} value={`faq-${index}`} className="faq-item">
@@ -451,7 +495,7 @@ function FinalCta() {
       <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} className="final-cta cta-outcome mx-auto max-w-7xl">
         <div className="final-cta__grid" />
         <div className="relative z-10 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
-          <div><div className="section-kicker section-kicker--dark">Need HVAC help?</div><h2 className="mt-3 max-w-3xl text-3xl font-black leading-[1.02] tracking-[-.045em] text-white sm:text-4xl md:text-5xl">Need HVAC help? Tell us what’s happening.</h2><p className="mt-4 max-w-xl text-base font-medium leading-7 text-white/65">Give homeowners one clear next step: call, add the business number, or request service online.</p></div>
+          <div><div className="section-kicker section-kicker--dark">Need HVAC help?</div><h2 className="mt-3 max-w-3xl text-3xl font-black leading-[1.02] tracking-[-.045em] text-white sm:text-4xl md:text-5xl">Heating or AC problem? Get the next step.</h2><p className="mt-4 max-w-xl text-base font-medium leading-7 text-white/65">Tell us what’s happening. We’ll confirm availability and explain what happens next.</p></div>
           <div className="flex flex-wrap gap-3"><PhoneAction className="btn-light" /><Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={15} /></Link></div>
         </div>
       </motion.div>
@@ -490,7 +534,7 @@ function ServicesPage() {
 
 function QuotePage() {
   return (
-    <><Header currentPage="quote" /><section id="contact-details" className="relative isolate overflow-hidden bg-[#edf2ef] py-12 md:py-18"><div className="atmosphere-grid absolute inset-0 -z-10" /><div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8"><div className="lg:py-7"><div className="section-kicker">Request Service</div><h1 className="mt-4 text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl md:text-6xl">Tell us what’s going on.</h1><p className="mt-5 max-w-lg text-base font-medium leading-7 text-[#61747a] sm:text-lg">A short request is enough. Before sharing this template, replace the phone and email placeholders with the business’s real contact details.</p><div className="mt-7 space-y-3 text-sm font-bold text-[#536a72]"><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />No long questionnaire</div><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />Tell us the main problem</div><div className="flex items-center gap-2"><Phone size={15} className="text-[#e7613b]" />{siteConfig.brand.phoneDisplay}</div><div className="flex items-center gap-2"><Mail size={15} className="text-[#e7613b]" />Add Your Email</div></div></div><motion.form initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="quote-form" onSubmit={(event) => event.preventDefault()}><div className="grid gap-4 sm:grid-cols-2"><label className="form-label">Name<input className="form-input" placeholder="Your name" autoComplete="name" /></label><label className="form-label">Phone<input className="form-input" placeholder="Best number" inputMode="tel" autoComplete="tel" /></label><label className="form-label sm:col-span-2">Email<input className="form-input" placeholder="you@example.com" type="email" autoComplete="email" /></label><label className="form-label sm:col-span-2">What do you need help with?<textarea className="form-input min-h-28 resize-y" placeholder="AC not cooling, furnace issue, maintenance, replacement..." /></label></div><button type="submit" className="btn-primary mt-5 w-full justify-center">Request Service <ArrowRight size={15} /></button></motion.form></div></section><Footer /><MobileServiceBar /></>
+    <><Header currentPage="quote" /><section id="contact-details" className="relative isolate overflow-hidden bg-[#edf2ef] py-12 md:py-18"><div className="atmosphere-grid absolute inset-0 -z-10" /><div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8"><div className="lg:py-7"><div className="section-kicker">Request Service</div><h1 className="mt-4 text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl md:text-6xl">Tell us what’s going on.</h1><p className="mt-5 max-w-lg text-base font-medium leading-7 text-[#61747a] sm:text-lg">A short request is enough. Tell us the main problem and the best way to reach you.</p><div className="mt-7 space-y-3 text-sm font-bold text-[#536a72]"><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />No long questionnaire</div><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />Tell us the main problem</div><div className="flex items-center gap-2"><Phone size={15} className="text-[#e7613b]" />{siteConfig.brand.phoneDisplay}</div><div className="flex items-center gap-2"><Mail size={15} className="text-[#e7613b]" />Add Your Email</div></div></div><motion.form initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="quote-form" onSubmit={(event) => event.preventDefault()}><div className="grid gap-4 sm:grid-cols-2"><label className="form-label">Name<input className="form-input" placeholder="Your name" autoComplete="name" /></label><label className="form-label">Phone<input className="form-input" placeholder="Best number" inputMode="tel" autoComplete="tel" /></label><label className="form-label sm:col-span-2">Email<input className="form-input" placeholder="you@example.com" type="email" autoComplete="email" /></label><label className="form-label sm:col-span-2">What do you need help with?<textarea className="form-input min-h-28 resize-y" placeholder="AC not cooling, furnace issue, maintenance, replacement..." /></label></div><button type="submit" className="btn-primary mt-5 w-full justify-center">Request Service <ArrowRight size={15} /></button></motion.form></div></section><Footer /><MobileServiceBar /></>
   )
 }
 
