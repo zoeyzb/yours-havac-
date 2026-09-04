@@ -240,7 +240,7 @@ function Services({ all = false }: { all?: boolean }) {
   }
 
   return (
-    <section className="section-shell faq-panel--dark">
+    <section className="section-shell services-industrial-section">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionIntro
           eyebrow="Our Services"
@@ -469,7 +469,7 @@ function LocalService() {
 
 function FAQ() {
   return (
-    <section className="section-shell bg-[#f8f9f6]">
+    <section className="section-shell faq-panel--dark">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8">
         <div>
           <SectionIntro eyebrow="Helpful answers" title="Common HVAC questions." body="Quick answers for the questions homeowners usually ask before booking." />
