@@ -116,64 +116,75 @@ function Header({ currentPage }: { currentPage: Page }) {
 
 function Hero() {
   const reduceMotion = useReducedMotion()
+  const quickActions = [
+    ["AC not cooling", "Cooling problem"],
+    ["No heat", "Heating problem"],
+    ["Urgent service", "Urgent HVAC"],
+  ] as const
+
   return (
-    <section className="relative isolate overflow-hidden bg-[#edf2ef]">
-      <div className="atmosphere-grid absolute inset-0 -z-20" />
-      <div className="atmosphere-orb atmosphere-orb--one -z-10" />
-      <div className="atmosphere-orb atmosphere-orb--two -z-10" />
-      <div className="mx-auto grid max-w-7xl gap-9 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:px-8 lg:py-16">
-        <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
-          <div className="eyebrow-pill"><Star size={13} fill="currentColor" />{siteConfig.hero.eyebrow}</div>
-          <h1 className="mt-6 max-w-2xl text-[3rem] font-black leading-[.93] tracking-[-.058em] text-[#102630] sm:text-[4rem] lg:text-[4.8rem]">
-            Comfort back.<br /><span className="text-gradient">Without the runaround.</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-base font-semibold leading-7 text-[#536a72] sm:text-lg">{siteConfig.hero.body}</p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={16} /></Link>
-            <PhoneAction className="btn-secondary" />
-          </div>
-          <p className="mt-3 text-xs font-semibold text-[#6b7e84]">Clear options before work starts. No pressure. No guessing.</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.965, y: 18 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          whileHover={reduceMotion ? undefined : { y: -7, rotateX: 1.5, rotateY: -1.5 }}
-          className="hero-stage"
-        >
-          <div className="hero-stage__glow" />
-          <div className="hero-stage__frame">
-            <Photo src={siteConfig.hero.image} alt={siteConfig.hero.imageAlt} className="hero-stage__image" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#081a22]/82 via-[#0a1d24]/5 to-transparent" />
-            <motion.div animate={reduceMotion ? undefined : { y: [0, -6, 0] }} transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }} className="hero-chip left-4 top-4 sm:left-6 sm:top-6">
-              <ShieldCheck size={14} /> Residential HVAC service
-            </motion.div>
-            <motion.div animate={reduceMotion ? undefined : { y: [0, 5, 0] }} transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} className="hero-status bottom-5 left-5 right-5 sm:bottom-7 sm:left-7 sm:right-7">
-              <div>
-                <div className="text-[10px] font-black uppercase tracking-[.15em] text-white/55">Home comfort</div>
-                <div className="mt-1 text-4xl font-black tracking-[-.05em]">72°</div>
-              </div>
-              <div className="max-w-[220px] text-right text-xs font-semibold leading-5 text-white/76 sm:text-sm">Quiet. Even. Comfortable.<br />Exactly how home should feel.</div>
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="contractor-proof-strip mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8" aria-label="What homeowners can expect">
-        {siteConfig.trust.map((item, index) => (
+    <section className="hero-industrial">
+      <div className="mx-auto max-w-[1500px]">
+        <div className="hero-industrial__grid">
           <motion.div
-            key={item}
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.6 }}
-            transition={{ delay: index * 0.06, duration: 0.35 }}
-            className="contractor-proof-strip__item"
+            initial={{ opacity: 0, x: -26 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="hero-industrial__copy"
           >
-            <span className="contractor-proof-strip__icon"><Check size={13} strokeWidth={3} /></span>
-            <span>{item}</span>
+            <div className="hero-industrial__eyebrow"><Star size={13} fill="currentColor" /> {siteConfig.hero.eyebrow}</div>
+            <h1>Comfort back.<br /><span>Without the runaround.</span></h1>
+            <p>{siteConfig.hero.body}</p>
+
+            <div className="hero-quick-actions" aria-label="Common HVAC problems">
+              {quickActions.map(([label, aria]) => (
+                <Link key={label} href="/quote" className="hero-quick-action" aria-label={aria}>
+                  <span>{label}</span><ArrowRight size={14} />
+                </Link>
+              ))}
+            </div>
+
+            <div className="hero-industrial__actions">
+              <Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={16} /></Link>
+              <PhoneAction className="hero-industrial__phone" />
+            </div>
+
+            <div className="hero-industrial__promise">
+              <ShieldCheck size={16} />
+              <span>Clear options before work starts. Work checked before the job is finished.</span>
+            </div>
           </motion.div>
-        ))}
+
+          <motion.div
+            initial={{ opacity: 0, scale: 1.03 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.75, delay: 0.08 }}
+            whileHover={reduceMotion ? undefined : { scale: 1.01 }}
+            className="hero-industrial__media"
+          >
+            <Photo src={siteConfig.hero.image} alt={siteConfig.hero.imageAlt} className="hero-industrial__image" />
+            <div className="hero-industrial__overlay" />
+            <div className="hero-industrial__service-label"><Wrench size={15} /> Residential HVAC service</div>
+            <div className="hero-industrial__result">
+              <div><span>HOME COMFORT</span><strong>72°</strong></div>
+              <p>Quiet. Even. Comfortable.<br />Exactly how home should feel.</p>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="hero-industrial__trust">
+          {siteConfig.trust.map((item, index) => (
+            <motion.div
+              key={item}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+            >
+              <Check size={14} strokeWidth={3} /> {item}
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -182,43 +193,33 @@ function Hero() {
 function ProofStrip() {
   const icons = [Star, Clock3, Wrench, MapPin]
   return (
-    <section className="proof-board-section bg-[#edf2ef] px-4 pb-20 pt-4 sm:px-6 lg:px-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 0.5 }}
-        className="proof-board mx-auto max-w-7xl"
-      >
-        <div className="proof-board__intro">
-          <div className="section-kicker">Built for clear service</div>
-          <h2>What matters before the work starts.</h2>
-          <p>Homeowners want to know who is showing up, what the options are, and what happens next.</p>
+    <section className="proof-ribbon">
+      <div className="mx-auto grid max-w-7xl lg:grid-cols-[1.15fr_1.85fr]">
+        <div className="proof-ribbon__intro">
+          <div className="section-kicker">Before the work starts</div>
+          <h2>Know what happens next.</h2>
+          <p>Fast response. Clear options. Local service. No guessing.</p>
         </div>
-        <div className="proof-board__grid">
+        <div className="proof-ribbon__metrics">
           {siteConfig.stats.map((stat, index) => {
             const Icon = icons[index]
             return (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ delay: index * 0.06, duration: 0.35 }}
-                whileHover={{ y: -4 }}
-                className="proof-board__metric"
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
+                className="proof-ribbon__metric"
               >
-                <div className="proof-board__metric-top">
-                  <Icon size={18} />
-                  <span>0{index + 1}</span>
-                </div>
+                <Icon size={19} />
                 <strong>{stat.value}</strong>
-                <small>{stat.label}</small>
+                <span>{stat.label}</span>
               </motion.div>
             )
           })}
         </div>
-      </motion.div>
+      </div>
     </section>
   )
 }
@@ -239,14 +240,14 @@ function Services({ all = false }: { all?: boolean }) {
   }
 
   return (
-    <section className="section-shell bg-[#f8f9f6]">
+    <section className="section-shell faq-panel--dark">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionIntro
           eyebrow="Our Services"
           title="HVAC help for the problems homeowners actually notice."
           body="Start with the symptom. We diagnose the cause, explain the options, then test the work before we leave."
         />
-        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service, index) => {
             const path = servicePaths[service.key] ?? ["Tell us the issue", "Diagnose", "Fix & test"]
             return (
@@ -257,9 +258,9 @@ function Services({ all = false }: { all?: boolean }) {
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ delay: Math.min(index * 0.04, 0.2), duration: 0.45 }}
                   whileHover={reduceMotion ? undefined : { y: -6 }}
-                  className="service-card service-card--outcome"
+                  className="service-card service-card--outcome service-card--industrial"
                 >
-                  <div className="relative h-44 overflow-hidden bg-[#dce5e2]">
+                  <div className="relative h-52 overflow-hidden bg-[#dce5e2]">
                     <Photo src={service.image} alt={service.imageAlt} className="transition duration-700 group-hover:scale-[1.045]" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#09202a]/30 via-transparent to-transparent" />
                     <div className="service-outcome">Common call</div>
@@ -297,32 +298,32 @@ function WhyChooseUs() {
   ] as const
 
   return (
-    <section className="service-standard-section bg-[#102630] py-14 text-white md:py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="service-standard-header service-standard-header--compact">
-          <div>
-            <div className="section-kicker section-kicker--dark">Why homeowners choose us</div>
-            <h2>Four standards. Every service call.</h2>
-          </div>
+    <section className="standards-section">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8 lg:py-20">
+        <div className="standards-section__intro">
+          <div className="section-kicker section-kicker--dark">Why homeowners choose us</div>
+          <h2>Simple standards.<br />Serious service.</h2>
           <p>Clear communication, practical recommendations, and work that gets checked before the job is finished.</p>
+          <Link href="/quote" className="standards-section__cta">Request service <ArrowRight size={15} /></Link>
         </div>
 
-        <div className="service-standard-bar" aria-label="Service standards">
+        <div className="standards-rail">
           {standards.map(([Icon, title, copy], index) => (
             <motion.div
               key={title}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.5 }}
               transition={{ delay: index * 0.06, duration: 0.35 }}
-              whileHover={{ y: -3 }}
-              className="service-standard-bar__item"
+              className="standards-rail__row"
             >
-              <span className="service-standard-bar__icon"><Icon size={18} /></span>
-              <div>
+              <div className="standards-rail__number">0{index + 1}</div>
+              <div className="standards-rail__icon"><Icon size={19} /></div>
+              <div className="standards-rail__copy">
                 <strong>{title}</strong>
-                <small>{copy}</small>
+                <span>{copy}</span>
               </div>
+              <ArrowRight size={18} className="standards-rail__arrow" />
             </motion.div>
           ))}
         </div>
@@ -333,21 +334,32 @@ function WhyChooseUs() {
 
 function Work() {
   return (
-    <section className="section-shell bg-[#f8f9f6]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionIntro eyebrow="Work in action" title="Real equipment. Real service visits." body="A few examples of the hands-on work behind a comfortable home." />
-        <div className="mt-9 grid gap-4 lg:grid-cols-3">
+    <section className="work-strip">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="work-strip__header">
+          <div>
+            <div className="section-kicker">Work in action</div>
+            <h2>Real equipment. Real service visits.</h2>
+          </div>
+          <p>Hands-on diagnosis, equipment checks, and clear explanations before decisions get made.</p>
+        </div>
+        <div className="work-strip__grid">
           {siteConfig.projects.map((project, index) => (
             <motion.article
               key={project.title}
-              initial={{ opacity: 0, y: 28 }}
+              initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
-              transition={{ delay: index * 0.08, duration: 0.5 }}
-              className="project-card group"
+              transition={{ delay: index * 0.07, duration: 0.4 }}
+              className="work-strip__item group"
             >
-              <div className="h-60 overflow-hidden"><Photo src={project.image} alt={project.imageAlt} className="transition duration-700 group-hover:scale-[1.045]" /></div>
-              <div className="p-5"><h3 className="text-lg font-black text-[#102630]">{project.title}</h3><p className="mt-2 text-sm font-medium leading-6 text-[#65787e]">{project.copy}</p></div>
+              <Photo src={project.image} alt={project.imageAlt} className="transition duration-700 group-hover:scale-[1.045]" />
+              <div className="work-strip__shade" />
+              <div className="work-strip__content">
+                <span>0{index + 1}</span>
+                <h3>{project.title}</h3>
+                <p>{project.copy}</p>
+              </div>
             </motion.article>
           ))}
         </div>
@@ -492,7 +504,7 @@ function FAQ() {
 function FinalCta() {
   return (
     <section className="bg-[#f8f9f6] px-4 pb-20 pt-3 sm:px-6 md:pb-24 lg:px-8">
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} className="final-cta cta-outcome mx-auto max-w-7xl">
+      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} className="final-cta cta-outcome cta-panel--orange mx-auto max-w-7xl">
         <div className="final-cta__grid" />
         <div className="relative z-10 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
           <div><div className="section-kicker section-kicker--dark">Need HVAC help?</div><h2 className="mt-3 max-w-3xl text-3xl font-black leading-[1.02] tracking-[-.045em] text-white sm:text-4xl md:text-5xl">Heating or AC problem? Get the next step.</h2><p className="mt-4 max-w-xl text-base font-medium leading-7 text-white/65">Tell us what’s happening. We’ll confirm availability and explain what happens next.</p></div>
