@@ -472,7 +472,7 @@ function FAQ() {
     <section className="section-shell faq-panel--dark">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8">
         <div>
-          <SectionIntro eyebrow="Helpful answers" title="Common HVAC questions." body="Quick answers for the questions homeowners usually ask before booking." />
+          <SectionIntro eyebrow="Helpful answers" title="Common HVAC questions." body="Quick answers for the questions homeowners usually ask before booking." dark />
           <div className="faq-help-panel">
             <div className="faq-help-panel__icon"><Phone size={19} /></div>
             <div>
