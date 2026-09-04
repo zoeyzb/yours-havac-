@@ -128,31 +128,7 @@ function Hero() {
             Comfort back.<br /><span className="text-gradient">Without the runaround.</span>
           </h1>
           <p className="mt-5 max-w-xl text-base font-semibold leading-7 text-[#536a72] sm:text-lg">{siteConfig.hero.body}</p>
-          <div className="hero-trust-stack" aria-label="Service promises">
-            {siteConfig.trust.map((item, index) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, y: 22, scale: 0.94 }}
-                animate={reduceMotion ? { opacity: 1, y: 0, scale: 1 } : {
-                  opacity: 1,
-                  y: [0, index % 2 === 0 ? -5 : 5, 0],
-                  scale: 1,
-                }}
-                transition={{
-                  opacity: { delay: 0.12 + index * 0.07, duration: 0.45 },
-                  scale: { delay: 0.12 + index * 0.07, duration: 0.45 },
-                  y: { delay: 0.5 + index * 0.18, duration: 5 + index * 0.7, repeat: Infinity, ease: "easeInOut" },
-                }}
-                whileHover={reduceMotion ? undefined : { y: -9, scale: 1.035, rotateX: 5, rotateY: index % 2 ? -4 : 4 }}
-                className={`hero-trust-card hero-trust-card--${index + 1}`}
-              >
-                <span className="hero-trust-card__shine" aria-hidden="true" />
-                <span className="hero-trust-card__icon"><Check size={12} strokeWidth={3.2} /></span>
-                <span>{item}</span>
-              </motion.div>
-            ))}
-          </div>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={16} /></Link>
             <PhoneAction className="btn-secondary" />
           </div>
@@ -167,6 +143,28 @@ function Hero() {
           className="hero-stage"
         >
           <div className="hero-stage__glow" />
+          <div className="hero-trust-orbit" aria-label="Service promises">
+            {siteConfig.trust.map((item, index) => (
+              <motion.div
+                key={item}
+                className={`hero-orbit-badge hero-orbit-badge--${index + 1}`}
+                initial={{ opacity: 0, scale: 0.86 }}
+                animate={reduceMotion ? { opacity: 1, scale: 1 } : {
+                  opacity: 1,
+                  scale: 1,
+                  y: [0, index % 2 ? 8 : -8, 0],
+                }}
+                transition={{
+                  opacity: { delay: 0.22 + index * 0.08, duration: 0.45 },
+                  scale: { delay: 0.22 + index * 0.08, duration: 0.45 },
+                  y: { duration: 5.5 + index * 0.8, repeat: Infinity, ease: "easeInOut", delay: index * 0.45 },
+                }}
+                whileHover={reduceMotion ? undefined : { scale: 1.07, rotate: index % 2 ? -2 : 2 }}
+              >
+                <span><Check size={11} strokeWidth={3.2} /></span>{item}
+              </motion.div>
+            ))}
+          </div>
           <div className="hero-stage__frame">
             <Photo src={siteConfig.hero.image} alt={siteConfig.hero.imageAlt} className="hero-stage__image" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#081a22]/82 via-[#0a1d24]/5 to-transparent" />
@@ -191,51 +189,51 @@ function ProofStrip() {
   const reduceMotion = useReducedMotion()
   const icons = [Star, Zap, Sparkles, MapPin]
   return (
-    <section className="proof-section relative isolate overflow-hidden bg-[#edf2ef] px-4 pb-20 pt-2 sm:px-6 lg:px-8">
+    <section className="proof-section relative isolate overflow-hidden bg-[#edf2ef] px-4 pb-24 pt-8 sm:px-6 lg:px-8">
       <div className="proof-depth-grid absolute inset-0 -z-10" aria-hidden="true" />
-      <motion.div
-        initial={{ opacity: 0, y: 28, scale: 0.97 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.38 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="proof-scene mx-auto max-w-7xl"
-      >
-        <div className="proof-scene__core">
-          <div className="proof-orbit" aria-hidden="true">
-            <span className="proof-orbit__ring proof-orbit__ring--1" />
-            <span className="proof-orbit__ring proof-orbit__ring--2" />
-            <motion.span
-              className="proof-orbit__dot"
-              animate={reduceMotion ? undefined : { rotate: 360 }}
-              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-          <div className="proof-scene__eyebrow">Homeowner-first service</div>
-          <h2>Proof that feels simple.</h2>
-          <p>Fast response, clear options, and local accountability — without burying the homeowner in process.</p>
-        </div>
-        <div className="proof-scene__nodes">
-          {siteConfig.stats.map((stat, index) => {
-            const Icon = icons[index]
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 24, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ delay: 0.1 + index * 0.09, duration: 0.5 }}
-                animate={reduceMotion ? undefined : { y: [0, index % 2 ? 7 : -7, 0] }}
-                whileHover={reduceMotion ? undefined : { y: -11, scale: 1.045, rotateX: 6, rotateY: index % 2 ? -5 : 5 }}
-                className={`proof-node proof-node--${index + 1}`}
-              >
-                <div className="proof-node__top"><Icon size={17} /><span>0{index + 1}</span></div>
-                <div className="proof-node__value">{stat.value}</div>
-                <div className="proof-node__label">{stat.label}</div>
-              </motion.div>
-            )
-          })}
-        </div>
-      </motion.div>
+      <div className="proof-constellation mx-auto max-w-7xl">
+        <motion.div
+          className="proof-core"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.45 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="proof-core__pulse" aria-hidden="true" />
+          <div className="proof-core__eyebrow">Homeowner-first service</div>
+          <h2>Clear enough to trust.</h2>
+          <p>Fast response, understandable choices, and local accountability.</p>
+        </motion.div>
+
+        {siteConfig.stats.map((stat, index) => {
+          const Icon = icons[index]
+          return (
+            <motion.div
+              key={stat.label}
+              className={`proof-satellite proof-satellite--${index + 1}`}
+              initial={{ opacity: 0, scale: 0.82 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.45 }}
+              transition={{ delay: 0.12 + index * 0.09, duration: 0.5 }}
+              animate={reduceMotion ? undefined : { y: [0, index % 2 ? 9 : -9, 0] }}
+              whileHover={reduceMotion ? undefined : { scale: 1.08, rotate: index % 2 ? -2 : 2 }}
+            >
+              <span className="proof-satellite__icon"><Icon size={17} /></span>
+              <div>
+                <div className="proof-satellite__value">{stat.value}</div>
+                <div className="proof-satellite__label">{stat.label}</div>
+              </div>
+            </motion.div>
+          )
+        })}
+
+        <motion.div
+          className="proof-orbit-line"
+          animate={reduceMotion ? undefined : { rotate: 360 }}
+          transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+          aria-hidden="true"
+        />
+      </div>
     </section>
   )
 }
@@ -299,45 +297,50 @@ function WhyChooseUs() {
         ))}
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[.86fr_1.14fr] lg:items-start lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, x: -28 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="lg:sticky lg:top-28"
-        >
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
           <div className="credibility-kicker">Why homeowners choose us</div>
           <h2 className="credibility-heading">
-            No guessing.<br />
-            <span>No vague answers.</span>
+            No guessing.<br /><span>No vague answers.</span>
           </h2>
-          <p className="credibility-copy">
+          <p className="credibility-copy mx-auto">
             HVAC service should feel calm, clear, and professional — from the first call to the final system check.
           </p>
-          <div className="credibility-signal">
-            <span className="credibility-signal__pulse" />
-            Clear communication at every step
-          </div>
-        </motion.div>
+        </div>
 
-        <div className="credibility-list">
+        <div className="credibility-stage">
+          <motion.div
+            className="credibility-core"
+            initial={{ opacity: 0, scale: 0.85 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 0.65 }}
+          >
+            <div className="credibility-core__ring" />
+            <div className="credibility-core__inner">
+              <Wind size={34} />
+              <span>Clear service</span>
+              <strong>Every step</strong>
+            </div>
+          </motion.div>
+
           {items.map(([Icon, title, copy], index) => (
             <motion.div
               key={title}
-              initial={{ opacity: 0, x: 34 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.35 }}
-              transition={{ delay: index * 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className={`credibility-callout credibility-callout--${index + 1}`}
+              initial={{ opacity: 0, y: 22, scale: 0.92 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ delay: 0.1 + index * 0.09, duration: 0.5 }}
+              animate={reduceMotion ? undefined : { y: [0, index % 2 ? 7 : -7, 0] }}
             >
-              <Link href="/quote" className="credibility-row" aria-label={`${title}: request HVAC service`}>
-                <div className="credibility-row__number">0{index + 1}</div>
-                <div className="credibility-row__icon"><Icon size={20} /></div>
-                <div>
-                  <h3>{title}</h3>
-                  <p>{copy}</p>
-                </div>
-                <span className="credibility-row__action"><span>Explore</span><ArrowRight className="credibility-row__arrow" size={20} aria-hidden="true" /></span>
+              <Link href="/quote" className="credibility-callout__link">
+                <span className="credibility-callout__icon"><Icon size={19} /></span>
+                <span className="credibility-callout__copy">
+                  <strong>{title}</strong>
+                  <small>{copy}</small>
+                </span>
+                <ArrowRight size={18} className="credibility-callout__arrow" />
               </Link>
             </motion.div>
           ))}
@@ -379,65 +382,58 @@ function HowItWorks() {
     ["02", Wrench, "Get a clear diagnosis", "We inspect the system and explain the options."],
     ["03", Check, "Get comfortable again", "We complete the work and test the system."],
   ] as const
+
   return (
     <section className="workflow-section relative isolate overflow-hidden py-20 md:py-28">
       <div className="workflow-background" aria-hidden="true" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto max-w-3xl text-center"
-        >
+        <div className="mx-auto max-w-3xl text-center">
           <div className="section-kicker">How It Works</div>
           <h2 className="section-title">One clear path from problem to comfort.</h2>
-          <p className="section-copy mx-auto">Watch the service journey move forward — no mystery steps, no dead ends.</p>
-        </motion.div>
+          <p className="section-copy mx-auto">No boxes. No mystery steps. Just a visible journey from first contact to comfort restored.</p>
+        </div>
 
-        <div className="workflow-shell mx-auto mt-14 max-w-6xl">
-          <div className="workflow-track" aria-hidden="true">
-            <motion.div
-              className="workflow-progress"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
+        <div className="workflow-curve mx-auto mt-14 max-w-6xl">
+          <svg className="workflow-curve__svg" viewBox="0 0 1400 420" preserveAspectRatio="none" aria-hidden="true">
+            <path className="workflow-path workflow-path--base" d="M80 215 C300 55 440 360 700 210 S1060 70 1320 215" />
+            <motion.path
+              className="workflow-path workflow-path--active"
+              d="M80 215 C300 55 440 360 700 210 S1060 70 1320 215"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: 1 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </svg>
+
+          <motion.div
+            className="workflow-traveler"
+            animate={reduceMotion ? undefined : { offsetDistance: ["0%", "100%"] }}
+            transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.5 }}
+            aria-hidden="true"
+          />
+
+          {steps.map(([number, Icon, title, copy], index) => (
+            <motion.article
+              key={number}
+              className={`workflow-stop workflow-stop--${index + 1}`}
+              initial={{ opacity: 0, scale: 0.82, y: 28 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true, amount: 0.45 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            />
-            <motion.div
-              className="workflow-pulse"
-              animate={reduceMotion ? undefined : { left: ["0%", "100%"] }}
-              transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.5 }}
-            />
-          </div>
-          <div className="workflow-stages">
-            {steps.map(([number, Icon, title, copy], index) => (
-              <motion.article
-                key={number}
-                initial={{ opacity: 0, y: 34, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.45 }}
-                transition={{ delay: 0.18 + index * 0.16, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={reduceMotion ? undefined : { y: -9, scale: 1.025 }}
-                className="workflow-stage"
+              transition={{ delay: 0.2 + index * 0.16, duration: 0.55 }}
+            >
+              <motion.div
+                className="workflow-stop__node"
+                animate={reduceMotion ? undefined : { scale: [1, 1.08, 1] }}
+                transition={{ duration: 2.8, repeat: Infinity, delay: index * 0.8 }}
               >
-                <motion.div
-                  className="workflow-stage__node"
-                  animate={reduceMotion ? undefined : { boxShadow: [
-                    "0 0 0 0 rgba(231,97,59,.0)",
-                    "0 0 0 12px rgba(231,97,59,.10)",
-                    "0 0 0 0 rgba(231,97,59,.0)",
-                  ] }}
-                  transition={{ duration: 2.6, repeat: Infinity, delay: index * 0.7 }}
-                >
-                  <Icon size={21} />
-                </motion.div>
-                <div className="workflow-stage__number">{number}</div>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-              </motion.article>
-            ))}
-          </div>
+                <Icon size={22} />
+              </motion.div>
+              <div className="workflow-stop__number">{number}</div>
+              <h3>{title}</h3>
+              <p>{copy}</p>
+            </motion.article>
+          ))}
         </div>
       </div>
     </section>
