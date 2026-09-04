@@ -41,12 +41,13 @@ test('homepage visual story includes dimensional trust, proof motion, workflow m
     'How It Works',
     'Homeowner Reviews',
     'review-marquee',
-    'hero-trust-stack',
-    'proof-scene',
-    'proof-orbit',
-    'workflow-track',
-    'workflow-progress',
-    'workflow-pulse',
+    'hero-trust-orbit',
+    'proof-constellation',
+    'proof-core',
+    'proof-satellite',
+    'workflow-curve',
+    'workflow-path',
+    'workflow-traveler',
     'airflow-stream',
     'MobileServiceBar',
     'Schedule Service',
@@ -54,7 +55,9 @@ test('homepage visual story includes dimensional trust, proof motion, workflow m
     assert.ok(`${component}\n${styles}`.includes(required), `missing redesign element: ${required}`)
   }
   assert.equal(component.includes('className="workflow-card"'), false, 'how-it-works must not regress to three static cards')
+  assert.equal(component.includes('className="workflow-stage"'), false, 'workflow must not be three card-like stages')
   assert.equal(styles.includes('.proof-band__stats'), false, 'proof should not regress to a flat segmented dashboard bar')
+  assert.equal(styles.includes('.proof-scene__nodes'), false, 'proof must not remain a grid of stat cards')
 })
 
 test('visual contract avoids cheap SaaS styling and fake proof', () => {
