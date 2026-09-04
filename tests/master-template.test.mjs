@@ -34,34 +34,37 @@ test('homepage has premium motion and accessible interaction primitives', () => 
   assert.ok(styles.includes('prefers-reduced-motion'), 'CSS motion must have a reduced-motion fallback')
 })
 
-test('homepage visual story includes dimensional trust, proof motion, workflow motion, and moving reviews', () => {
+test('homepage uses contractor-first proof, service standards, compact workflow, and clear CTA', () => {
   for (const required of [
     'Comfort back.',
-    'Why homeowners choose us',
-    'How It Works',
+    'contractor-proof-strip',
+    'service-standard-grid',
+    'workflow-compact',
+    'cta-outcome',
     'Homeowner Reviews',
     'review-marquee',
-    'hero-trust-orbit',
-    'proof-constellation',
-    'proof-core',
-    'proof-satellite',
-    'workflow-curve',
-    'workflow-path',
-    'workflow-traveler',
-    'airflow-stream',
-    'credibility-stage',
-    'credibility-core',
-    'credibility-callout',
     'MobileServiceBar',
     'Schedule Service',
   ]) {
-    assert.ok(`${component}\n${styles}`.includes(required), `missing redesign element: ${required}`)
+    assert.ok(`${component}\n${styles}`.includes(required), `missing contractor-first element: ${required}`)
   }
-  assert.equal(component.includes('className="workflow-card"'), false, 'how-it-works must not regress to three static cards')
-  assert.equal(component.includes('className="workflow-stage"'), false, 'workflow must not be three card-like stages')
-  assert.equal(component.includes('className="credibility-row"'), false, 'credibility section must not remain a right-side list of rows')
-  assert.equal(styles.includes('.proof-band__stats'), false, 'proof should not regress to a flat segmented dashboard bar')
-  assert.equal(styles.includes('.proof-scene__nodes'), false, 'proof must not remain a grid of stat cards')
+
+  for (const rejected of [
+    'hero-trust-orbit',
+    'proof-constellation',
+    'proof-satellite',
+    'credibility-stage',
+    'credibility-core',
+    'credibility-callout',
+    'workflow-traveler',
+  ]) {
+    assert.equal(`${component}\n${styles}`.includes(rejected), false, `cartoon/decorative pattern should be removed: ${rejected}`)
+  }
+
+  assert.equal(component.includes('No vague answers.'), false, 'childish gradient credibility headline should be replaced')
+  assert.ok(component.includes('What homeowners can expect'), 'credibility section should lead with practical expectations')
+  assert.ok(component.includes('From first call to system running'), 'workflow copy should describe a practical service outcome')
+  assert.ok(component.includes('Need HVAC help?'), 'final CTA should be immediately understandable')
 })
 
 test('visual contract avoids cheap SaaS styling and fake proof', () => {
