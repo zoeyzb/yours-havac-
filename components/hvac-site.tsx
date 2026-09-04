@@ -408,7 +408,10 @@ function HowItWorks() {
 
           <motion.div
             className="workflow-traveler"
-            animate={reduceMotion ? undefined : { offsetDistance: ["0%", "100%"] }}
+            animate={reduceMotion ? undefined : {
+              left: ["5.7%", "18%", "32%", "50%", "66%", "82%", "94.3%"],
+              top: ["51%", "30%", "68%", "50%", "31%", "28%", "51%"],
+            }}
             transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.5 }}
             aria-hidden="true"
           />
