@@ -94,12 +94,12 @@ export const siteConfig = {
     },
   ],
   reviews: [
-    { quote: "They were on time, explained the problem in plain English, and had the AC running again before the house got miserable.", name: "Sarah M.", location: "Homeowner" },
-    { quote: "I knew what the options were before any work started. No pressure, no confusing pitch.", name: "James R.", location: "Homeowner" },
-    { quote: "Clean work, easy communication, and no surprises when the job was finished.", name: "Nicole T.", location: "Homeowner" },
-    { quote: "The technician listened first, checked the system, then showed me exactly what was wrong.", name: "Robert K.", location: "Homeowner" },
-    { quote: "Our AC quit in the afternoon. They found an opening quickly and got cold air moving again that day.", name: "Michael R.", location: "Homeowner" },
-    { quote: "The replacement was organized from estimate through final walkthrough. Everything felt straightforward.", name: "David M.", location: "Homeowner" },
+    { quote: "They were on time, explained the problem in plain English, and had the AC running again before the house got miserable.", name: "Sarah M.", location: "AC Repair · Local homeowner" },
+    { quote: "I knew what the options were before any work started. No pressure, no confusing pitch.", name: "James R.", location: "System diagnosis · Local homeowner" },
+    { quote: "Clean work, easy communication, and no surprises when the job was finished.", name: "Nicole T.", location: "Maintenance · Local homeowner" },
+    { quote: "The technician listened first, checked the system, then showed me exactly what was wrong.", name: "Robert K.", location: "HVAC diagnosis · Local homeowner" },
+    { quote: "Our AC quit in the afternoon. They found an opening quickly and got cold air moving again that day.", name: "Michael R.", location: "Urgent cooling · Local homeowner" },
+    { quote: "The replacement was organized from estimate through final walkthrough. Everything felt straightforward.", name: "David M.", location: "System replacement · Local homeowner" },
   ],
   projects: [
     {
