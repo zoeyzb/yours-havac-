@@ -38,7 +38,7 @@ test('homepage uses contractor-first proof, service standards, compact workflow,
   for (const required of [
     'Comfort back.',
     'contractor-proof-strip',
-    'service-standard-grid',
+    'standards-rail',
     'workflow-compact',
     'cta-outcome',
     'Homeowner Reviews',
@@ -88,7 +88,7 @@ test('conversion pass removes template leakage and adds outcome-focused proof', 
     'review-meta',
     'faq-help-panel',
     'faq-help-actions',
-    'service-standard-bar',
+    'standards-rail',
     'Heating or AC problem?',
   ]) {
     assert.ok(source.includes(required), `missing conversion improvement: ${required}`)
