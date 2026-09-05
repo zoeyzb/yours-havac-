@@ -301,7 +301,7 @@ function WhyChooseUs() {
     <section className="standards-section">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8 lg:py-20">
         <div className="standards-section__intro">
-          <div className="section-kicker section-kicker--dark">Why homeowners choose us</div>
+          <div className="section-kicker section-kicker--dark">What homeowners can expect</div>
           <h2>Simple standards.<br />Serious service.</h2>
           <p>Clear communication, practical recommendations, and work that gets checked before the job is finished.</p>
           <Link href="/quote" className="standards-section__cta">Request service <ArrowRight size={15} /></Link>
