@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 const config = readFileSync(new URL('../lib/site-config.ts', import.meta.url), 'utf8')
 const component = readFileSync(new URL('../components/hvac-site.tsx', import.meta.url), 'utf8')
@@ -144,4 +144,21 @@ test('owner offer uses a motion-led claim journey instead of four bland onboardi
   ]) {
     assert.ok(source.includes(required), `missing owner journey element: ${required}`)
   }
+})
+
+
+test('claim flow has a dedicated product page, live Stripe deposit, and post-payment handoff', () => {
+  const claimUrl = new URL('../app/claim/page.tsx', import.meta.url)
+  const successUrl = new URL('../app/claim/success/page.tsx', import.meta.url)
+  assert.ok(existsSync(claimUrl), 'dedicated claim page should exist before sending a buyer to Stripe')
+  assert.ok(existsSync(successUrl), 'post-payment success page should exist')
+  if (!existsSync(claimUrl) || !existsSync(successUrl)) return
+
+  const claimPage = readFileSync(claimUrl, 'utf8')
+  const successPage = readFileSync(successUrl, 'utf8')
+  assert.ok(claimPage.includes('Take this site off preview and make it yours.'), 'claim page should explain the transaction')
+  assert.ok(claimPage.includes('$97 today'), 'claim page should make the deposit obvious')
+  assert.ok(claimPage.includes('$500 after approval'), 'claim page should preserve the risk reversal')
+  assert.ok(claimPage.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'claim page should use the live Stripe payment link')
+  assert.ok(successPage.includes('Payment received'), 'success page should confirm the deposit and explain next steps')
 })
