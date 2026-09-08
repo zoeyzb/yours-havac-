@@ -123,3 +123,25 @@ test('aggressive contractor redesign uses bold industrial hierarchy instead of s
   assert.equal(source.includes('service-standard-bar'), false, 'subtle standards bar should be replaced with a stronger rail')
   assert.equal(source.includes('proof-board__grid'), false, 'subtle proof grid should be replaced with a bolder proof ribbon')
 })
+
+
+test('owner conversion layer feels separate from the homeowner website and removes placeholder header leakage', () => {
+  const header = component.match(/function Header[\s\S]*?function Hero/)?.[0] ?? ''
+  assert.equal(header.includes('<PhoneAction'), false, 'placeholder phone action should not appear in the main homeowner header')
+  assert.ok(component.includes('Built for your business. Ready to finish.'), 'owner preview bar should explain the site is already built')
+  assert.ok(component.includes('Claim This Site'), 'owner CTAs should use one clear claim action')
+  assert.equal(component.includes('href="https://recoverrevenue.company"'), false, 'owner CTAs should not dump buyers on the generic Recover Revenue homepage')
+})
+
+test('owner offer uses a motion-led claim journey instead of four bland onboarding cards', () => {
+  const source = `${component}\n${styles}`
+  for (const required of [
+    'Claim it. Make it yours. Go live.',
+    'owner-journey',
+    'owner-journey__track',
+    'owner-journey__node',
+    'owner-journey__pulse',
+  ]) {
+    assert.ok(source.includes(required), `missing owner journey element: ${required}`)
+  }
+})
