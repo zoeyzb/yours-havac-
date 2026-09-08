@@ -44,7 +44,7 @@ test('homepage uses contractor-first proof, service standards, compact workflow,
     'Homeowner Reviews',
     'review-marquee',
     'MobileServiceBar',
-    'Schedule Service',
+    'Request Service',
   ]) {
     assert.ok(`${component}\n${styles}`.includes(required), `missing contractor-first element: ${required}`)
   }
