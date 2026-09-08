@@ -536,8 +536,119 @@ function MobileServiceBar() {
   )
 }
 
+
+function OwnerOffer() {
+  const benefits = [
+    "Get found by local customers",
+    "Make it easy to call or request service",
+    "Show the services you offer",
+    "Put your best reviews to work",
+    "Show your service area",
+    "Look established and professional online",
+  ] as const
+
+  const steps = [
+    ["01", "Start", "Reserve it for just $97."],
+    ["02", "Customize", "We add your business details and personalize the site for you."],
+    ["03", "Approve", "Review it and request any changes before final payment."],
+    ["04", "Go Live", "Customers can find you and reach you online."],
+  ] as const
+
+  return (
+    <section id="owner-offer" className="border-y border-[#eadfd7] bg-[#fffaf6]">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+        <div className="grid gap-8 xl:grid-cols-[1.08fr_.72fr] xl:items-start">
+          <div>
+            <div className="section-kicker">For HVAC Business Owners</div>
+            <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl">
+              Most of it is already done.
+              <span className="block text-[#e7613b]">Let&apos;s get you more customers.</span>
+            </h2>
+            <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#60727a] sm:text-lg">
+              We&apos;ll finish it around your business so customers can find you, trust you, and reach you easily.
+            </p>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              {benefits.map((benefit) => (
+                <div key={benefit} className="flex items-start gap-3 rounded-2xl border border-[#eadfd7] bg-white/80 px-4 py-3.5 text-sm font-extrabold leading-5 text-[#203944] shadow-[0_8px_24px_rgba(16,38,48,.04)]">
+                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#e7613b] text-white">
+                    <Check size={12} strokeWidth={3.5} />
+                  </span>
+                  <span>{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-[#eadfd7] bg-white p-5 shadow-[0_20px_60px_rgba(16,38,48,.10)] sm:p-7">
+            <div className="text-xs font-black uppercase tracking-[.16em] text-[#e7613b]">Simple start</div>
+            <div className="mt-2 flex flex-wrap items-end gap-x-3 gap-y-1">
+              <div className="text-5xl font-black tracking-[-.06em] text-[#102630]">$97</div>
+              <div className="pb-1 text-xl font-black text-[#102630]">to start</div>
+            </div>
+            <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total</div>
+
+            <div className="my-5 h-px bg-[#e9eeeb]" />
+
+            <p className="text-sm font-bold leading-6 text-[#536a72]">
+              Approve it first. Pay the remaining $500 only when you&apos;re happy with the finished site.
+            </p>
+            <div className="mt-4 flex items-center gap-2 text-sm font-black text-[#17323c]">
+              <Clock3 size={16} className="text-[#e7613b]" />
+              Ready within 3 business days
+            </div>
+
+            <a
+              href="https://recoverrevenue.company"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#e7613b] px-5 py-4 text-base font-black text-white shadow-[0_12px_28px_rgba(231,97,59,.25)] transition hover:-translate-y-0.5 hover:bg-[#d95531]"
+            >
+              Make It Yours <ArrowRight size={17} />
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-10 rounded-[28px] border border-[#dfe7e4] bg-white p-5 shadow-[0_16px_45px_rgba(16,38,48,.06)] sm:p-7 lg:p-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="section-kicker">How It Works</div>
+              <h3 className="mt-2 text-3xl font-black tracking-[-.04em] text-[#102630] sm:text-4xl">You stay in control.</h3>
+            </div>
+            <p className="max-w-md text-sm font-bold leading-6 text-[#687b81]">Start small, personalize everything, approve the final version, then go live.</p>
+          </div>
+
+          <div className="mt-7 grid gap-3 lg:grid-cols-4">
+            {steps.map(([number, title, copy], index) => (
+              <div key={number} className="relative rounded-2xl border border-[#e3e9e6] bg-[#f8faf8] p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-[#102630] text-xs font-black text-white">{number}</span>
+                  {index < steps.length - 1 && <ArrowRight size={16} className="hidden text-[#e7613b] lg:block" />}
+                </div>
+                <h4 className="mt-5 text-lg font-black text-[#102630]">{title}</h4>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[#65787e]">{copy}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-4 rounded-[24px] bg-[#102630] px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between sm:px-7">
+          <div>
+            <div className="text-xl font-black tracking-[-.03em]">Most of it&apos;s done. Let&apos;s get you more customers.</div>
+            <div className="mt-1 text-sm font-bold text-white/65">Start for $97. Approve before the final payment.</div>
+          </div>
+          <a
+            href="https://recoverrevenue.company"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#e7613b] px-6 py-3.5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-[#d95531]"
+          >
+            Get It Now <ArrowRight size={16} />
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function HomePage() {
-  return <><Header currentPage="home" /><Hero /><ProofStrip /><Services /><WhyChooseUs /><Work /><HowItWorks /><Reviews /><LocalService /><FAQ /><FinalCta /><Footer /><MobileServiceBar /></>
+  return <><Header currentPage="home" /><Hero /><ProofStrip /><Services /><OwnerOffer /><WhyChooseUs /><Work /><HowItWorks /><Reviews /><LocalService /><FAQ /><FinalCta /><Footer /><MobileServiceBar /></>
 }
 
 function ServicesPage() {
