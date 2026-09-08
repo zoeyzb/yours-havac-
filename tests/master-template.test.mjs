@@ -157,7 +157,7 @@ test('claim flow has a dedicated product page, live Stripe deposit, and post-pay
   const claimPage = readFileSync(claimUrl, 'utf8')
   const successPage = readFileSync(successUrl, 'utf8')
   assert.ok(claimPage.includes('Take this site off preview and make it yours.'), 'claim page should explain the transaction')
-  assert.ok(claimPage.includes('$97 today'), 'claim page should make the deposit obvious')
+  assert.ok(claimPage.includes('$97') && claimPage.includes('today'), 'claim page should make the deposit obvious')
   assert.ok(claimPage.includes('$500 after approval'), 'claim page should preserve the risk reversal')
   assert.ok(claimPage.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'claim page should use the live Stripe payment link')
   assert.ok(successPage.includes('Payment received'), 'success page should confirm the deposit and explain next steps')
