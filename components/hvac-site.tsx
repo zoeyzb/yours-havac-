@@ -39,27 +39,18 @@ function Photo({ src, alt, className = "" }: { src: string; alt: string; classNa
   )
 }
 
-function PhoneAction({ className = "", compact = false }: { className?: string; compact?: boolean }) {
-  const label = hasPhone ? siteConfig.brand.phoneDisplay : compact ? "Add number" : "Add Your Number"
-  if (hasPhone) {
-    return (
-      <a href={`tel:${siteConfig.brand.phoneHref}`} className={className} aria-label={`Call ${siteConfig.brand.name}`}>
-        <Phone size={16} />{label}
-      </a>
-    )
-  }
+function PhoneAction({ className = "" }: { className?: string }) {
+  if (!hasPhone) return null
   return (
-    <Link href="/quote#contact-details" className={className} aria-label="Add or confirm the business phone number">
-      <Phone size={16} />{label}
-    </Link>
+    <a href={`tel:${siteConfig.brand.phoneHref}`} className={className} aria-label={`Call ${siteConfig.brand.name}`}>
+      <Phone size={16} />{siteConfig.brand.phoneDisplay}
+    </a>
   )
 }
 
 function EmailAction({ className = "" }: { className?: string }) {
-  if (hasEmail) {
-    return <a href={`mailto:${siteConfig.brand.email}`} className={className}><Mail size={15} />{siteConfig.brand.email}</a>
-  }
-  return <Link href="/quote#contact-details" className={className}><Mail size={15} />Add Your Email</Link>
+  if (!hasEmail) return null
+  return <a href={`mailto:${siteConfig.brand.email}`} className={className}><Mail size={15} />{siteConfig.brand.email}</a>
 }
 
 function BrandMark() {
@@ -89,20 +80,20 @@ function SectionIntro({ eyebrow, title, body, dark = false }: { eyebrow: string;
 
 function OwnerTopBar() {
   return (
-    <div className="border-b border-[#eadfd7] bg-[#fff8f3]">
+    <div className="owner-preview-bar border-b border-[#eadfd7] bg-[#fff8f3]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-2 text-sm font-black text-[#102630]">
-          <Wrench size={16} className="shrink-0 text-[#e7613b]" />
-          <span className="truncate">Most of it&apos;s already done.</span>
+          <Sparkles size={16} className="shrink-0 text-[#e7613b]" />
+          <span className="truncate">Built for your business. Ready to finish.</span>
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <span className="hidden text-xs font-extrabold text-[#60727a] sm:inline">Start for $97</span>
-          <a
-            href="#owner-offer"
+          <span className="hidden text-xs font-extrabold text-[#60727a] sm:inline">$97 today · $597 total</span>
+          <Link
+            href="/claim"
             className="inline-flex items-center gap-1.5 rounded-full bg-[#e7613b] px-4 py-2 text-xs font-black text-white shadow-[0_8px_20px_rgba(231,97,59,.20)] transition hover:-translate-y-0.5 hover:bg-[#d95531]"
           >
-            Make It Yours <ArrowRight size={13} />
-          </a>
+            Claim This Site <ArrowRight size={13} />
+          </Link>
         </div>
       </div>
     </div>
@@ -127,8 +118,16 @@ function Header({ currentPage }: { currentPage: Page }) {
           <Link href="/quote" className="transition hover:text-[#e55e37]">Contact</Link>
         </nav>
         <div className="flex items-center gap-2">
-          <PhoneAction className="hidden items-center gap-2 rounded-full border border-[#dce3e2] bg-white/85 px-4 py-2.5 text-sm font-extrabold text-[#17323c] shadow-[0_8px_24px_rgba(16,38,48,.06)] transition hover:-translate-y-0.5 hover:border-[#f1b29d] md:inline-flex" />
-          <Link href="/quote" className="btn-primary text-xs sm:text-sm">Schedule Service <ArrowRight size={15} /></Link>
+          {hasPhone && (
+            <a
+              href={`tel:${siteConfig.brand.phoneHref}`}
+              className="hidden items-center gap-2 rounded-full border border-[#dce3e2] bg-white/85 px-4 py-2.5 text-sm font-extrabold text-[#17323c] shadow-[0_8px_24px_rgba(16,38,48,.06)] transition hover:-translate-y-0.5 hover:border-[#f1b29d] md:inline-flex"
+              aria-label={`Call ${siteConfig.brand.name}`}
+            >
+              <Phone size={16} />{siteConfig.brand.phoneDisplay}
+            </a>
+          )}
+          <Link href="/quote" className="btn-primary text-xs sm:text-sm">Request Service <ArrowRight size={15} /></Link>
         </div>
       </div>
       <nav className="flex items-center justify-center gap-5 border-t border-[#e7ece9] px-4 py-2 text-xs font-extrabold text-[#5f7279] lg:hidden" aria-label="Mobile navigation">
@@ -172,7 +171,7 @@ function Hero() {
             </div>
 
             <div className="hero-industrial__actions">
-              <Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={16} /></Link>
+              <Link href="/quote" className="btn-primary">Request Service <ArrowRight size={16} /></Link>
               <PhoneAction className="hero-industrial__phone" />
             </div>
 
@@ -535,7 +534,7 @@ function FinalCta() {
         <div className="final-cta__grid" />
         <div className="relative z-10 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
           <div><div className="section-kicker section-kicker--dark">Need HVAC help?</div><h2 className="mt-3 max-w-3xl text-3xl font-black leading-[1.02] tracking-[-.045em] text-white sm:text-4xl md:text-5xl">Heating or AC problem? Get the next step.</h2><p className="mt-4 max-w-xl text-base font-medium leading-7 text-white/65">Tell us what’s happening. We’ll confirm availability and explain what happens next.</p></div>
-          <div className="flex flex-wrap gap-3"><PhoneAction className="btn-light" /><Link href="/quote" className="btn-primary">Schedule Service <ArrowRight size={15} /></Link></div>
+          <div className="flex flex-wrap gap-3"><PhoneAction className="btn-light" /><Link href="/quote" className="btn-primary">Request Service <ArrowRight size={15} /></Link></div>
         </div>
       </motion.div>
     </section>
@@ -547,7 +546,7 @@ function Footer() {
     <footer className="border-t border-[#dfe7e4] bg-[#eef2ef] pb-20 md:pb-0">
       <div className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
         <div><div className="flex items-center gap-3"><BrandMark /><div className="text-lg font-black text-[#102630]">{siteConfig.brand.name}</div></div><p className="mt-3 max-w-sm text-sm font-medium leading-6 text-[#687b81]">Heating, cooling, maintenance, repair, replacement, and indoor comfort service.</p></div>
-        <div className="text-sm font-bold text-[#5c7077]"><Link className="block py-1.5 hover:text-[#d95531]" href="/">Home</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/services">Services</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/quote">Schedule Service</Link></div>
+        <div className="text-sm font-bold text-[#5c7077]"><Link className="block py-1.5 hover:text-[#d95531]" href="/">Home</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/services">Services</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/quote">Request Service</Link></div>
         <div className="flex flex-col items-start gap-2 text-sm font-bold text-[#65787e] md:items-end"><PhoneAction className="inline-flex items-center gap-2 hover:text-[#d95531]" /><EmailAction className="inline-flex items-center gap-2 hover:text-[#d95531]" /><div>Local service area</div></div>
       </div>
     </footer>
@@ -567,141 +566,174 @@ function MobileServiceBar() {
 function OwnerOffer() {
   const reduceMotion = useReducedMotion()
   const benefits = [
-    "Get found by local customers",
-    "Make it easy to call or request service",
-    "Show the services you offer",
-    "Put your best reviews to work",
-    "Show your service area",
-    "Look established and professional online",
+    ["Be easy to find", "Give local customers a real place to discover your business."],
+    ["Turn visits into calls", "Make the next step obvious on every screen."],
+    ["Show the work you do", "Put services, service area, and trust signals in one place."],
+    ["Look established online", "A finished site makes the business easier to trust before the first call."],
   ] as const
 
   const steps = [
-    ["01", "Start", "Reserve it for $97."],
-    ["02", "Customize", "We add your business details and make it yours."],
-    ["03", "Approve", "Review it. Request any changes."],
-    ["04", "Go Live", "Customers can find you and reach you."],
+    ["01", Sparkles, "Claim", "Start for $97 and reserve this build."],
+    ["02", Wrench, "Make it yours", "We swap in your number, services, reviews, branding, and service area."],
+    ["03", Check, "Approve", "Review the finished version and request any changes."],
+    ["04", Zap, "Go live", "We connect the final details and put the site to work."],
   ] as const
 
   return (
-    <section id="owner-offer" className="relative isolate overflow-hidden border-y border-[#eadfd7] bg-[#fffaf6]">
+    <section id="owner-offer" className="owner-offer-v2 relative isolate overflow-hidden border-y border-[#eadfd7] bg-[#fffaf6]">
       <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#ef7046]/8 blur-3xl" />
       <div className="pointer-events-none absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-[#102630]/7 blur-3xl" />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
-        <div className="grid gap-8 xl:grid-cols-[1.08fr_.72fr] xl:items-start">
+      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-20 lg:px-8">
+        <div className="grid gap-9 xl:grid-cols-[1.08fr_.72fr] xl:items-start">
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="section-kicker">For HVAC Business Owners</div>
-            <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl">
-              Most of it&apos;s already done.
-              <span className="mt-1 block text-[.78em] leading-[1.04] text-[#e7613b]">Let&apos;s get you more customers.</span>
+            <div className="section-kicker">For the business owner</div>
+            <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[.96] tracking-[-.055em] text-[#102630] sm:text-5xl">
+              Put this site to work for your business.
+              <span className="mt-2 block text-[.72em] leading-[1.04] text-[#e7613b]">More trust. More calls. A cleaner path to the next job.</span>
             </h2>
-            <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-[#60727a]">
-              We finish the details. You approve the final site.
+            <p className="mt-5 max-w-2xl text-base font-semibold leading-7 text-[#60727a]">
+              The heavy lifting is already done. We finish your real details, you approve it, then we launch.
             </p>
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              {benefits.map((benefit, index) => (
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              {benefits.map(([title, copy], index) => (
                 <motion.div
-                  key={benefit}
+                  key={title}
                   initial={{ opacity: 0, y: 16, scale: 0.985 }}
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, amount: 0.55 }}
-                  transition={{ delay: index * 0.045, duration: 0.35 }}
+                  transition={{ delay: index * 0.05, duration: 0.35 }}
                   whileHover={reduceMotion ? undefined : { y: -5, scale: 1.012 }}
-                  className="flex items-start gap-3 rounded-2xl border border-[#eadfd7] bg-white/85 px-4 py-3.5 text-sm font-extrabold leading-5 text-[#203944] shadow-[0_8px_24px_rgba(16,38,48,.04)] backdrop-blur-sm"
+                  className="rounded-2xl border border-[#eadfd7] bg-white/88 px-4 py-4 shadow-[0_8px_24px_rgba(16,38,48,.04)] backdrop-blur-sm"
                 >
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#e7613b] text-white shadow-[0_4px_10px_rgba(231,97,59,.22)]">
-                    <Check size={12} strokeWidth={3.5} />
-                  </span>
-                  <span>{benefit}</span>
+                  <div className="flex items-center gap-2 text-sm font-black text-[#17323c]">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#e7613b] text-white">
+                      <Check size={12} strokeWidth={3.5} />
+                    </span>
+                    {title}
+                  </div>
+                  <p className="mt-2 text-sm font-semibold leading-5 text-[#687b81]">{copy}</p>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 30, rotateX: 4 }}
+            initial={{ opacity: 0, y: 30, rotateX: 5 }}
             whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={reduceMotion ? undefined : { y: -7, rotateX: -1.2, rotateY: 1.2 }}
+            whileHover={reduceMotion ? undefined : { y: -8, rotateX: -1.2, rotateY: 1.2 }}
             style={{ transformPerspective: 1000 }}
-            className="relative rounded-[30px] border border-[#eadfd7] bg-white/94 p-5 shadow-[0_28px_70px_rgba(16,38,48,.12)] backdrop-blur sm:p-7"
+            className="relative overflow-hidden rounded-[30px] border border-[#eadfd7] bg-white/95 p-5 shadow-[0_30px_80px_rgba(16,38,48,.13)] backdrop-blur sm:p-7"
           >
-            <div className="absolute inset-x-7 top-0 h-px bg-gradient-to-r from-transparent via-[#e7613b]/60 to-transparent" />
-            <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+            <div className="absolute inset-x-7 top-0 h-px bg-gradient-to-r from-transparent via-[#e7613b]/70 to-transparent" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#edf4f1] px-3 py-1.5 text-[11px] font-black uppercase tracking-[.13em] text-[#36545d]">
+              <ShieldCheck size={14} /> See the finished version first
+            </div>
+            <div className="mt-5 flex flex-wrap items-end gap-x-3 gap-y-1">
               <motion.div
                 initial={{ scale: 0.92, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.45, delay: 0.18 }}
-                className="text-5xl font-black tracking-[-.06em] text-[#102630]"
+                className="text-6xl font-black tracking-[-.065em] text-[#102630]"
               >
                 $97
               </motion.div>
-              <div className="pb-1 text-xl font-black text-[#102630]">to start</div>
+              <div className="pb-2 text-xl font-black text-[#102630]">today</div>
             </div>
-            <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total</div>
+            <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total · final $500 after approval</div>
 
             <div className="my-5 h-px bg-[#e9eeeb]" />
 
-            <p className="text-sm font-extrabold leading-6 text-[#536a72]">
-              Approve it first. Pay the remaining $500 after you&apos;re happy.
-            </p>
-            <div className="mt-4 flex items-center gap-2 text-sm font-black text-[#17323c]">
+            <div className="space-y-3 text-sm font-extrabold leading-6 text-[#536a72]">
+              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />We finish your business details and branding.</div>
+              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />You review it and request changes before launch.</div>
+              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />You pay the final $500 only after approval.</div>
+            </div>
+            <div className="mt-5 flex items-center gap-2 text-sm font-black text-[#17323c]">
               <Clock3 size={16} className="text-[#e7613b]" />
               Ready in 3 business days
             </div>
 
-            <a
-              href="https://recoverrevenue.company"
+            <Link
+              href="/claim"
               className="group mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#e7613b] px-5 py-4 text-base font-black text-white shadow-[0_14px_30px_rgba(231,97,59,.28)] transition hover:-translate-y-1 hover:bg-[#d95531] active:translate-y-0"
             >
-              Make It Yours <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
-            </a>
+              Claim This Site <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+            </Link>
+            <p className="mt-3 text-center text-[11px] font-bold text-[#839197]">Secure checkout powered by Stripe.</p>
           </motion.div>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 26 }}
+          initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.55 }}
-          className="mt-10 rounded-[30px] border border-[#dfe7e4] bg-white/94 p-5 shadow-[0_20px_55px_rgba(16,38,48,.07)] backdrop-blur sm:p-7 lg:p-8"
+          className="owner-journey mt-11"
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="owner-journey__heading">
             <div>
-              <div className="section-kicker">How It Works</div>
-              <h3 className="mt-2 text-3xl font-black tracking-[-.04em] text-[#102630] sm:text-4xl">From $97 to live in 4 steps.</h3>
+              <div className="section-kicker">How it becomes yours</div>
+              <h3>Claim it. Make it yours. Go live.</h3>
             </div>
-            <p className="max-w-sm text-sm font-bold leading-6 text-[#687b81]">Start. Customize. Approve. Go live.</p>
+            <p>Four moves. No agency maze. No paying the full amount before you see the finished site.</p>
           </div>
 
-          <div className="mt-7 grid gap-3 lg:grid-cols-4">
-            {steps.map(([number, title, copy], index) => (
-              <motion.div
-                key={number}
-                initial={{ opacity: 0, y: 18, scale: 0.985 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.45 }}
-                transition={{ delay: index * 0.07, duration: 0.38 }}
-                whileHover={reduceMotion ? undefined : { y: -6, scale: 1.015 }}
-                className="group relative overflow-hidden rounded-2xl border border-[#e3e9e6] bg-[#f8faf8] p-5 shadow-[0_8px_22px_rgba(16,38,48,.035)]"
-              >
-                <div className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-[#e7613b] transition-transform duration-300 group-hover:scale-x-100" />
-                <div className="flex items-center justify-between gap-3">
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-[#102630] text-xs font-black text-white shadow-[0_5px_12px_rgba(16,38,48,.18)]">{number}</span>
-                  {index < steps.length - 1 && <ArrowRight size={16} className="hidden text-[#e7613b] transition-transform group-hover:translate-x-1 lg:block" />}
-                </div>
-                <h4 className="mt-5 text-lg font-black text-[#102630]">{title}</h4>
-                <p className="mt-2 text-sm font-semibold leading-6 text-[#65787e]">{copy}</p>
-              </motion.div>
-            ))}
+          <div className="owner-journey__stage">
+            <svg className="owner-journey__track" viewBox="0 0 1200 260" preserveAspectRatio="none" aria-hidden="true">
+              <motion.path
+                d="M 40 155 C 180 155, 210 70, 340 92 S 520 205, 650 152 S 835 62, 965 95 S 1085 158, 1160 125"
+                fill="none"
+                pathLength="1"
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </svg>
+            {!reduceMotion && (
+              <motion.span
+                className="owner-journey__pulse"
+                initial={{ left: "3%", top: "58%" }}
+                whileInView={{
+                  left: ["3%", "29%", "54%", "79%", "96%"],
+                  top: ["58%", "33%", "61%", "31%", "48%"],
+                }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 2.8, delay: 0.35, ease: "easeInOut" }}
+              />
+            )}
+
+            <div className="owner-journey__steps">
+              {steps.map(([number, Icon, title, copy], index) => (
+                <motion.article
+                  key={number}
+                  initial={{ opacity: 0, y: 28, rotateX: 7 }}
+                  whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ delay: index * 0.09, duration: 0.45 }}
+                  whileHover={reduceMotion ? undefined : { y: -9, rotateX: -2, scale: 1.02 }}
+                  className={`owner-journey__node owner-journey__node--${index + 1}`}
+                  style={{ transformPerspective: 900 }}
+                >
+                  <div className="owner-journey__node-top">
+                    <span>{number}</span>
+                    <span className="owner-journey__icon"><Icon size={19} /></span>
+                  </div>
+                  <h4>{title}</h4>
+                  <p>{copy}</p>
+                </motion.article>
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>
@@ -719,15 +751,15 @@ function OwnerFloatingBar() {
     >
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-[22px] border border-white/10 bg-[#102630]/96 px-4 py-3 text-white shadow-[0_20px_60px_rgba(4,18,24,.34)] backdrop-blur-xl sm:px-5">
         <div className="min-w-0">
-          <div className="hidden truncate text-sm font-black sm:block">Most of it&apos;s done.</div>
-          <div className="text-sm font-black sm:mt-0.5 sm:text-xs sm:text-white/68">Start for $97</div>
+          <div className="truncate text-sm font-black">Want this live for your business?</div>
+          <div className="mt-0.5 hidden text-xs font-bold text-white/68 sm:block">$97 today · final $500 after approval</div>
         </div>
-        <a
-          href="https://recoverrevenue.company"
+        <Link
+          href="/claim"
           className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#e7613b] px-5 py-3 text-sm font-black text-white shadow-[0_10px_24px_rgba(231,97,59,.26)] transition hover:-translate-y-0.5 hover:bg-[#d95531]"
         >
-          Get It Now <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-        </a>
+          Claim This Site <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+        </Link>
       </div>
     </motion.div>
   )
@@ -743,7 +775,7 @@ function ServicesPage() {
 
 function QuotePage() {
   return (
-    <><Header currentPage="quote" /><section id="contact-details" className="relative isolate overflow-hidden bg-[#edf2ef] py-12 md:py-18"><div className="atmosphere-grid absolute inset-0 -z-10" /><div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8"><div className="lg:py-7"><div className="section-kicker">Request Service</div><h1 className="mt-4 text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl md:text-6xl">Tell us what’s going on.</h1><p className="mt-5 max-w-lg text-base font-medium leading-7 text-[#61747a] sm:text-lg">A short request is enough. Tell us the main problem and the best way to reach you.</p><div className="mt-7 space-y-3 text-sm font-bold text-[#536a72]"><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />No long questionnaire</div><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />Tell us the main problem</div><div className="flex items-center gap-2"><Phone size={15} className="text-[#e7613b]" />{siteConfig.brand.phoneDisplay}</div><div className="flex items-center gap-2"><Mail size={15} className="text-[#e7613b]" />Add Your Email</div></div></div><motion.form initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="quote-form" onSubmit={(event) => event.preventDefault()}><div className="grid gap-4 sm:grid-cols-2"><label className="form-label">Name<input className="form-input" placeholder="Your name" autoComplete="name" /></label><label className="form-label">Phone<input className="form-input" placeholder="Best number" inputMode="tel" autoComplete="tel" /></label><label className="form-label sm:col-span-2">Email<input className="form-input" placeholder="you@example.com" type="email" autoComplete="email" /></label><label className="form-label sm:col-span-2">What do you need help with?<textarea className="form-input min-h-28 resize-y" placeholder="AC not cooling, furnace issue, maintenance, replacement..." /></label></div><button type="submit" className="btn-primary mt-5 w-full justify-center">Request Service <ArrowRight size={15} /></button></motion.form></div></section><Footer /><MobileServiceBar /></>
+    <><Header currentPage="quote" /><section id="contact-details" className="relative isolate overflow-hidden bg-[#edf2ef] py-12 md:py-18"><div className="atmosphere-grid absolute inset-0 -z-10" /><div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[.82fr_1.18fr] lg:px-8"><div className="lg:py-7"><div className="section-kicker">Request Service</div><h1 className="mt-4 text-4xl font-black leading-[.98] tracking-[-.05em] text-[#102630] sm:text-5xl md:text-6xl">Tell us what’s going on.</h1><p className="mt-5 max-w-lg text-base font-medium leading-7 text-[#61747a] sm:text-lg">A short request is enough. Tell us the main problem and the best way to reach you.</p><div className="mt-7 space-y-3 text-sm font-bold text-[#536a72]"><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />No long questionnaire</div><div className="flex items-center gap-2"><Check size={15} className="text-[#e7613b]" />Tell us the main problem</div>{hasPhone && <div className="flex items-center gap-2"><Phone size={15} className="text-[#e7613b]" />{siteConfig.brand.phoneDisplay}</div>}{hasEmail && <div className="flex items-center gap-2"><Mail size={15} className="text-[#e7613b]" />{siteConfig.brand.email}</div>}</div></div><motion.form initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="quote-form" onSubmit={(event) => event.preventDefault()}><div className="grid gap-4 sm:grid-cols-2"><label className="form-label">Name<input className="form-input" placeholder="Your name" autoComplete="name" /></label><label className="form-label">Phone<input className="form-input" placeholder="Best number" inputMode="tel" autoComplete="tel" /></label><label className="form-label sm:col-span-2">Email<input className="form-input" placeholder="you@example.com" type="email" autoComplete="email" /></label><label className="form-label sm:col-span-2">What do you need help with?<textarea className="form-input min-h-28 resize-y" placeholder="AC not cooling, furnace issue, maintenance, replacement..." /></label></div><button type="submit" className="btn-primary mt-5 w-full justify-center">Request Service <ArrowRight size={15} /></button></motion.form></div></section><Footer /><MobileServiceBar /></>
   )
 }
 
