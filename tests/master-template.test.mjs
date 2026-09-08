@@ -209,4 +209,5 @@ test('claim page keeps checkout concise and approval-first', () => {
   assert.ok(claimPage.includes('Make this website yours.'), 'claim page should use a short contractor-friendly headline')
   assert.ok(claimPage.includes('Remaining $500 only after you approve'), 'claim page should emphasize approval before the balance')
   assert.ok(claimPage.includes('Make It Yours — $97'), 'claim page CTA should match the preview CTA')
+  assert.ok(claimPage.includes('Processed by Recover Revenue'), 'claim page should preframe the merchant name buyers see on Stripe')
 })
