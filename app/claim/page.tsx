@@ -84,7 +84,7 @@ export default function ClaimPage() {
             </a>
 
             <div className="mt-4 text-center text-xs font-bold leading-5 text-[#7a8a8f]">
-              One-time website project. Secure payment through Stripe.
+              Processed by Recover Revenue · Secure payment through Stripe.
             </div>
           </aside>
         </section>
