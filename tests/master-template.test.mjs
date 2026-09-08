@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 const config = readFileSync(new URL('../lib/site-config.ts', import.meta.url), 'utf8')
 const component = readFileSync(new URL('../components/hvac-site.tsx', import.meta.url), 'utf8')
@@ -44,7 +44,7 @@ test('homepage uses contractor-first proof, service standards, compact workflow,
     'Homeowner Reviews',
     'review-marquee',
     'MobileServiceBar',
-    'Schedule Service',
+    'Request Service',
   ]) {
     assert.ok(`${component}\n${styles}`.includes(required), `missing contractor-first element: ${required}`)
   }
@@ -122,4 +122,43 @@ test('aggressive contractor redesign uses bold industrial hierarchy instead of s
 
   assert.equal(source.includes('service-standard-bar'), false, 'subtle standards bar should be replaced with a stronger rail')
   assert.equal(source.includes('proof-board__grid'), false, 'subtle proof grid should be replaced with a bolder proof ribbon')
+})
+
+
+test('owner conversion layer feels separate from the homeowner website and removes placeholder header leakage', () => {
+  const header = component.match(/function Header[\s\S]*?function Hero/)?.[0] ?? ''
+  assert.equal(header.includes('<PhoneAction'), false, 'placeholder phone action should not appear in the main homeowner header')
+  assert.ok(component.includes('Built for your business. Ready to finish.'), 'owner preview bar should explain the site is already built')
+  assert.ok(component.includes('Claim This Site'), 'owner CTAs should use one clear claim action')
+  assert.equal(component.includes('href="https://recoverrevenue.company"'), false, 'owner CTAs should not dump buyers on the generic Recover Revenue homepage')
+})
+
+test('owner offer uses a motion-led claim journey instead of four bland onboarding cards', () => {
+  const source = `${component}\n${styles}`
+  for (const required of [
+    'Claim it. Make it yours. Go live.',
+    'owner-journey',
+    'owner-journey__track',
+    'owner-journey__node',
+    'owner-journey__pulse',
+  ]) {
+    assert.ok(source.includes(required), `missing owner journey element: ${required}`)
+  }
+})
+
+
+test('claim flow has a dedicated product page, live Stripe deposit, and post-payment handoff', () => {
+  const claimUrl = new URL('../app/claim/page.tsx', import.meta.url)
+  const successUrl = new URL('../app/claim/success/page.tsx', import.meta.url)
+  assert.ok(existsSync(claimUrl), 'dedicated claim page should exist before sending a buyer to Stripe')
+  assert.ok(existsSync(successUrl), 'post-payment success page should exist')
+  if (!existsSync(claimUrl) || !existsSync(successUrl)) return
+
+  const claimPage = readFileSync(claimUrl, 'utf8')
+  const successPage = readFileSync(successUrl, 'utf8')
+  assert.ok(claimPage.includes('Take this site off preview and make it yours.'), 'claim page should explain the transaction')
+  assert.ok(claimPage.includes('$97') && claimPage.includes('today'), 'claim page should make the deposit obvious')
+  assert.ok(claimPage.includes('$500 after approval'), 'claim page should preserve the risk reversal')
+  assert.ok(claimPage.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'claim page should use the live Stripe payment link')
+  assert.ok(successPage.includes('Payment received'), 'success page should confirm the deposit and explain next steps')
 })
