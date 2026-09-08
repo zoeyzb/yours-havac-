@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, Check, Mail, ShieldCheck } from "lucide-react"
+import { ArrowRight, Check, ShieldCheck } from "lucide-react"
 
 export const metadata = {
   title: "Site Reserved",
