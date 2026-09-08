@@ -162,3 +162,51 @@ test('claim flow has a dedicated product page, live Stripe deposit, and post-pay
   assert.ok(claimPage.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'claim page should use the live Stripe payment link')
   assert.ok(successPage.includes('Payment received'), 'success page should confirm the deposit and explain next steps')
 })
+
+
+test('preview uses generic owner-safe branding instead of pretending to know the business name', () => {
+  assert.ok(config.includes('name: "Your Heating & Cooling"'), 'preview brand should stay generic until real business details are supplied')
+  assert.equal(config.includes('name: "Prime Heating & Cooling"'), false, 'demo company name should not leak into cold outreach previews')
+  assert.equal(homepage.includes('Prime Heating & Cooling'), false, 'homepage metadata should not hard-code the old demo business')
+})
+
+test('owner sales UI is restrained on desktop and uses one clear claim action', () => {
+  const source = `${component}\n${styles}`
+  assert.ok(component.includes('Your website preview is ready.'), 'top owner strip should read like a preview control')
+  assert.ok(component.includes('Make It Yours — $97'), 'owner CTA should say exactly what happens and what it costs')
+  assert.ok(component.includes('function OwnerMobileClaimBar'), 'mobile-only owner CTA should exist')
+  assert.equal(component.includes('function OwnerFloatingBar'), false, 'desktop floating sales bar should be removed')
+  assert.ok(source.includes('owner-mobile-claim'), 'mobile claim bar should have a dedicated responsive class')
+})
+
+test('owner offer is simpler, outcome-led, and uses an aligned four-step rail', () => {
+  const source = `${component}\n${styles}`
+  for (const required of [
+    'Your website is already built.',
+    'Make it yours.',
+    'Remaining $500 only after you approve',
+    'owner-steps',
+    'owner-steps__line',
+    'Reserve — $97',
+    'We customize',
+    'You approve',
+    'Pay $500 + launch',
+  ]) {
+    assert.ok(source.includes(required), `missing owner polish element: ${required}`)
+  }
+  for (const rejected of [
+    'More trust. More calls. A cleaner path to the next job.',
+    'owner-journey__track',
+    'owner-journey__pulse',
+    'Four moves. No agency maze.',
+  ]) {
+    assert.equal(source.includes(rejected), false, `old noisy owner element should be removed: ${rejected}`)
+  }
+})
+
+test('claim page keeps checkout concise and approval-first', () => {
+  const claimPage = readFileSync(new URL('../app/claim/page.tsx', import.meta.url), 'utf8')
+  assert.ok(claimPage.includes('Make this website yours.'), 'claim page should use a short contractor-friendly headline')
+  assert.ok(claimPage.includes('Remaining $500 only after you approve'), 'claim page should emphasize approval before the balance')
+  assert.ok(claimPage.includes('Make It Yours — $97'), 'claim page CTA should match the preview CTA')
+})
