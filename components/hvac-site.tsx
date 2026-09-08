@@ -84,17 +84,14 @@ function OwnerTopBar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-2 text-sm font-black text-[#102630]">
           <Sparkles size={16} className="shrink-0 text-[#e7613b]" />
-          <span className="truncate">Built for your business. Ready to finish.</span>
+          <span className="truncate">Your website preview is ready.</span>
         </div>
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <span className="hidden text-xs font-extrabold text-[#60727a] sm:inline">$97 today · $597 total</span>
-          <Link
-            href="/claim"
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#e7613b] px-4 py-2 text-xs font-black text-white shadow-[0_8px_20px_rgba(231,97,59,.20)] transition hover:-translate-y-0.5 hover:bg-[#d95531]"
-          >
-            Claim This Site <ArrowRight size={13} />
-          </Link>
-        </div>
+        <Link
+          href="/claim"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e7613b] px-4 py-2 text-xs font-black text-white shadow-[0_8px_20px_rgba(231,97,59,.20)] transition hover:-translate-y-0.5 hover:bg-[#d95531]"
+        >
+          Make It Yours — $97 <ArrowRight size={13} />
+        </Link>
       </div>
     </div>
   )
@@ -574,17 +571,16 @@ function MobileServiceBar() {
 function OwnerOffer() {
   const reduceMotion = useReducedMotion()
   const benefits = [
-    ["Be easy to find", "Give local customers a real place to discover your business."],
-    ["Turn visits into calls", "Make the next step obvious on every screen."],
-    ["Show the work you do", "Put services, service area, and trust signals in one place."],
-    ["Look established online", "A finished site makes the business easier to trust before the first call."],
+    ["Built to get calls", "Clear service paths make it easy for a homeowner to take the next step."],
+    ["Looks established", "Services, reviews, and trust signals are already presented like a real local company."],
+    ["Ready on mobile", "The experience is built for the phone your customers are actually using."],
   ] as const
 
   const steps = [
-    ["01", Sparkles, "Claim", "Start for $97 and reserve this build."],
-    ["02", Wrench, "Make it yours", "We swap in your number, services, reviews, branding, and service area."],
-    ["03", Check, "Approve", "Review the finished version and request any changes."],
-    ["04", Zap, "Go live", "We connect the final details and put the site to work."],
+    ["01", Sparkles, "Reserve — $97", "Lock in this build and start the customization."],
+    ["02", Wrench, "We customize", "We swap in your real details, services, reviews, and service area."],
+    ["03", Check, "You approve", "Review the finished version and request any changes."],
+    ["04", Zap, "Pay $500 + launch", "Pay the remaining balance only after approval, then we put it live."],
   ] as const
 
   return (
@@ -595,29 +591,29 @@ function OwnerOffer() {
       <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-20 lg:px-8">
         <div className="grid gap-9 xl:grid-cols-[1.08fr_.72fr] xl:items-start">
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="section-kicker">For the business owner</div>
-            <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[.96] tracking-[-.055em] text-[#102630] sm:text-5xl">
-              Put this site to work for your business.
-              <span className="mt-2 block text-[.72em] leading-[1.04] text-[#e7613b]">More trust. More calls. A cleaner path to the next job.</span>
+            <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[.94] tracking-[-.055em] text-[#102630] sm:text-5xl">
+              Your website is already built.
+              <span className="mt-2 block text-[#e7613b]">Make it yours.</span>
             </h2>
             <p className="mt-5 max-w-2xl text-base font-semibold leading-7 text-[#60727a]">
-              The heavy lifting is already done. We finish your real details, you approve it, then we launch.
+              We replace the preview details with yours. You review the finished site, request changes, then pay the remaining $500 only after you approve.
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {benefits.map(([title, copy], index) => (
                 <motion.div
                   key={title}
-                  initial={{ opacity: 0, y: 16, scale: 0.985 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.55 }}
-                  transition={{ delay: index * 0.05, duration: 0.35 }}
-                  whileHover={reduceMotion ? undefined : { y: -5, scale: 1.012 }}
+                  transition={{ delay: index * 0.05, duration: 0.32 }}
+                  whileHover={reduceMotion ? undefined : { y: -4 }}
                   className="rounded-2xl border border-[#eadfd7] bg-white/88 px-4 py-4 shadow-[0_8px_24px_rgba(16,38,48,.04)] backdrop-blur-sm"
                 >
                   <div className="flex items-center gap-2 text-sm font-black text-[#17323c]">
@@ -632,111 +628,77 @@ function OwnerOffer() {
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30, rotateX: 5 }}
-            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          <motion.aside
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={reduceMotion ? undefined : { y: -8, rotateX: -1.2, rotateY: 1.2 }}
-            style={{ transformPerspective: 1000 }}
-            className="relative overflow-hidden rounded-[30px] border border-[#eadfd7] bg-white/95 p-5 shadow-[0_30px_80px_rgba(16,38,48,.13)] backdrop-blur sm:p-7"
+            transition={{ duration: 0.5, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={reduceMotion ? undefined : { y: -5 }}
+            className="relative overflow-hidden rounded-[28px] border border-[#eadfd7] bg-white/96 p-5 shadow-[0_28px_70px_rgba(16,38,48,.11)] sm:p-7"
           >
-            <div className="absolute inset-x-7 top-0 h-px bg-gradient-to-r from-transparent via-[#e7613b]/70 to-transparent" />
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#edf4f1] px-3 py-1.5 text-[11px] font-black uppercase tracking-[.13em] text-[#36545d]">
-              <ShieldCheck size={14} /> See the finished version first
-            </div>
-            <div className="mt-5 flex flex-wrap items-end gap-x-3 gap-y-1">
-              <motion.div
-                initial={{ scale: 0.92, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: 0.18 }}
-                className="text-6xl font-black tracking-[-.065em] text-[#102630]"
-              >
-                $97
-              </motion.div>
+            <div className="text-[11px] font-black uppercase tracking-[.13em] text-[#d95531]">Make this preview yours</div>
+            <div className="mt-4 flex items-end gap-3">
+              <div className="text-6xl font-black tracking-[-.065em] text-[#102630]">$97</div>
               <div className="pb-2 text-xl font-black text-[#102630]">today</div>
             </div>
-            <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total · final $500 after approval</div>
+            <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total</div>
+            <div className="mt-2 inline-flex rounded-full bg-[#edf4f1] px-3 py-1.5 text-xs font-black text-[#36545d]">
+              Remaining $500 only after you approve
+            </div>
 
             <div className="my-5 h-px bg-[#e9eeeb]" />
 
             <div className="space-y-3 text-sm font-extrabold leading-6 text-[#536a72]">
-              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />We finish your business details and branding.</div>
+              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />We replace the preview details with yours.</div>
               <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />You review it and request changes before launch.</div>
-              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />You pay the final $500 only after approval.</div>
-            </div>
-            <div className="mt-5 flex items-center gap-2 text-sm font-black text-[#17323c]">
-              <Clock3 size={16} className="text-[#e7613b]" />
-              Ready in 3 business days
+              <div className="flex gap-2"><Clock3 size={16} className="mt-1 shrink-0 text-[#e7613b]" />Target turnaround: 3 business days.</div>
             </div>
 
             <Link
               href="/claim"
-              className="group mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#e7613b] px-5 py-4 text-base font-black text-white shadow-[0_14px_30px_rgba(231,97,59,.28)] transition hover:-translate-y-1 hover:bg-[#d95531] active:translate-y-0"
+              className="group mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#e7613b] px-5 py-4 text-base font-black text-white shadow-[0_14px_30px_rgba(231,97,59,.28)] transition hover:-translate-y-1 hover:bg-[#d95531]"
             >
-              Claim This Site <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+              Make It Yours — $97 <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
             </Link>
             <p className="mt-3 text-center text-[11px] font-bold text-[#839197]">Secure checkout powered by Stripe.</p>
-          </motion.div>
+          </motion.aside>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.55 }}
-          className="owner-journey mt-11"
+          transition={{ duration: 0.5 }}
+          className="owner-steps mt-11"
         >
-          <div className="owner-journey__heading">
+          <div className="owner-steps__heading">
             <div>
-              <div className="section-kicker">How it becomes yours</div>
-              <h3>Claim it. Make it yours. Go live.</h3>
+              <div className="section-kicker">How it works</div>
+              <h3>From preview to live.</h3>
             </div>
-            <p>Four moves. No agency maze. No paying the full amount before you see the finished site.</p>
+            <p>Four straight steps. You do not pay the final $500 until the finished site is approved.</p>
           </div>
 
-          <div className="owner-journey__stage">
-            <svg className="owner-journey__track" viewBox="0 0 1200 260" preserveAspectRatio="none" aria-hidden="true">
-              <motion.path
-                d="M 40 155 C 180 155, 210 70, 340 92 S 520 205, 650 152 S 835 62, 965 95 S 1085 158, 1160 125"
-                fill="none"
-                pathLength="1"
-                initial={{ pathLength: 0 }}
-                whileInView={{ pathLength: 1 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
-              />
-            </svg>
-            {!reduceMotion && (
-              <motion.span
-                className="owner-journey__pulse"
-                initial={{ left: "3%", top: "58%" }}
-                whileInView={{
-                  left: ["3%", "29%", "54%", "79%", "96%"],
-                  top: ["58%", "33%", "61%", "31%", "48%"],
-                }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 2.8, delay: 0.35, ease: "easeInOut" }}
-              />
-            )}
-
-            <div className="owner-journey__steps">
+          <div className="owner-steps__rail">
+            <motion.div
+              className="owner-steps__line"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, amount: 0.45 }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            />
+            <div className="owner-steps__grid">
               {steps.map(([number, Icon, title, copy], index) => (
                 <motion.article
                   key={number}
-                  initial={{ opacity: 0, y: 28, rotateX: 7 }}
-                  whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{ delay: index * 0.09, duration: 0.45 }}
-                  whileHover={reduceMotion ? undefined : { y: -9, rotateX: -2, scale: 1.02 }}
-                  className={`owner-journey__node owner-journey__node--${index + 1}`}
-                  style={{ transformPerspective: 900 }}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.45 }}
+                  transition={{ delay: index * 0.07, duration: 0.35 }}
+                  className="owner-step"
                 >
-                  <div className="owner-journey__node-top">
-                    <span>{number}</span>
-                    <span className="owner-journey__icon"><Icon size={19} /></span>
-                  </div>
+                  <div className="owner-step__node"><Icon size={18} /></div>
+                  <div className="owner-step__number">{number}</div>
                   <h4>{title}</h4>
                   <p>{copy}</p>
                 </motion.article>
@@ -749,32 +711,30 @@ function OwnerOffer() {
   )
 }
 
-function OwnerFloatingBar() {
+function OwnerMobileClaimBar() {
   return (
     <motion.div
-      initial={{ y: 90, opacity: 0 }}
+      initial={{ y: 70, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-x-0 bottom-0 z-[70] px-3 pb-3 md:px-5 md:pb-5"
+      transition={{ delay: 0.35, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="owner-mobile-claim fixed inset-x-0 bottom-0 z-[70] px-3 pb-3 md:hidden"
     >
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-[22px] border border-white/10 bg-[#102630]/96 px-4 py-3 text-white shadow-[0_20px_60px_rgba(4,18,24,.34)] backdrop-blur-xl sm:px-5">
-        <div className="min-w-0">
-          <div className="truncate text-sm font-black">Want this live for your business?</div>
-          <div className="mt-0.5 hidden text-xs font-bold text-white/68 sm:block">$97 today · final $500 after approval</div>
+      <Link
+        href="/claim"
+        className="mx-auto flex max-w-lg items-center justify-between gap-3 rounded-[18px] border border-white/10 bg-[#102630]/96 px-4 py-3 text-white shadow-[0_18px_50px_rgba(4,18,24,.34)] backdrop-blur-xl"
+      >
+        <div>
+          <div className="text-sm font-black">Make this site yours</div>
+          <div className="mt-0.5 text-xs font-bold text-white/64">$97 today · $500 after approval</div>
         </div>
-        <Link
-          href="/claim"
-          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#e7613b] px-5 py-3 text-sm font-black text-white shadow-[0_10px_24px_rgba(231,97,59,.26)] transition hover:-translate-y-0.5 hover:bg-[#d95531]"
-        >
-          Claim This Site <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-        </Link>
-      </div>
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e7613b]"><ArrowRight size={17} /></span>
+      </Link>
     </motion.div>
   )
 }
 
 function HomePage() {
-  return <><OwnerTopBar /><Header currentPage="home" /><Hero /><ProofStrip /><Services /><OwnerOffer /><WhyChooseUs /><Work /><HowItWorks /><Reviews /><LocalService /><FAQ /><FinalCta /><Footer /><div className="h-24" aria-hidden="true" /><OwnerFloatingBar /></>
+  return <><OwnerTopBar /><Header currentPage="home" /><Hero /><ProofStrip /><Services /><OwnerOffer /><WhyChooseUs /><Work /><HowItWorks /><Reviews /><LocalService /><FAQ /><FinalCta /><Footer /><div className="h-20 md:hidden" aria-hidden="true" /><OwnerMobileClaimBar /></>
 }
 
 function ServicesPage() {
