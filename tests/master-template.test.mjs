@@ -76,7 +76,7 @@ test('visual contract avoids cheap SaaS styling and fake proof', () => {
 test('homepage metadata is HVAC-specific and contains no stale handyman branding', () => {
   assert.equal(homepage.includes('Oakwell House Care'), false, 'homepage still contains old Oakwell branding')
   assert.equal(homepage.includes('Premium Handyman Template'), false, 'homepage still contains old handyman metadata')
-  assert.ok(homepage.includes('Prime Heating & Cooling'), 'homepage title should use the HVAC demo brand')
+  assert.ok(homepage.includes('siteConfig.brand.name'), 'homepage title should derive from the configured preview brand')
 })
 
 
@@ -128,22 +128,22 @@ test('aggressive contractor redesign uses bold industrial hierarchy instead of s
 test('owner conversion layer feels separate from the homeowner website and removes placeholder header leakage', () => {
   const header = component.match(/function Header[\s\S]*?function Hero/)?.[0] ?? ''
   assert.equal(header.includes('<PhoneAction'), false, 'placeholder phone action should not appear in the main homeowner header')
-  assert.ok(component.includes('Built for your business. Ready to finish.'), 'owner preview bar should explain the site is already built')
-  assert.ok(component.includes('Claim This Site'), 'owner CTAs should use one clear claim action')
+  assert.ok(component.includes('Your website preview is ready.'), 'owner preview bar should read like a preview control')
+  assert.ok(component.includes('Make It Yours — $97'), 'owner CTAs should use one clear priced claim action')
   assert.equal(component.includes('href="https://recoverrevenue.company"'), false, 'owner CTAs should not dump buyers on the generic Recover Revenue homepage')
 })
 
-test('owner offer uses a motion-led claim journey instead of four bland onboarding cards', () => {
+test('owner offer uses an aligned motion-led four-step rail', () => {
   const source = `${component}\n${styles}`
   for (const required of [
-    'Claim it. Make it yours. Go live.',
-    'owner-journey',
-    'owner-journey__track',
-    'owner-journey__node',
-    'owner-journey__pulse',
+    'From preview to live.',
+    'owner-steps',
+    'owner-steps__line',
+    'owner-step__node',
   ]) {
-    assert.ok(source.includes(required), `missing owner journey element: ${required}`)
+    assert.ok(source.includes(required), `missing owner step rail element: ${required}`)
   }
+  assert.equal(source.includes('owner-journey__track'), false, 'wavy journey track should stay removed')
 })
 
 
@@ -156,9 +156,58 @@ test('claim flow has a dedicated product page, live Stripe deposit, and post-pay
 
   const claimPage = readFileSync(claimUrl, 'utf8')
   const successPage = readFileSync(successUrl, 'utf8')
-  assert.ok(claimPage.includes('Take this site off preview and make it yours.'), 'claim page should explain the transaction')
+  assert.ok(claimPage.includes('Make this website yours.'), 'claim page should explain the transaction')
   assert.ok(claimPage.includes('$97') && claimPage.includes('today'), 'claim page should make the deposit obvious')
-  assert.ok(claimPage.includes('$500 after approval'), 'claim page should preserve the risk reversal')
+  assert.ok(claimPage.includes('Remaining $500 only after you approve'), 'claim page should preserve the risk reversal')
   assert.ok(claimPage.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'claim page should use the live Stripe payment link')
   assert.ok(successPage.includes('Payment received'), 'success page should confirm the deposit and explain next steps')
+})
+
+
+test('preview uses generic owner-safe branding instead of pretending to know the business name', () => {
+  assert.ok(config.includes('name: "Your Heating & Cooling"'), 'preview brand should stay generic until real business details are supplied')
+  assert.equal(config.includes('name: "Prime Heating & Cooling"'), false, 'demo company name should not leak into cold outreach previews')
+  assert.equal(homepage.includes('Prime Heating & Cooling'), false, 'homepage metadata should not hard-code the old demo business')
+})
+
+test('owner sales UI is restrained on desktop and uses one clear claim action', () => {
+  const source = `${component}\n${styles}`
+  assert.ok(component.includes('Your website preview is ready.'), 'top owner strip should read like a preview control')
+  assert.ok(component.includes('Make It Yours — $97'), 'owner CTA should say exactly what happens and what it costs')
+  assert.ok(component.includes('function OwnerMobileClaimBar'), 'mobile-only owner CTA should exist')
+  assert.equal(component.includes('function OwnerFloatingBar'), false, 'desktop floating sales bar should be removed')
+  assert.ok(source.includes('owner-mobile-claim'), 'mobile claim bar should have a dedicated responsive class')
+})
+
+test('owner offer is simpler, outcome-led, and uses an aligned four-step rail', () => {
+  const source = `${component}\n${styles}`
+  for (const required of [
+    'Your website is already built.',
+    'Make it yours.',
+    'Remaining $500 only after you approve',
+    'owner-steps',
+    'owner-steps__line',
+    'Reserve — $97',
+    'We customize',
+    'You approve',
+    'Pay $500 + launch',
+  ]) {
+    assert.ok(source.includes(required), `missing owner polish element: ${required}`)
+  }
+  for (const rejected of [
+    'More trust. More calls. A cleaner path to the next job.',
+    'owner-journey__track',
+    'owner-journey__pulse',
+    'Four moves. No agency maze.',
+  ]) {
+    assert.equal(source.includes(rejected), false, `old noisy owner element should be removed: ${rejected}`)
+  }
+})
+
+test('claim page keeps checkout concise and approval-first', () => {
+  const claimPage = readFileSync(new URL('../app/claim/page.tsx', import.meta.url), 'utf8')
+  assert.ok(claimPage.includes('Make this website yours.'), 'claim page should use a short contractor-friendly headline')
+  assert.ok(claimPage.includes('Remaining $500 only after you approve'), 'claim page should emphasize approval before the balance')
+  assert.ok(claimPage.includes('Make It Yours — $97'), 'claim page CTA should match the preview CTA')
+  assert.ok(claimPage.includes('Processed by Recover Revenue'), 'claim page should preframe the merchant name buyers see on Stripe')
 })

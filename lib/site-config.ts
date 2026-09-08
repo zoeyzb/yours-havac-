@@ -1,7 +1,7 @@
 export const siteConfig = {
   brand: {
-    name: "Prime Heating & Cooling",
-    shortName: "PRIME HEATING & COOLING",
+    name: "Your Heating & Cooling",
+    shortName: "YOUR HEATING & COOLING",
     tagline: "Heating · Cooling · Indoor Comfort",
     city: "Your Service Area",
     state: "",
