@@ -555,9 +555,17 @@ function Footer() {
 
 function MobileServiceBar() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 gap-2 border-t border-white/60 bg-[#f7f8f5]/92 p-2.5 shadow-[0_-12px_35px_rgba(16,38,48,.1)] backdrop-blur-2xl md:hidden">
-      <PhoneAction compact className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d7e0dd] bg-white px-3 py-3 text-sm font-black text-[#15303a]" />
-      <Link href="/quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#e7613b] px-3 py-3 text-sm font-black text-white shadow-[0_10px_24px_rgba(231,97,59,.24)]">Schedule <ArrowRight size={15} /></Link>
+    <div className={`fixed inset-x-0 bottom-0 z-50 grid ${hasPhone ? "grid-cols-2" : "grid-cols-1"} gap-2 border-t border-white/60 bg-[#f7f8f5]/92 p-2.5 shadow-[0_-12px_35px_rgba(16,38,48,.1)] backdrop-blur-2xl md:hidden`}>
+      {hasPhone && (
+        <a
+          href={`tel:${siteConfig.brand.phoneHref}`}
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d7e0dd] bg-white px-3 py-3 text-sm font-black text-[#15303a]"
+          aria-label={`Call ${siteConfig.brand.name}`}
+        >
+          <Phone size={16} /> Call Now
+        </a>
+      )}
+      <Link href="/quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#e7613b] px-3 py-3 text-sm font-black text-white shadow-[0_10px_24px_rgba(231,97,59,.24)]">Request Service <ArrowRight size={15} /></Link>
     </div>
   )
 }
