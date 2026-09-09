@@ -128,7 +128,7 @@ test('aggressive contractor redesign uses bold industrial hierarchy instead of s
 test('owner conversion layer uses one fixed lower CTA and keeps the top strip non-sticky', () => {
   const header = component.match(/function Header[\s\S]*?function Hero/)?.[0] ?? ''
   assert.equal(header.includes('<PhoneAction'), false, 'placeholder phone action should not appear in the main homeowner header')
-  assert.ok(component.includes('Your website preview is ready.'), 'top preview strip should remain visible at page start')
+  assert.ok(component.includes('We put in the work. Your site is ready.'), 'top preview strip should use the punchier owner message')
   assert.ok(component.includes('Start for $97'), 'owner CTA should be short and priced')
   assert.ok(component.includes('const checkoutUrl = "/checkout"'), 'owner CTAs should use the custom onsite checkout')
   assert.equal(component.includes('https://buy.stripe.com/'), false, 'hosted payment link should not be used from the preview')
@@ -144,12 +144,12 @@ test('owner offer is compact, punchy, and keeps the four-step motion inside the 
     'The website is built.',
     'Add your details. Go live.',
     'More visibility',
-    'More customer inquiries',
-    'Your branding + contact info',
-    'Your services + service area',
-    'Reviews from your customers',
-    'Your domain + launch',
-        'Start with $97 today',
+    'More inquiries',
+    'Your branding',
+    'Your services',
+    'Real reviews',
+    'Trusted by 500+',
+    'Make it yours',
     'owner-card-flow',
     'owner-card-flow__line',
     'Reserve',
@@ -185,11 +185,14 @@ test('checkout stays onsite and uses a custom Stripe Elements handoff', () => {
   const successPage = readFileSync(successUrl, 'utf8')
 
   assert.ok(checkoutPage.includes('Your site is built.'), 'checkout should preserve offer continuity')
-  assert.ok(checkoutPage.includes('USD only.'), 'checkout should clearly lock the purchase to USD')
-  assert.ok(checkoutForm.includes('paymentMethodOrder: ["card", "cashapp"]'), 'card should be first and Cash App available')
-  assert.ok(checkoutForm.includes('applePay: "auto"'), 'Apple Pay should appear when eligible')
-  assert.ok(checkoutForm.includes('link: "never"') && checkoutForm.includes('amazonPay: "never"'), 'Link and Amazon Pay should be disabled')
-  assert.ok(checkoutForm.includes('Where should we send the finished site?'), 'only one necessary contact field should be collected')
+  assert.equal(checkoutPage.includes('USD only.'), false, 'checkout should not explain internal currency mechanics to the buyer')
+  assert.ok(checkoutForm.includes('paymentMethodOrder: ["card"]'), 'main card form should stay open and focused')
+  assert.ok(checkoutForm.includes('paymentMethodOrder: ["cashapp"]'), 'Cash App should use its own focused payment flow')
+  assert.ok(checkoutForm.includes('applePay: "always"'), 'Apple Pay should be requested aggressively when the device supports it')
+  assert.ok(checkoutForm.includes('wallets: { link: "never" }'), 'Link should be disabled in each Payment Element instance')
+  assert.ok(checkoutForm.includes('fields: { billingDetails: "never" }'), 'visible billing/contact fields should be suppressed')
+  assert.ok(checkoutForm.includes('address: { country: "US" }'), 'the hidden billing country should be fixed to the US')
+  assert.equal(checkoutForm.includes('Where should we send the finished site?'), false, 'checkout should not collect an extra email before payment')
   assert.ok(proxy.includes('recoverrevenue.company/api/public/website-build/intent'), 'site should create payment state through the Recover payment backend')
   assert.ok(successPage.includes('Your build is reserved.'), 'post-payment handoff should explain the next step')
 })
@@ -206,18 +209,20 @@ test('preview removes fake business branding entirely', () => {
 
 test('owner sales UI uses a persistent preview strip plus one floating checkout action', () => {
   const source = `${component}\n${styles}`
-  assert.ok(component.includes('Your website preview is ready.'), 'top owner strip should read like a preview control')
+  assert.ok(component.includes('We put in the work. Your site is ready.'), 'top owner strip should use the finished-work message')
   assert.ok(component.includes('Start for $97'), 'owner CTA should use one short priced action')
   assert.ok(component.includes('function OwnerFloatingClaimBar'), 'floating claim action should exist on desktop and mobile')
   assert.ok(source.includes('owner-floating-claim'), 'floating claim bar should have dedicated responsive styles')
 })
 
-test('owner price card keeps the approval-first risk reversal without repeated paragraphs', () => {
+test('owner price card removes redundant price math and keeps the approval-first risk reversal', () => {
   const source = `${component}\n${styles}`
-  assert.ok(source.includes('$597 total'))
-  assert.ok(source.includes('Remaining $500 only after you approve'))
+  assert.equal(source.includes('$597 total'), false)
+  assert.equal(source.includes('Remaining $500 only after you approve'), false)
+  assert.ok(source.includes('Approve first'))
+  assert.ok(source.includes('Approve the finished site, then pay the remaining $500.'))
   assert.ok(source.includes('We add your details'))
-  assert.ok(source.includes('Review + request changes'))
+  assert.ok(source.includes('You review it'))
   assert.ok(source.includes('3 business days'))
   assert.equal(source.includes('We replace the preview details with yours.'), false)
 })
