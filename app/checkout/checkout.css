@@ -227,10 +227,28 @@
   background: linear-gradient(145deg, rgba(255,113,76,.13), rgba(255,255,255,.035));
 }
 
-.checkout-outcome-card--proof .checkout-outcome-icon {
-  color: #ffd1c2;
-  background: rgba(255,113,76,.16);
+.checkout-proof-visuals {
+  display: flex;
+  align-items: center;
+  min-width: 72px;
+  padding-left: 4px;
 }
+
+.checkout-proof-avatar {
+  width: 36px;
+  height: 36px;
+  margin-left: -10px;
+  border: 2px solid #274952;
+  border-radius: 50%;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 6px 14px rgba(0,0,0,.20);
+}
+
+.checkout-proof-avatar:first-child { margin-left: 0; }
+.checkout-proof-avatar--one { background-image: url("/hvac/prime-hero.webp"); }
+.checkout-proof-avatar--two { background-image: url("/hvac/hero-tech.svg"); }
+.checkout-proof-avatar--three { background-image: url("/hvac/local-tech.svg"); }
 
 .site-checkout-trust {
   display: grid;
@@ -617,25 +635,6 @@
   font-weight: 750;
 }
 
-.checkout-security-row {
-  display: grid;
-  grid-template-columns: repeat(3,minmax(0,1fr));
-  gap: 1rem;
-  margin-top: 18px;
-  color: #61747a;
-  font-size: .68rem;
-  font-weight: 750;
-}
-
-.checkout-security-row span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .42rem;
-}
-
-.checkout-security-row svg { color: #118367; }
-
 @media (prefers-reduced-motion: no-preference) {
   .checkout-outcome-icon {
     animation: checkoutGlow 4s ease-in-out infinite;
@@ -689,8 +688,6 @@
 @media (max-width: 520px) {
   .fast-pay-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem; }
   .cashapp-fast-button { font-size: .72rem; padding: 0 .5rem; }
-  .payment-choice-grid { grid-template-columns: 1fr; }
-  .payment-choice { justify-content: flex-start; padding: 0 .9rem; }
   .checkout-outcome-grid { grid-template-columns: 1fr 1fr; }
   .checkout-trust-points { grid-template-columns: 1fr; }
   .checkout-security-row { grid-template-columns: 1fr; }
