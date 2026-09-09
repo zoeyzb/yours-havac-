@@ -931,3 +931,69 @@
     font-size: .68rem;
   }
 }
+
+
+/* Clear, face-first social proof avatars */
+.checkout-outcome-card--proof {
+  grid-template-columns: 112px minmax(0, 1fr);
+  border-color: rgba(255,126,86,.48);
+  background: linear-gradient(145deg, rgba(255,113,76,.16), rgba(255,255,255,.04));
+}
+
+.checkout-proof-visuals {
+  min-width: 112px;
+  padding-left: 0;
+}
+
+.checkout-proof-avatar {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  margin-left: -13px;
+  border: 3px solid rgba(255,255,255,.96);
+  background-repeat: no-repeat;
+  box-shadow: 0 8px 18px rgba(0,0,0,.24), 0 0 0 1px rgba(13,52,62,.25);
+}
+
+.checkout-proof-avatar:first-child { margin-left: 0; }
+
+/* Zoom the supplied worker photos onto faces instead of showing full-body/scenery crops. */
+.checkout-proof-avatar--one {
+  background-size: 235%;
+  background-position: 64% 17%;
+}
+
+.checkout-proof-avatar--two {
+  background-size: 250%;
+  background-position: 50% 12%;
+}
+
+.checkout-proof-avatar--three {
+  background-size: 285%;
+  background-position: 51% 9%;
+}
+
+.checkout-outcome-card--proof .checkout-outcome-copy strong {
+  font-size: .98rem;
+}
+
+.checkout-outcome-card--proof .checkout-outcome-copy span {
+  color: rgba(255,255,255,.66);
+}
+
+@media (max-width: 720px) {
+  .checkout-outcome-card--proof {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .checkout-proof-visuals {
+    min-width: 92px;
+  }
+
+  .checkout-proof-avatar {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    margin-left: -11px;
+  }
+}
