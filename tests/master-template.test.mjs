@@ -257,7 +257,7 @@ test('checkout payment hierarchy keeps wallets first, card open, and optional me
 
   assert.equal(checkoutPage.includes('Encrypted checkout'), false, 'avoid fear-triggering checkout reassurance copy')
   assert.equal(checkoutPage.includes('Your information is secure'), false, 'avoid introducing security anxiety')
-  assert.ok(checkoutPage.includes('checkout-proof-visuals'), 'trusted-by proof should include visual proof treatment')
+  assert.ok(checkoutPage.includes('checkout-outcome-icon--proof'), 'trusted-by proof should use a clean non-pixelated trust treatment')
 })
 
 
@@ -271,9 +271,22 @@ test('checkout visual polish keeps proof people, four-step flow, and orange CTA'
   }
 
   assert.ok(checkoutStyles.includes('.checkout-process'), 'four-step checkout flow should have dedicated styling')
-  assert.ok(checkoutStyles.includes('checkout-proof-avatar--one'), 'trusted proof should use real people imagery')
+  assert.ok(checkoutStyles.includes('.checkout-outcome-icon--proof'), 'trusted proof should avoid low-resolution avatar crops')
   assert.ok(checkoutStyles.includes('linear-gradient(135deg, #f05d34, #ff6f43)'), 'Pay $97 CTA should stay orange')
   assert.ok(checkoutStyles.includes('pointer-events: none'), 'unsupported Apple Pay fallback must not be clickable')
   assert.ok(checkoutForm.includes('Available in Safari'), 'unsupported Apple Pay state should explain the browser requirement')
   assert.ok(checkoutForm.includes('type: "tabs"'), 'BNPL should use a cleaner Stripe tab layout')
+})
+
+
+test('checkout optional payments are one layer and process sits beside the purchase', () => {
+  const checkoutPage = readFileSync(new URL('../app/checkout/page.tsx', import.meta.url), 'utf8')
+  const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
+  const checkoutStyles = readFileSync(new URL('../app/checkout/checkout.css', import.meta.url), 'utf8')
+
+  assert.equal(checkoutForm.includes('FAST PAY'), false, 'redundant fast-pay label should be removed')
+  assert.equal(checkoutForm.includes('Pay over time</strong>'), false, 'optional payments should not add a second nested pay-over-time toggle')
+  assert.ok(checkoutForm.includes('defaultCollapsed: true'), 'BNPL choices should stay compact until the provider is selected')
+  assert.ok(checkoutPage.includes('checkout-process--payment'), 'Reserve → Customize → Approve → Launch belongs next to Start for $97')
+  assert.ok(checkoutStyles.includes('checkoutProgressSweep'), 'purchase process should have a restrained moving progress line')
 })
