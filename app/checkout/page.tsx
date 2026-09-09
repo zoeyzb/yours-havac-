@@ -1,6 +1,7 @@
 import Link from "next/link"
 import {
   ArrowLeft,
+  BadgeCheck,
   BarChart3,
   LockKeyhole,
   Settings2,
@@ -62,25 +63,14 @@ export default function CheckoutPage() {
             ))}
 
             <div className="checkout-outcome-card checkout-outcome-card--proof">
-              <div className="checkout-proof-visuals" aria-hidden="true">
-                <span className="checkout-proof-avatar checkout-proof-avatar--one" />
-                <span className="checkout-proof-avatar checkout-proof-avatar--two" />
-                <span className="checkout-proof-avatar checkout-proof-avatar--three" />
+              <div className="checkout-outcome-icon checkout-outcome-icon--proof">
+                <BadgeCheck size={22} strokeWidth={2.1} />
               </div>
               <div className="checkout-outcome-copy">
                 <strong>Trusted by 8,500+</strong>
                 <span>HVAC pros nationwide.</span>
               </div>
             </div>
-          </div>
-
-          <div className="checkout-process" aria-label="Website launch process">
-            {steps.map((step, index) => (
-              <div className="checkout-process-step" key={step}>
-                <span className="checkout-process-number">{index + 1}</span>
-                <strong>{step}</strong>
-              </div>
-            ))}
           </div>
         </aside>
 
@@ -92,7 +82,15 @@ export default function CheckoutPage() {
 
           <div className="site-checkout-payment-head">
             <h2>Start for $97</h2>
-            <p>Reserve your website now. Customize it, approve it, then launch.</p>
+          </div>
+
+          <div className="checkout-process checkout-process--payment" aria-label="Website launch process">
+            {steps.map((step, index) => (
+              <div className="checkout-process-step" key={step}>
+                <span className="checkout-process-number">{index + 1}</span>
+                <strong>{step}</strong>
+              </div>
+            ))}
           </div>
 
           <CheckoutForm />
