@@ -1,12 +1,9 @@
 import Link from "next/link"
 import {
   ArrowLeft,
-  BadgeCheck,
   BarChart3,
-  CheckCircle2,
   LockKeyhole,
   Settings2,
-  ShieldCheck,
   Sparkles,
   Star,
   Tag,
@@ -29,6 +26,8 @@ const outcomes = [
   { icon: Star, title: "Best reviews", copy: "Build trust and credibility." },
 ] as const
 
+const steps = ["Reserve", "Customize", "Approve", "Launch"] as const
+
 export default function CheckoutPage() {
   return (
     <main className="site-checkout-page">
@@ -48,7 +47,7 @@ export default function CheckoutPage() {
           <div className="site-checkout-kicker"><Sparkles size={14} /> WEBSITE BUILD</div>
           <h1>Your site is built.<br /><span>Finish it your way.</span></h1>
           <p className="checkout-summary-subtitle">
-            A high-converting website for your HVAC business. Approve first, then pay the remaining balance.
+            A high-converting website for your HVAC business, ready to make yours.
           </p>
 
           <div className="checkout-outcome-grid" aria-label="What your finished site includes">
@@ -75,17 +74,13 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="site-checkout-trust">
-            <div className="checkout-trust-shield"><ShieldCheck size={28} /></div>
-            <div className="checkout-trust-main">
-              <strong>Approve first</strong>
-              <span>Approve the finished site, then pay the remaining $500.</span>
-            </div>
-            <div className="checkout-trust-points">
-              <span><CheckCircle2 size={15} /> No risk</span>
-              <span><CheckCircle2 size={15} /> No long-term contracts</span>
-              <span><CheckCircle2 size={15} /> Cancel anytime</span>
-            </div>
+          <div className="checkout-process" aria-label="Website launch process">
+            {steps.map((step, index) => (
+              <div className="checkout-process-step" key={step}>
+                <span className="checkout-process-number">{index + 1}</span>
+                <strong>{step}</strong>
+              </div>
+            ))}
           </div>
         </aside>
 
@@ -97,7 +92,7 @@ export default function CheckoutPage() {
 
           <div className="site-checkout-payment-head">
             <h2>Start for $97</h2>
-            <p>Launch your HVAC website today. Approve the final site, then pay the remaining $500.</p>
+            <p>Reserve your website now. Customize it, approve it, then launch.</p>
           </div>
 
           <CheckoutForm />
