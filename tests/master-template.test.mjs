@@ -144,11 +144,11 @@ test('owner offer is compact, punchy, and keeps the four-step motion inside the 
     'The website is built.',
     'Add your details. Go live.',
     'More visibility',
-    'More inquiries',
+    'More customers',
     'Your branding',
     'Your services',
-    'Real reviews',
-    'Trusted by 500+',
+    'Best reviews',
+    'Trusted by 8,500+',
     'Make it yours',
     'owner-card-flow',
     'owner-card-flow__line',
@@ -191,7 +191,8 @@ test('checkout stays onsite and uses a custom Stripe Elements handoff', () => {
   assert.ok(checkoutForm.includes('applePay: "always"'), 'Apple Pay should be requested aggressively when the device supports it')
   assert.ok(checkoutForm.includes('wallets: { link: "never" }'), 'Link should be disabled in each Payment Element instance')
   assert.ok(checkoutForm.includes('fields: { billingDetails: "never" }'), 'visible billing/contact fields should be suppressed')
-  assert.ok(checkoutForm.includes('address: { country: "US" }'), 'the hidden billing country should be fixed to the US')
+  assert.ok(checkoutForm.includes('address: { country: "US" }'), 'the hidden billing country should remain fixed to the US')
+  assert.equal(checkoutForm.includes('US checkout'), false, 'checkout should not show a redundant US checkout badge')
   assert.equal(checkoutForm.includes('Where should we send the finished site?'), false, 'checkout should not collect an extra email before payment')
   assert.ok(proxy.includes('recoverrevenue.company/api/public/website-build/intent'), 'site should create payment state through the Recover payment backend')
   assert.ok(successPage.includes('Your build is reserved.'), 'post-payment handoff should explain the next step')
