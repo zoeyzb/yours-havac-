@@ -240,3 +240,22 @@ test('legacy claim route redirects to the custom onsite checkout', () => {
   assert.ok(claimPage.includes('"/checkout"'), 'legacy claim route should use the custom onsite checkout')
   assert.equal(claimPage.includes('buy.stripe.com'), false, 'legacy claim route should not use the hosted Stripe payment link')
 })
+
+
+test('checkout payment hierarchy keeps wallets first, card open, and optional methods below', () => {
+  const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
+  const checkoutPage = readFileSync(new URL('../app/checkout/page.tsx', import.meta.url), 'utf8')
+
+  assert.ok(checkoutForm.includes('applePay: "always"'), 'Apple Pay should remain a real Stripe Express Checkout option')
+  assert.ok(checkoutForm.includes('Cash App Pay'), 'Cash App Pay should remain beside Apple Pay')
+  assert.equal(checkoutForm.includes('Bank transfer'), false, 'disabled bank transfer should not be shown')
+  assert.equal(checkoutForm.includes('Pay another way'), false, 'card should not be nested behind a duplicate pay-another-way chooser')
+
+  const cardHeading = checkoutForm.indexOf('Enter card details')
+  const moreOptions = checkoutForm.indexOf('More payment options')
+  assert.ok(cardHeading >= 0 && moreOptions > cardHeading, 'card form should be open before optional payment methods')
+
+  assert.equal(checkoutPage.includes('Encrypted checkout'), false, 'avoid fear-triggering checkout reassurance copy')
+  assert.equal(checkoutPage.includes('Your information is secure'), false, 'avoid introducing security anxiety')
+  assert.ok(checkoutPage.includes('checkout-proof-visuals'), 'trusted-by proof should include visual proof treatment')
+})
