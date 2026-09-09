@@ -75,7 +75,7 @@ function OwnerTopBar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-2 text-sm font-black text-[#102630]">
           <Sparkles size={15} className="shrink-0 text-[#e7613b]" />
-          <span className="truncate">Your website preview is ready.</span>
+          <span className="truncate">We put in the work. Your site is ready.</span>
         </div>
         <a
           href={checkoutUrl}
@@ -562,11 +562,11 @@ function OwnerOffer() {
   const reduceMotion = useReducedMotion()
   const benefits = [
     "More visibility",
-    "More customer inquiries",
-    "Your branding + contact info",
-    "Your services + service area",
-    "Reviews from your customers",
-    "Your domain + launch",
+    "More inquiries",
+    "Your branding",
+    "Your services",
+    "Real reviews",
+    "Trusted by 500+",
   ] as const
 
   const flow = ["Reserve", "Customize", "Approve", "Launch"] as const
@@ -622,11 +622,10 @@ function OwnerOffer() {
             whileHover={reduceMotion ? undefined : { y: -5 }}
             className="owner-checkout-card relative overflow-hidden rounded-[28px] border border-[#eadfd7] bg-white/96 p-5 shadow-[0_28px_70px_rgba(16,38,48,.11)] sm:p-7"
           >
-            <div className="text-[11px] font-black uppercase tracking-[.13em] text-[#d95531]">Start with $97 today</div>
-            <div className="mt-3 text-6xl font-black tracking-[-.065em] text-[#102630]">$97</div>
-            <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total</div>
-            <div className="mt-2 inline-flex rounded-full bg-[#edf4f1] px-3 py-1.5 text-xs font-black text-[#36545d]">
-              Remaining $500 only after you approve
+            <div className="text-[11px] font-black uppercase tracking-[.13em] text-[#d95531]">Make it yours</div>
+            <div className="mt-3 flex items-end gap-3">
+              <div className="text-6xl font-black tracking-[-.065em] text-[#102630]">$97</div>
+              <div className="pb-2 text-sm font-extrabold text-[#6a7b81]">to start</div>
             </div>
 
             <div className="owner-card-flow mt-6" aria-label="Website launch steps">
@@ -661,11 +660,17 @@ function OwnerOffer() {
               </div>
             </div>
 
-            <div className="my-5 h-px bg-[#e9eeeb]" />
+            <div className="owner-approve-first mt-5">
+              <ShieldCheck size={18} />
+              <div>
+                <strong>Approve first</strong>
+                <span>Approve the finished site, then pay the remaining $500.</span>
+              </div>
+            </div>
 
-            <div className="owner-checkout-points">
+            <div className="owner-checkout-points mt-4">
               <div><Check size={15} />We add your details</div>
-              <div><Check size={15} />Review + request changes</div>
+              <div><Check size={15} />You review it</div>
               <div><Clock3 size={15} />3 business days</div>
             </div>
 
@@ -675,7 +680,7 @@ function OwnerOffer() {
             >
               Start for $97 <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
             </a>
-            <p className="mt-3 text-center text-[11px] font-bold text-[#839197]">$500 balance only after approval · Secure Stripe checkout</p>
+            <p className="mt-3 text-center text-[11px] font-bold text-[#839197]">Secure Stripe checkout · No final $500 before approval</p>
           </motion.aside>
         </div>
       </div>
