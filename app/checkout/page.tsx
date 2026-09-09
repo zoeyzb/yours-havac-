@@ -28,7 +28,7 @@ export default function CheckoutPage() {
           <div className="site-checkout-kicker"><Sparkles size={14} /> WEBSITE BUILD</div>
           <h1>Your site is built.<br /><span>Finish it your way.</span></h1>
 
-          <div className="checkout-outcome-grid">
+          <div className="checkout-outcome-grid" aria-label="What your finished site includes">
             {outcomes.map((item, index) => (
               <div
                 key={item}
