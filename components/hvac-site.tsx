@@ -562,11 +562,11 @@ function OwnerOffer() {
   const reduceMotion = useReducedMotion()
   const benefits = [
     "More visibility",
-    "More calls",
-    "Mobile-first",
-    "Your services + area",
-    "Your reviews + trust",
-    "Domain + launch",
+    "More customer inquiries",
+    "Your branding + contact info",
+    "Your services + service area",
+    "Reviews + trust proof",
+    "Mobile-first + domain launch",
   ] as const
 
   const flow = ["Reserve", "Customize", "Approve", "Launch"] as const
@@ -617,10 +617,7 @@ function OwnerOffer() {
             className="owner-checkout-card relative overflow-hidden rounded-[28px] border border-[#eadfd7] bg-white/96 p-5 shadow-[0_28px_70px_rgba(16,38,48,.11)] sm:p-7"
           >
             <div className="text-[11px] font-black uppercase tracking-[.13em] text-[#d95531]">Start with $97 today</div>
-            <div className="mt-3 flex items-end gap-3">
-              <div className="text-6xl font-black tracking-[-.065em] text-[#102630]">$97</div>
-              <div className="pb-2 text-lg font-black text-[#102630]">today</div>
-            </div>
+            <div className="mt-3 text-6xl font-black tracking-[-.065em] text-[#102630]">$97</div>
             <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total</div>
             <div className="mt-2 inline-flex rounded-full bg-[#edf4f1] px-3 py-1.5 text-xs font-black text-[#36545d]">
               Remaining $500 only after you approve
