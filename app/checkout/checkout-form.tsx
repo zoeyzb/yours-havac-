@@ -2,13 +2,7 @@
 
 import Script from "next/script"
 import { useEffect, useRef, useState } from "react"
-import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  Clock3,
-  LockKeyhole,
-} from "lucide-react"
+import { ArrowRight, Check, ChevronDown, LockKeyhole } from "lucide-react"
 
 declare global {
   interface Window {
@@ -70,7 +64,7 @@ export function CheckoutForm() {
   const cardRef = useRef<HTMLDivElement>(null)
   const applePayRef = useRef<HTMLDivElement>(null)
   const cashAppRef = useRef<HTMLDivElement>(null)
-  const moreExpressRef = useRef<HTMLDivElement>(null)
+  const googlePayRef = useRef<HTMLDivElement>(null)
   const bnplRef = useRef<HTMLDivElement>(null)
 
   const stripeRef = useRef<any>(null)
@@ -87,9 +81,7 @@ export function CheckoutForm() {
   const [cashAppReady, setCashAppReady] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [moreLoading, setMoreLoading] = useState(false)
-  const [bnplOpen, setBnplOpen] = useState(false)
   const [bnplReady, setBnplReady] = useState(false)
-  const [bnplLoading, setBnplLoading] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
 
@@ -122,9 +114,7 @@ export function CheckoutForm() {
             spacedAccordionItems: false,
           },
           paymentMethodOrder: ["card"],
-          defaultValues: {
-            billingDetails: { address: { country: "US" } },
-          },
+          defaultValues: { billingDetails: { address: { country: "US" } } },
         })
 
         cardElement.on("ready", () => {
@@ -268,19 +258,24 @@ export function CheckoutForm() {
     setMoreOpen(nextOpen)
     setError("")
 
-    if (!nextOpen || moreElementsRef.current || moreLoading) return
+    if (!nextOpen || moreLoading || bnplElementsRef.current) return
 
     setMoreLoading(true)
     try {
       const stripe = stripeRef.current
       if (!stripe) throw new Error("Secure checkout is still loading.")
-      const { clientSecret } = await createIntent("card")
-      const elements = stripe.elements({ clientSecret, appearance })
-      moreElementsRef.current = elements
 
-      if (moreExpressRef.current) {
+      const [{ clientSecret: cardClientSecret }, { clientSecret: bnplClientSecret }] = await Promise.all([
+        createIntent("card"),
+        createIntent("bnpl"),
+      ])
+
+      const moreElements = stripe.elements({ clientSecret: cardClientSecret, appearance })
+      moreElementsRef.current = moreElements
+
+      if (googlePayRef.current) {
         try {
-          const googlePayElement = elements.create("expressCheckout", {
+          const googlePayElement = moreElements.create("expressCheckout", {
             paymentMethods: {
               applePay: "never",
               googlePay: "always",
@@ -290,57 +285,38 @@ export function CheckoutForm() {
               klarna: "never",
             },
             layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-            buttonHeight: 50,
+            buttonHeight: 48,
             buttonTheme: { googlePay: "black" },
             billingAddressRequired: false,
             emailRequired: false,
             phoneNumberRequired: false,
           })
-
           googlePayElement.on("confirm", async () => confirmPayment(moreElementsRef.current, "card"))
-          googlePayElement.mount(moreExpressRef.current)
+          googlePayElement.mount(googlePayRef.current)
         } catch {
-          // Google Pay only appears on supported devices/browsers.
+          // Google Pay only appears when Stripe and the browser support it.
         }
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "More payment options could not load.")
-    } finally {
-      setMoreLoading(false)
-    }
-  }
 
-  async function openBnpl() {
-    const nextOpen = !bnplOpen
-    setBnplOpen(nextOpen)
-    setError("")
+      const bnplElements = stripe.elements({ clientSecret: bnplClientSecret, appearance })
+      bnplElementsRef.current = bnplElements
 
-    if (!nextOpen || bnplElementsRef.current || bnplLoading) return
-
-    setBnplLoading(true)
-    try {
-      const stripe = stripeRef.current
-      if (!stripe) throw new Error("Secure checkout is still loading.")
-      const { clientSecret } = await createIntent("bnpl")
-
-      const elements = stripe.elements({ clientSecret, appearance })
-      bnplElementsRef.current = elements
-
-      const paymentElement = elements.create("payment", {
+      const bnplElement = bnplElements.create("payment", {
         layout: {
-          type: "tabs",
-          defaultCollapsed: false,
+          type: "accordion",
+          defaultCollapsed: true,
+          radios: false,
+          spacedAccordionItems: false,
         },
         paymentMethodOrder: ["affirm", "klarna"],
       })
 
-      paymentElement.on("ready", () => setBnplReady(true))
-      paymentElement.mount(bnplRef.current!)
+      bnplElement.on("ready", () => setBnplReady(true))
+      bnplElement.mount(bnplRef.current!)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Pay later options are not available right now.")
-      setBnplOpen(false)
+      setError(err instanceof Error ? err.message : "More payment options are not available right now.")
     } finally {
-      setBnplLoading(false)
+      setMoreLoading(false)
     }
   }
 
@@ -359,8 +335,6 @@ export function CheckoutForm() {
       />
 
       <div className="checkout-payment-card">
-        <div className="fast-pay-label">FAST PAY</div>
-
         <div className="fast-pay-grid">
           <div className="fast-pay-apple fast-pay-wallet">
             <div ref={applePayRef} />
@@ -438,40 +412,20 @@ export function CheckoutForm() {
         </button>
 
         {moreOpen ? (
-          <div className="more-payment-panel">
-            {moreLoading ? <div className="more-payment-loading">Checking available payment methods…</div> : null}
-            <div className="more-google-pay" ref={moreExpressRef} />
-
-            <button
-              type="button"
-              className={bnplOpen ? "pay-later-button pay-later-button--open" : "pay-later-button"}
-              onClick={openBnpl}
-              aria-expanded={bnplOpen}
-            >
-              <div className="pay-later-icon"><Clock3 size={18} /></div>
-              <span>
-                <strong>Pay over time</strong>
-                <small>Affirm or Klarna when available</small>
-              </span>
-              <ChevronDown size={16} />
-            </button>
-
-            {bnplOpen ? (
-              <div className="bnpl-panel">
-                {bnplLoading ? <div className="bnpl-loading">Loading installment options…</div> : null}
-                <div ref={bnplRef} />
-                {bnplReady ? (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    className="bnpl-confirm"
-                    onClick={() => confirmPayment(bnplElementsRef.current, "bnpl")}
-                  >
-                    {busy ? "Processing…" : "Continue with selected option"}
-                    {!busy ? <ArrowRight size={16} /> : null}
-                  </button>
-                ) : null}
-              </div>
+          <div className="more-payment-panel more-payment-panel--direct">
+            {moreLoading ? <div className="more-payment-loading">Loading payment options…</div> : null}
+            <div className="more-google-pay" ref={googlePayRef} />
+            <div className="bnpl-direct" ref={bnplRef} />
+            {bnplReady ? (
+              <button
+                type="button"
+                disabled={busy}
+                className="bnpl-confirm bnpl-confirm--direct"
+                onClick={() => confirmPayment(bnplElementsRef.current, "bnpl")}
+              >
+                {busy ? "Processing…" : "Continue"}
+                {!busy ? <ArrowRight size={16} /> : null}
+              </button>
             ) : null}
           </div>
         ) : null}
