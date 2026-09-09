@@ -23,6 +23,8 @@ export function CheckoutForm() {
   const expressRef = useRef<HTMLDivElement>(null)
   const stripeRef = useRef<any>(null)
   const elementsRef = useRef<any>(null)
+  const emailRef = useRef("")
+  const busyRef = useRef(false)
   const [scriptReady, setScriptReady] = useState(false)
   const [ready, setReady] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -127,19 +129,23 @@ export function CheckoutForm() {
     async function confirmPayment() {
       const stripe = stripeRef.current
       const elements = elementsRef.current
-      if (!stripe || !elements || busy) return
+      if (!stripe || !elements || busyRef.current) return
 
-      if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
+      const currentEmail = emailRef.current.trim()
+      if (!currentEmail || !/^\S+@\S+\.\S+$/.test(currentEmail)) {
         setError("Enter the email where you want the finished site sent.")
         return
       }
 
+      busyRef.current = true
       setBusy(true)
       setError("")
       try {
         const submitResult = await elements.submit?.()
         if (submitResult?.error) {
           setError(submitResult.error.message || "Check your payment details.")
+          busyRef.current = false
+          busyRef.current = false
           setBusy(false)
           return
         }
@@ -149,7 +155,7 @@ export function CheckoutForm() {
           confirmParams: {
             return_url: `${window.location.origin}/payment/success`,
             payment_method_data: {
-              billing_details: { email: email.trim() },
+              billing_details: { email: currentEmail },
             },
           },
           redirect: "if_required",
@@ -166,9 +172,11 @@ export function CheckoutForm() {
           window.location.assign(`/payment/success?payment_intent=${encodeURIComponent(intent.id)}`)
           return
         }
+        busyRef.current = false
         setBusy(false)
       } catch {
         setError("Payment could not be completed. Please try again.")
+        busyRef.current = false
         setBusy(false)
       }
     }
@@ -181,7 +189,7 @@ export function CheckoutForm() {
       try { expressElement?.unmount?.() } catch {}
       delete (window as any).__websiteConfirmPayment
     }
-  }, [scriptReady, busy, email])
+  }, [scriptReady])
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
@@ -204,7 +212,7 @@ export function CheckoutForm() {
           <input
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => { emailRef.current = event.target.value; setEmail(event.target.value) }}
             placeholder="you@business.com"
             autoComplete="email"
             required
