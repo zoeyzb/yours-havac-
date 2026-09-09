@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowLeft, Check, ShieldCheck, Sparkles } from "lucide-react"
+import { ArrowLeft, ShieldCheck, Sparkles } from "lucide-react"
 import { CheckoutForm } from "./checkout-form"
 import "./checkout.css"
 
@@ -10,12 +10,12 @@ export const metadata = {
 }
 
 const outcomes = [
+  "More customers",
   "More visibility",
-  "More inquiries",
   "Your branding",
   "Your services",
-  "Real reviews",
-  "Trusted by 500+",
+  "Best reviews",
+  "Trusted by 8,500+",
 ] as const
 
 export default function CheckoutPage() {
@@ -30,7 +30,10 @@ export default function CheckoutPage() {
 
           <div className="checkout-outcome-grid">
             {outcomes.map((item, index) => (
-              <div key={item} className="checkout-outcome-card">
+              <div
+                key={item}
+                className={index === outcomes.length - 1 ? "checkout-outcome-card checkout-outcome-card--proof" : "checkout-outcome-card"}
+              >
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <strong>{item}</strong>
               </div>
