@@ -1,7 +1,7 @@
 export const siteConfig = {
   brand: {
-    name: "Your Heating & Cooling",
-    shortName: "YOUR HEATING & COOLING",
+    name: "HVAC Website Preview",
+    shortName: "HVAC WEBSITE PREVIEW",
     tagline: "Heating · Cooling · Indoor Comfort",
     city: "Your Service Area",
     state: "",

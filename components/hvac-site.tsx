@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
-  Wind,
   Wrench,
   Zap,
 } from "lucide-react"
@@ -24,6 +23,7 @@ type Page = "home" | "services" | "quote"
 
 const hasPhone = Boolean(siteConfig.brand.phoneHref.trim())
 const hasEmail = siteConfig.brand.email.includes("@")
+const checkoutUrl = "https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00"
 
 function Photo({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   return (
@@ -53,15 +53,6 @@ function EmailAction({ className = "" }: { className?: string }) {
   return <a href={`mailto:${siteConfig.brand.email}`} className={className}><Mail size={15} />{siteConfig.brand.email}</a>
 }
 
-function BrandMark() {
-  return (
-    <span className="brand-mark" aria-hidden="true">
-      <span className="brand-mark__ring" />
-      <Wind size={19} strokeWidth={2.3} />
-    </span>
-  )
-}
-
 function SectionIntro({ eyebrow, title, body, dark = false }: { eyebrow: string; title: string; body?: string; dark?: boolean }) {
   return (
     <motion.div
@@ -83,15 +74,15 @@ function OwnerTopBar() {
     <div className="owner-preview-bar border-b border-[#eadfd7] bg-[#fff8f3]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-2 text-sm font-black text-[#102630]">
-          <Sparkles size={16} className="shrink-0 text-[#e7613b]" />
+          <Sparkles size={15} className="shrink-0 text-[#e7613b]" />
           <span className="truncate">Your website preview is ready.</span>
         </div>
-        <Link
-          href="/claim"
+        <a
+          href={checkoutUrl}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e7613b] px-4 py-2 text-xs font-black text-white shadow-[0_8px_20px_rgba(231,97,59,.20)] transition hover:-translate-y-0.5 hover:bg-[#d95531]"
         >
-          Make It Yours — $97 <ArrowRight size={13} />
-        </Link>
+          Start for $97 <ArrowRight size={13} />
+        </a>
       </div>
     </div>
   )
@@ -99,14 +90,11 @@ function OwnerTopBar() {
 
 function Header({ currentPage }: { currentPage: Page }) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/50 bg-[#f7f8f5]/88 backdrop-blur-2xl">
+    <header className="relative z-40 border-b border-white/60 bg-[#f7f8f5]/96">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ef7046]">
-          <BrandMark />
-          <div className="min-w-0">
-            <div className="truncate text-[16px] font-black tracking-[-.035em] text-[#102630] sm:text-xl">{siteConfig.brand.name}</div>
-            <div className="mt-0.5 hidden text-[10px] font-bold uppercase tracking-[.15em] text-[#60727a] sm:block">{siteConfig.brand.tagline}</div>
-          </div>
+        <Link href="/" className="min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ef7046]">
+          <div className="truncate text-[17px] font-black tracking-[-.035em] text-[#102630] sm:text-xl">Comfort at home.</div>
+          <div className="mt-0.5 hidden text-[10px] font-bold uppercase tracking-[.15em] text-[#60727a] sm:block">Heating · Cooling · Indoor Comfort</div>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-bold text-[#546970] lg:flex" aria-label="Primary navigation">
           <Link href="/" className={currentPage === "home" ? "text-[#102630]" : "transition hover:text-[#e55e37]"}>Home</Link>
@@ -124,7 +112,9 @@ function Header({ currentPage }: { currentPage: Page }) {
               <Phone size={16} />{siteConfig.brand.phoneDisplay}
             </a>
           )}
-          <Link href="/quote" className="btn-primary text-xs sm:text-sm">Request Service <ArrowRight size={15} /></Link>
+          <Link href="/quote" className="inline-flex items-center gap-2 rounded-full border border-[#d8e1de] bg-white px-4 py-2.5 text-xs font-black text-[#17323c] shadow-[0_7px_20px_rgba(16,38,48,.05)] transition hover:-translate-y-0.5 hover:border-[#efb19b] sm:text-sm">
+            Request Service <ArrowRight size={15} />
+          </Link>
         </div>
       </div>
       <nav className="flex items-center justify-center gap-5 border-t border-[#e7ece9] px-4 py-2 text-xs font-extrabold text-[#5f7279] lg:hidden" aria-label="Mobile navigation">
@@ -187,7 +177,7 @@ function Hero() {
           >
             <Photo src={siteConfig.hero.image} alt={siteConfig.hero.imageAlt} className="hero-industrial__image" />
             <div className="hero-industrial__overlay" />
-            <div className="hero-industrial__service-label"><Wrench size={15} /> Residential HVAC service</div>
+            <div className="hero-industrial__service-label">Residential HVAC service</div>
             <div className="hero-industrial__result">
               <div><span>HOME COMFORT</span><strong>72°</strong></div>
               <p>Quiet. Even. Comfortable.<br />Exactly how home should feel.</p>
@@ -542,7 +532,7 @@ function Footer() {
   return (
     <footer className="border-t border-[#dfe7e4] bg-[#eef2ef] pb-20 md:pb-0">
       <div className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
-        <div><div className="flex items-center gap-3"><BrandMark /><div className="text-lg font-black text-[#102630]">{siteConfig.brand.name}</div></div><p className="mt-3 max-w-sm text-sm font-medium leading-6 text-[#687b81]">Heating, cooling, maintenance, repair, replacement, and indoor comfort service.</p></div>
+        <div><div className="text-lg font-black text-[#102630]">Comfort at home.</div><p className="mt-3 max-w-sm text-sm font-medium leading-6 text-[#687b81]">Heating, cooling, maintenance, repair, replacement, and indoor comfort service.</p></div>
         <div className="text-sm font-bold text-[#5c7077]"><Link className="block py-1.5 hover:text-[#d95531]" href="/">Home</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/services">Services</Link><Link className="block py-1.5 hover:text-[#d95531]" href="/quote">Request Service</Link></div>
         <div className="flex flex-col items-start gap-2 text-sm font-bold text-[#65787e] md:items-end"><PhoneAction className="inline-flex items-center gap-2 hover:text-[#d95531]" /><EmailAction className="inline-flex items-center gap-2 hover:text-[#d95531]" /><div>Local service area</div></div>
       </div>
@@ -571,170 +561,148 @@ function MobileServiceBar() {
 function OwnerOffer() {
   const reduceMotion = useReducedMotion()
   const benefits = [
-    ["Built to get calls", "Clear service paths make it easy for a homeowner to take the next step."],
-    ["Looks established", "Services, reviews, and trust signals are already presented like a real local company."],
-    ["Ready on mobile", "The experience is built for the phone your customers are actually using."],
+    "More visibility",
+    "More customer inquiries",
+    "Your branding + contact info",
+    "Your services + service area",
+    "Reviews + trust proof",
+    "Mobile-first + domain launch",
   ] as const
 
-  const steps = [
-    ["01", Sparkles, "Reserve — $97", "Lock in this build and start the customization."],
-    ["02", Wrench, "We customize", "We swap in your real details, services, reviews, and service area."],
-    ["03", Check, "You approve", "Review the finished version and request any changes."],
-    ["04", Zap, "Pay $500 + launch", "Pay the remaining balance only after approval, then we put it live."],
-  ] as const
+  const flow = ["Reserve", "Customize", "Approve", "Launch"] as const
 
   return (
-    <section id="owner-offer" className="owner-offer-v2 relative isolate overflow-hidden border-y border-[#eadfd7] bg-[#fffaf6]">
-      <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#ef7046]/8 blur-3xl" />
-      <div className="pointer-events-none absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-[#102630]/7 blur-3xl" />
+    <section id="owner-offer" className="owner-offer-v3 relative isolate overflow-hidden border-y border-[#eadfd7] bg-[#fffaf6]">
+      <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#ef7046]/8 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 bottom-8 h-80 w-80 rounded-full bg-[#102630]/6 blur-3xl" />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-20 lg:px-8">
-        <div className="grid gap-9 xl:grid-cols-[1.08fr_.72fr] xl:items-start">
+      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-18 lg:px-8">
+        <div className="grid gap-8 xl:grid-cols-[1.03fr_.77fr] xl:items-center">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="section-kicker">For the business owner</div>
             <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[.94] tracking-[-.055em] text-[#102630] sm:text-5xl">
-              Your website is already built.
-              <span className="mt-2 block text-[#e7613b]">Make it yours.</span>
+              The website is built.
+              <span className="mt-2 block text-[#e7613b]">Add your details. Go live.</span>
             </h2>
-            <p className="mt-5 max-w-2xl text-base font-semibold leading-7 text-[#60727a]">
-              We replace the preview details with yours. You review the finished site, request changes, then pay the remaining $500 only after you approve.
-            </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {benefits.map(([title, copy], index) => (
+            <div className="owner-benefit-grid mt-7">
+              {benefits.map((benefit, index) => (
                 <motion.div
-                  key={title}
-                  initial={{ opacity: 0, y: 14 }}
+                  key={benefit}
+                  initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.55 }}
-                  transition={{ delay: index * 0.05, duration: 0.32 }}
-                  whileHover={reduceMotion ? undefined : { y: -4 }}
-                  className="rounded-2xl border border-[#eadfd7] bg-white/88 px-4 py-4 shadow-[0_8px_24px_rgba(16,38,48,.04)] backdrop-blur-sm"
+                  transition={{ delay: index * 0.045, duration: 0.28 }}
+                  whileHover={reduceMotion ? undefined : { y: -3, scale: 1.01 }}
+                  className="owner-benefit-pill"
                 >
-                  <div className="flex items-center gap-2 text-sm font-black text-[#17323c]">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#e7613b] text-white">
-                      <Check size={12} strokeWidth={3.5} />
-                    </span>
-                    {title}
-                  </div>
-                  <p className="mt-2 text-sm font-semibold leading-5 text-[#687b81]">{copy}</p>
+                  <Check size={14} strokeWidth={3.4} />
+                  <span>{benefit}</span>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
           <motion.aside
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
             whileHover={reduceMotion ? undefined : { y: -5 }}
-            className="relative overflow-hidden rounded-[28px] border border-[#eadfd7] bg-white/96 p-5 shadow-[0_28px_70px_rgba(16,38,48,.11)] sm:p-7"
+            className="owner-checkout-card relative overflow-hidden rounded-[28px] border border-[#eadfd7] bg-white/96 p-5 shadow-[0_28px_70px_rgba(16,38,48,.11)] sm:p-7"
           >
-            <div className="text-[11px] font-black uppercase tracking-[.13em] text-[#d95531]">Make this preview yours</div>
-            <div className="mt-4 flex items-end gap-3">
-              <div className="text-6xl font-black tracking-[-.065em] text-[#102630]">$97</div>
-              <div className="pb-2 text-xl font-black text-[#102630]">today</div>
-            </div>
+            <div className="text-[11px] font-black uppercase tracking-[.13em] text-[#d95531]">Start with $97 today</div>
+            <div className="mt-3 text-6xl font-black tracking-[-.065em] text-[#102630]">$97</div>
             <div className="mt-1 text-sm font-extrabold text-[#6a7b81]">$597 total</div>
             <div className="mt-2 inline-flex rounded-full bg-[#edf4f1] px-3 py-1.5 text-xs font-black text-[#36545d]">
               Remaining $500 only after you approve
             </div>
 
+            <div className="owner-card-flow mt-6" aria-label="Website launch steps">
+              <motion.div
+                className="owner-card-flow__line"
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true, amount: 0.7 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              />
+              <div className="owner-card-flow__grid">
+                {flow.map((step, index) => (
+                  <motion.div
+                    key={step}
+                    initial={{ opacity: 0, y: 8, scale: 0.94 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.7 }}
+                    transition={{ delay: 0.12 + index * 0.08, duration: 0.3 }}
+                    whileHover={reduceMotion ? undefined : { y: -4 }}
+                    className="owner-card-flow__step"
+                  >
+                    <motion.span
+                      animate={reduceMotion ? undefined : { y: [0, -2, 0] }}
+                      transition={reduceMotion ? undefined : { duration: 2.4, repeat: Infinity, delay: index * 0.25 }}
+                      className="owner-card-flow__node"
+                    >
+                      {index + 1}
+                    </motion.span>
+                    <strong>{step}</strong>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
             <div className="my-5 h-px bg-[#e9eeeb]" />
 
-            <div className="space-y-3 text-sm font-extrabold leading-6 text-[#536a72]">
-              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />We replace the preview details with yours.</div>
-              <div className="flex gap-2"><Check size={16} className="mt-1 shrink-0 text-[#e7613b]" />You review it and request changes before launch.</div>
-              <div className="flex gap-2"><Clock3 size={16} className="mt-1 shrink-0 text-[#e7613b]" />Target turnaround: 3 business days.</div>
+            <div className="owner-checkout-points">
+              <div><Check size={15} />We add your details</div>
+              <div><Check size={15} />Review + request changes</div>
+              <div><Clock3 size={15} />3 business days</div>
             </div>
 
-            <Link
-              href="/claim"
+            <a
+              href={checkoutUrl}
               className="group mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#e7613b] px-5 py-4 text-base font-black text-white shadow-[0_14px_30px_rgba(231,97,59,.28)] transition hover:-translate-y-1 hover:bg-[#d95531]"
             >
-              Make It Yours — $97 <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
-            </Link>
-            <p className="mt-3 text-center text-[11px] font-bold text-[#839197]">Secure checkout powered by Stripe.</p>
+              Start for $97 <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+            </a>
+            <p className="mt-3 text-center text-[11px] font-bold text-[#839197]">$500 balance only after approval · Secure Stripe checkout</p>
           </motion.aside>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-          className="owner-steps mt-11"
-        >
-          <div className="owner-steps__heading">
-            <div>
-              <div className="section-kicker">How it works</div>
-              <h3>From preview to live.</h3>
-            </div>
-            <p>Four straight steps. You do not pay the final $500 until the finished site is approved.</p>
-          </div>
-
-          <div className="owner-steps__rail">
-            <motion.div
-              className="owner-steps__line"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, amount: 0.45 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            />
-            <div className="owner-steps__grid">
-              {steps.map(([number, Icon, title, copy], index) => (
-                <motion.article
-                  key={number}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.45 }}
-                  transition={{ delay: index * 0.07, duration: 0.35 }}
-                  className="owner-step"
-                >
-                  <div className="owner-step__node"><Icon size={18} /></div>
-                  <div className="owner-step__number">{number}</div>
-                  <h4>{title}</h4>
-                  <p>{copy}</p>
-                </motion.article>
-              ))}
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   )
 }
 
-function OwnerMobileClaimBar() {
+function OwnerFloatingClaimBar() {
   return (
     <motion.div
-      initial={{ y: 70, opacity: 0 }}
+      initial={{ y: 80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.35, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="owner-mobile-claim fixed inset-x-0 bottom-0 z-[70] px-3 pb-3 md:hidden"
+      className="owner-floating-claim fixed inset-x-0 bottom-0 z-[75] px-3 pb-3 sm:px-5 sm:pb-5"
     >
-      <Link
-        href="/claim"
-        className="mx-auto flex max-w-lg items-center justify-between gap-3 rounded-[18px] border border-white/10 bg-[#102630]/96 px-4 py-3 text-white shadow-[0_18px_50px_rgba(4,18,24,.34)] backdrop-blur-xl"
+      <a
+        href={checkoutUrl}
+        className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-[20px] border border-white/10 bg-[#102630]/96 px-4 py-3.5 text-white shadow-[0_22px_60px_rgba(4,18,24,.35)] backdrop-blur-xl sm:px-5"
       >
-        <div>
-          <div className="text-sm font-black">Make this site yours</div>
-          <div className="mt-0.5 text-xs font-bold text-white/64">$97 today · $500 after approval</div>
+        <div className="min-w-0">
+          <div className="truncate text-sm font-black sm:text-base">Start for $97 today</div>
+          <div className="mt-0.5 truncate text-xs font-bold text-white/64">Remaining $500 only after you approve changes</div>
         </div>
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e7613b]"><ArrowRight size={17} /></span>
-      </Link>
+        <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#e7613b] px-4 py-2.5 text-xs font-black text-white sm:px-5 sm:text-sm">
+          Start <ArrowRight size={15} />
+        </span>
+      </a>
     </motion.div>
   )
 }
 
 function HomePage() {
-  return <><OwnerTopBar /><Header currentPage="home" /><Hero /><ProofStrip /><Services /><OwnerOffer /><WhyChooseUs /><Work /><HowItWorks /><Reviews /><LocalService /><FAQ /><FinalCta /><Footer /><div className="h-20 md:hidden" aria-hidden="true" /><OwnerMobileClaimBar /></>
+  return <><OwnerTopBar /><Header currentPage="home" /><Hero /><ProofStrip /><Services /><OwnerOffer /><WhyChooseUs /><Work /><HowItWorks /><Reviews /><LocalService /><FAQ /><FinalCta /><Footer /><div className="h-24" aria-hidden="true" /><OwnerFloatingClaimBar /></>
 }
 
 function ServicesPage() {
