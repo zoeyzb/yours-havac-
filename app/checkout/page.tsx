@@ -1,7 +1,6 @@
 import Link from "next/link"
 import {
   ArrowLeft,
-  BadgeCheck,
   BarChart3,
   LockKeyhole,
   Settings2,
@@ -34,6 +33,14 @@ export default function CheckoutPage() {
     <main className="site-checkout-page">
       <div className="site-checkout-shell">
         <aside className="site-checkout-summary">
+          <div className="checkout-depth-scene" aria-hidden="true">
+            <span className="checkout-depth-box checkout-depth-box--one" />
+            <span className="checkout-depth-box checkout-depth-box--two" />
+            <span className="checkout-depth-box checkout-depth-box--three" />
+            <span className="checkout-depth-box checkout-depth-box--four" />
+            <span className="checkout-depth-particles" />
+          </div>
+
           <div className="checkout-brand-row">
             <Link href="/" className="checkout-brand" aria-label="Back to Recover Revenue preview">
               <span className="checkout-brand-mark">R</span>
@@ -63,8 +70,10 @@ export default function CheckoutPage() {
             ))}
 
             <div className="checkout-outcome-card checkout-outcome-card--proof">
-              <div className="checkout-outcome-icon checkout-outcome-icon--proof">
-                <BadgeCheck size={22} strokeWidth={2.1} />
+              <div className="checkout-proof-visuals" aria-hidden="true">
+                <span className="checkout-proof-avatar checkout-proof-avatar--one" />
+                <span className="checkout-proof-avatar checkout-proof-avatar--two" />
+                <span className="checkout-proof-avatar checkout-proof-avatar--three" />
               </div>
               <div className="checkout-outcome-copy">
                 <strong>Trusted by 8,500+</strong>
