@@ -259,3 +259,21 @@ test('checkout payment hierarchy keeps wallets first, card open, and optional me
   assert.equal(checkoutPage.includes('Your information is secure'), false, 'avoid introducing security anxiety')
   assert.ok(checkoutPage.includes('checkout-proof-visuals'), 'trusted-by proof should include visual proof treatment')
 })
+
+
+test('checkout visual polish keeps proof people, four-step flow, and orange CTA', () => {
+  const checkoutPage = readFileSync(new URL('../app/checkout/page.tsx', import.meta.url), 'utf8')
+  const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
+  const checkoutStyles = readFileSync(new URL('../app/checkout/checkout.css', import.meta.url), 'utf8')
+
+  for (const step of ['Reserve', 'Customize', 'Approve', 'Launch']) {
+    assert.ok(checkoutPage.includes(step), `missing checkout process step: ${step}`)
+  }
+
+  assert.ok(checkoutStyles.includes('.checkout-process'), 'four-step checkout flow should have dedicated styling')
+  assert.ok(checkoutStyles.includes('checkout-proof-avatar--one'), 'trusted proof should use real people imagery')
+  assert.ok(checkoutStyles.includes('linear-gradient(135deg, #f05d34, #ff6f43)'), 'Pay $97 CTA should stay orange')
+  assert.ok(checkoutStyles.includes('pointer-events: none'), 'unsupported Apple Pay fallback must not be clickable')
+  assert.ok(checkoutForm.includes('Available in Safari'), 'unsupported Apple Pay state should explain the browser requirement')
+  assert.ok(checkoutForm.includes('type: "tabs"'), 'BNPL should use a cleaner Stripe tab layout')
+})
