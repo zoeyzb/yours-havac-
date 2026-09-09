@@ -2,7 +2,9 @@ import { NextResponse } from "next/server"
 
 const PAYMENT_BACKEND = "https://recoverrevenue.company/api/public/website-build/intent"
 
-export async function POST() {
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => ({})) as { method?: unknown }
+  const method = body.method === "cashapp" ? "cashapp" : "card"
   try {
     const response = await fetch(PAYMENT_BACKEND, {
       method: "POST",
@@ -10,6 +12,7 @@ export async function POST() {
         "x-recover-checkout-source": "yours-havac-v1",
         "content-type": "application/json",
       },
+      body: JSON.stringify({ method }),
       cache: "no-store",
       signal: AbortSignal.timeout(10_000),
     })
