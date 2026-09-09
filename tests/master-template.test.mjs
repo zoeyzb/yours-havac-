@@ -189,6 +189,8 @@ test('checkout stays onsite and uses a custom Stripe Elements handoff', () => {
   assert.ok(checkoutForm.includes('paymentMethodOrder: ["card"]'), 'main card form should stay open and focused')
   assert.ok(checkoutForm.includes('paymentMethodOrder: ["cashapp"]'), 'Cash App should use its own focused payment flow')
   assert.ok(checkoutForm.includes('applePay: "always"'), 'Apple Pay should be requested aggressively when the device supports it')
+  assert.ok(checkoutForm.includes('buttonHeight: 55'), 'Express Checkout wallet height must stay within Stripe\'s 40-55px limit')
+  assert.ok(checkoutForm.indexOf('cardElement.mount(cardRef.current)') < checkoutForm.indexOf('elements.create("expressCheckout"'), 'card checkout should mount before optional wallet UI')
   assert.ok(checkoutForm.includes('wallets: { link: "never" }'), 'Link should be disabled in each Payment Element instance')
   assert.ok(checkoutForm.includes('fields: { billingDetails: "never" }'), 'visible billing/contact fields should be suppressed')
   assert.ok(checkoutForm.includes('address: { country: "US" }'), 'the hidden billing country should remain fixed to the US')
