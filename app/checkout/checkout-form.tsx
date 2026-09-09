@@ -2,7 +2,14 @@
 
 import Script from "next/script"
 import { useEffect, useRef, useState } from "react"
-import { ArrowRight, Check, ChevronDown, LockKeyhole } from "lucide-react"
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Clock3,
+  Landmark,
+  LockKeyhole,
+} from "lucide-react"
 
 declare global {
   interface Window {
@@ -18,7 +25,8 @@ type CheckoutPayload = {
   error?: { message?: string }
 }
 
-type IntentMethod = "card" | "cashapp" | "bnpl"
+type IntentMethod = "card" | "cashapp"
+type HostedMethod = "bank" | "bnpl"
 
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
@@ -31,6 +39,24 @@ async function createIntent(method: IntentMethod) {
     throw new Error(payload?.error?.message || "Secure checkout could not be prepared.")
   }
   return payload.data as { clientSecret: string; publishableKey: string }
+}
+
+async function createHostedSession(method: HostedMethod) {
+  const response = await fetch("/api/checkout/session", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ method }),
+  })
+  const payload = await response.json().catch(() => null) as {
+    data?: { url?: string }
+    error?: { message?: string }
+  } | null
+
+  if (!response.ok || !payload?.data?.url) {
+    throw new Error(payload?.error?.message || "That payment option is not available right now.")
+  }
+
+  return payload.data.url
 }
 
 const appearance = {
@@ -65,13 +91,13 @@ export function CheckoutForm() {
   const applePayRef = useRef<HTMLDivElement>(null)
   const cashAppRef = useRef<HTMLDivElement>(null)
   const googlePayRef = useRef<HTMLDivElement>(null)
-  const bnplRef = useRef<HTMLDivElement>(null)
 
   const stripeRef = useRef<any>(null)
   const cardElementsRef = useRef<any>(null)
   const cashAppElementsRef = useRef<any>(null)
-  const moreElementsRef = useRef<any>(null)
-  const bnplElementsRef = useRef<any>(null)
+  const googlePayElementsRef = useRef<any>(null)
+  const initialCardIntentRef = useRef<Promise<{ clientSecret: string; publishableKey: string }> | null>(null)
+  const googlePayStartedRef = useRef(false)
   const busyRef = useRef(false)
 
   const [scriptReady, setScriptReady] = useState(false)
@@ -81,9 +107,14 @@ export function CheckoutForm() {
   const [cashAppReady, setCashAppReady] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [moreLoading, setMoreLoading] = useState(false)
-  const [bnplReady, setBnplReady] = useState(false)
+  const [hostedBusy, setHostedBusy] = useState<HostedMethod | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    // Start the network request immediately so Stripe.js and the PaymentIntent load in parallel.
+    initialCardIntentRef.current = createIntent("card")
+  }, [])
 
   useEffect(() => {
     if (!scriptReady || !window.Stripe || !cardRef.current) return
@@ -95,7 +126,7 @@ export function CheckoutForm() {
     void (async () => {
       try {
         setError("")
-        const { clientSecret, publishableKey } = await createIntent("card")
+        const { clientSecret, publishableKey } = await (initialCardIntentRef.current ?? createIntent("card"))
         const stripe = window.Stripe?.(publishableKey)
         if (!stripe || cancelled) return
 
@@ -150,7 +181,7 @@ export function CheckoutForm() {
 
             applePayElement.on("ready", syncAvailability)
             applePayElement.on("availablepaymentmethodschange", syncAvailability)
-            applePayElement.on("confirm", async () => confirmPayment(cardElementsRef.current, "card"))
+            applePayElement.on("confirm", async () => confirmElementsPayment(cardElementsRef.current))
             applePayElement.mount(applePayRef.current)
           } catch {
             setApplePayAvailable(false)
@@ -168,7 +199,7 @@ export function CheckoutForm() {
     }
   }, [scriptReady])
 
-  async function confirmPayment(elements: any, kind: IntentMethod) {
+  async function confirmElementsPayment(elements: any) {
     const stripe = stripeRef.current
     if (!stripe || !elements || busyRef.current) return
 
@@ -187,11 +218,9 @@ export function CheckoutForm() {
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/payment/success`,
-          ...(kind !== "bnpl" ? {
-            payment_method_data: {
-              billing_details: { address: { country: "US" } },
-            },
-          } : {}),
+          payment_method_data: {
+            billing_details: { address: { country: "US" } },
+          },
         },
         redirect: "if_required",
       })
@@ -253,76 +282,71 @@ export function CheckoutForm() {
     }
   }
 
+  async function initGooglePay() {
+    if (googlePayStartedRef.current || !googlePayRef.current) return
+    googlePayStartedRef.current = true
+
+    try {
+      const stripe = stripeRef.current
+      if (!stripe) return
+
+      const { clientSecret } = await createIntent("card")
+      const elements = stripe.elements({ clientSecret, appearance })
+      googlePayElementsRef.current = elements
+
+      const googlePayElement = elements.create("expressCheckout", {
+        paymentMethods: {
+          applePay: "never",
+          googlePay: "always",
+          link: "never",
+          amazonPay: "never",
+          paypal: "never",
+          klarna: "never",
+        },
+        layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
+        buttonHeight: 48,
+        buttonTheme: { googlePay: "black" },
+        billingAddressRequired: false,
+        emailRequired: false,
+        phoneNumberRequired: false,
+      })
+
+      googlePayElement.on("confirm", async () => confirmElementsPayment(googlePayElementsRef.current))
+      googlePayElement.mount(googlePayRef.current)
+    } catch {
+      // Google Pay is browser/device dependent; bank and pay-later remain available below.
+    }
+  }
+
   async function toggleMoreOptions() {
     const nextOpen = !moreOpen
     setMoreOpen(nextOpen)
     setError("")
 
-    if (!nextOpen || moreLoading || bnplElementsRef.current) return
-
-    setMoreLoading(true)
-    try {
-      const stripe = stripeRef.current
-      if (!stripe) throw new Error("Secure checkout is still loading.")
-
-      const [{ clientSecret: cardClientSecret }, { clientSecret: bnplClientSecret }] = await Promise.all([
-        createIntent("card"),
-        createIntent("bnpl"),
-      ])
-
-      const moreElements = stripe.elements({ clientSecret: cardClientSecret, appearance })
-      moreElementsRef.current = moreElements
-
-      if (googlePayRef.current) {
-        try {
-          const googlePayElement = moreElements.create("expressCheckout", {
-            paymentMethods: {
-              applePay: "never",
-              googlePay: "always",
-              link: "never",
-              amazonPay: "never",
-              paypal: "never",
-              klarna: "never",
-            },
-            layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-            buttonHeight: 48,
-            buttonTheme: { googlePay: "black" },
-            billingAddressRequired: false,
-            emailRequired: false,
-            phoneNumberRequired: false,
-          })
-          googlePayElement.on("confirm", async () => confirmPayment(moreElementsRef.current, "card"))
-          googlePayElement.mount(googlePayRef.current)
-        } catch {
-          // Google Pay only appears when Stripe and the browser support it.
-        }
-      }
-
-      const bnplElements = stripe.elements({ clientSecret: bnplClientSecret, appearance })
-      bnplElementsRef.current = bnplElements
-
-      const bnplElement = bnplElements.create("payment", {
-        layout: {
-          type: "accordion",
-          defaultCollapsed: true,
-          radios: false,
-          spacedAccordionItems: false,
-        },
-        paymentMethodOrder: ["affirm", "klarna"],
-      })
-
-      bnplElement.on("ready", () => setBnplReady(true))
-      bnplElement.mount(bnplRef.current!)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "More payment options are not available right now.")
-    } finally {
+    if (nextOpen) {
+      setMoreLoading(true)
+      await initGooglePay()
       setMoreLoading(false)
+    }
+  }
+
+  async function openHosted(method: HostedMethod) {
+    if (hostedBusy) return
+    setHostedBusy(method)
+    setError("")
+
+    try {
+      const url = await createHostedSession(method)
+      window.location.assign(url)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "That payment option is not available right now.")
+      setHostedBusy(null)
     }
   }
 
   async function submitCard(event: React.FormEvent) {
     event.preventDefault()
-    await confirmPayment(cardElementsRef.current, "card")
+    await confirmElementsPayment(cardElementsRef.current)
   }
 
   return (
@@ -365,7 +389,7 @@ export function CheckoutForm() {
               type="button"
               disabled={!cashAppReady || busy}
               className="cashapp-confirm"
-              onClick={() => confirmPayment(cashAppElementsRef.current, "cashapp")}
+              onClick={() => confirmElementsPayment(cashAppElementsRef.current)}
             >
               {busy ? "Processing…" : "Continue with Cash App Pay"}
             </button>
@@ -412,21 +436,39 @@ export function CheckoutForm() {
         </button>
 
         {moreOpen ? (
-          <div className="more-payment-panel more-payment-panel--direct">
-            {moreLoading ? <div className="more-payment-loading">Loading payment options…</div> : null}
+          <div className="more-payment-panel more-payment-panel--compact">
+            {moreLoading ? <div className="more-payment-loading">Checking Google Pay…</div> : null}
             <div className="more-google-pay" ref={googlePayRef} />
-            <div className="bnpl-direct" ref={bnplRef} />
-            {bnplReady ? (
+
+            <div className="alt-payment-row">
               <button
                 type="button"
-                disabled={busy}
-                className="bnpl-confirm bnpl-confirm--direct"
-                onClick={() => confirmPayment(bnplElementsRef.current, "bnpl")}
+                className="alt-payment-option"
+                disabled={hostedBusy !== null}
+                onClick={() => openHosted("bank")}
               >
-                {busy ? "Processing…" : "Continue"}
-                {!busy ? <ArrowRight size={16} /> : null}
+                <Landmark size={18} />
+                <span>
+                  <strong>{hostedBusy === "bank" ? "Opening…" : "Bank transfer"}</strong>
+                  <small>Pay from a U.S. bank account</small>
+                </span>
+                <ArrowRight size={15} />
               </button>
-            ) : null}
+
+              <button
+                type="button"
+                className="alt-payment-option"
+                disabled={hostedBusy !== null}
+                onClick={() => openHosted("bnpl")}
+              >
+                <Clock3 size={18} />
+                <span>
+                  <strong>{hostedBusy === "bnpl" ? "Opening…" : "Pay over time"}</strong>
+                  <small>Affirm or Klarna when eligible</small>
+                </span>
+                <ArrowRight size={15} />
+              </button>
+            </div>
           </div>
         ) : null}
       </div>
