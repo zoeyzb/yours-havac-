@@ -4,11 +4,9 @@ import Script from "next/script"
 import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
-  Building2,
   Check,
   ChevronDown,
   Clock3,
-  CreditCard,
   LockKeyhole,
 } from "lucide-react"
 
@@ -27,7 +25,6 @@ type CheckoutPayload = {
 }
 
 type IntentMethod = "card" | "cashapp" | "bnpl"
-type PayChoice = "card" | "bank" | "bnpl"
 
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
@@ -71,13 +68,15 @@ const appearance = {
 
 export function CheckoutForm() {
   const cardRef = useRef<HTMLDivElement>(null)
-  const expressRef = useRef<HTMLDivElement>(null)
+  const applePayRef = useRef<HTMLDivElement>(null)
   const cashAppRef = useRef<HTMLDivElement>(null)
+  const moreExpressRef = useRef<HTMLDivElement>(null)
   const bnplRef = useRef<HTMLDivElement>(null)
 
   const stripeRef = useRef<any>(null)
   const cardElementsRef = useRef<any>(null)
   const cashAppElementsRef = useRef<any>(null)
+  const moreElementsRef = useRef<any>(null)
   const bnplElementsRef = useRef<any>(null)
   const busyRef = useRef(false)
 
@@ -86,8 +85,9 @@ export function CheckoutForm() {
   const [applePayAvailable, setApplePayAvailable] = useState(false)
   const [cashAppOpen, setCashAppOpen] = useState(false)
   const [cashAppReady, setCashAppReady] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(true)
-  const [payChoice, setPayChoice] = useState<PayChoice>("card")
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [moreLoading, setMoreLoading] = useState(false)
+  const [bnplOpen, setBnplOpen] = useState(false)
   const [bnplReady, setBnplReady] = useState(false)
   const [bnplLoading, setBnplLoading] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -98,7 +98,7 @@ export function CheckoutForm() {
 
     let cancelled = false
     let cardElement: any = null
-    let expressElement: any = null
+    let applePayElement: any = null
 
     void (async () => {
       try {
@@ -132,9 +132,9 @@ export function CheckoutForm() {
         })
         cardElement.mount(cardRef.current)
 
-        if (expressRef.current) {
+        if (applePayRef.current) {
           try {
-            expressElement = elements.create("expressCheckout", {
+            applePayElement = elements.create("expressCheckout", {
               paymentMethods: {
                 applePay: "always",
                 googlePay: "never",
@@ -158,10 +158,10 @@ export function CheckoutForm() {
               setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
             }
 
-            expressElement.on("ready", syncAvailability)
-            expressElement.on("availablepaymentmethodschange", syncAvailability)
-            expressElement.on("confirm", async () => confirmPayment(cardElementsRef.current, "card"))
-            expressElement.mount(expressRef.current)
+            applePayElement.on("ready", syncAvailability)
+            applePayElement.on("availablepaymentmethodschange", syncAvailability)
+            applePayElement.on("confirm", async () => confirmPayment(cardElementsRef.current, "card"))
+            applePayElement.mount(applePayRef.current)
           } catch {
             setApplePayAvailable(false)
           }
@@ -174,7 +174,7 @@ export function CheckoutForm() {
     return () => {
       cancelled = true
       try { cardElement?.unmount?.() } catch {}
-      try { expressElement?.unmount?.() } catch {}
+      try { applePayElement?.unmount?.() } catch {}
     }
   }, [scriptReady])
 
@@ -214,7 +214,6 @@ export function CheckoutForm() {
       const intent = result?.paymentIntent
       if (intent?.status === "succeeded" || intent?.status === "processing") {
         window.location.assign(`/payment/success?payment_intent=${encodeURIComponent(intent.id)}`)
-        return
       }
     } catch {
       setError("Payment could not be completed. Please try again.")
@@ -264,11 +263,59 @@ export function CheckoutForm() {
     }
   }
 
-  async function choosePayment(next: PayChoice) {
-    setPayChoice(next)
+  async function toggleMoreOptions() {
+    const nextOpen = !moreOpen
+    setMoreOpen(nextOpen)
     setError("")
 
-    if (next !== "bnpl" || bnplElementsRef.current || bnplLoading) return
+    if (!nextOpen || moreElementsRef.current || moreLoading) return
+
+    setMoreLoading(true)
+    try {
+      const stripe = stripeRef.current
+      if (!stripe) throw new Error("Secure checkout is still loading.")
+      const { clientSecret } = await createIntent("card")
+      const elements = stripe.elements({ clientSecret, appearance })
+      moreElementsRef.current = elements
+
+      if (moreExpressRef.current) {
+        try {
+          const googlePayElement = elements.create("expressCheckout", {
+            paymentMethods: {
+              applePay: "never",
+              googlePay: "always",
+              link: "never",
+              amazonPay: "never",
+              paypal: "never",
+              klarna: "never",
+            },
+            layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
+            buttonHeight: 52,
+            buttonTheme: { googlePay: "black" },
+            billingAddressRequired: false,
+            emailRequired: false,
+            phoneNumberRequired: false,
+          })
+
+          googlePayElement.on("confirm", async () => confirmPayment(moreElementsRef.current, "card"))
+          googlePayElement.mount(moreExpressRef.current)
+        } catch {
+          // Google Pay is device/browser dependent. Do not block the checkout if it is unavailable.
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "More payment options could not load.")
+    } finally {
+      setMoreLoading(false)
+    }
+  }
+
+  async function openBnpl() {
+    const nextOpen = !bnplOpen
+    setBnplOpen(nextOpen)
+    setError("")
+
+    if (!nextOpen || bnplElementsRef.current || bnplLoading) return
 
     setBnplLoading(true)
     try {
@@ -276,10 +323,7 @@ export function CheckoutForm() {
       if (!stripe) throw new Error("Secure checkout is still loading.")
       const { clientSecret } = await createIntent("bnpl")
 
-      const elements = stripe.elements({
-        clientSecret,
-        appearance,
-      })
+      const elements = stripe.elements({ clientSecret, appearance })
       bnplElementsRef.current = elements
 
       const paymentElement = elements.create("payment", {
@@ -295,17 +339,16 @@ export function CheckoutForm() {
       paymentElement.on("ready", () => setBnplReady(true))
       paymentElement.mount(bnplRef.current!)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Buy now, pay later could not load.")
-      setPayChoice("card")
+      setError(err instanceof Error ? err.message : "Pay later options are not available right now.")
+      setBnplOpen(false)
     } finally {
       setBnplLoading(false)
     }
   }
 
-  async function submitSelected(event: React.FormEvent) {
+  async function submitCard(event: React.FormEvent) {
     event.preventDefault()
-    if (payChoice === "card") return confirmPayment(cardElementsRef.current, "card")
-    if (payChoice === "bnpl") return confirmPayment(bnplElementsRef.current, "bnpl")
+    await confirmPayment(cardElementsRef.current, "card")
   }
 
   return (
@@ -318,9 +361,16 @@ export function CheckoutForm() {
       />
 
       <div className="checkout-payment-card">
+        <div className="fast-pay-label">FAST PAY</div>
         <div className="fast-pay-grid">
-          <div className={applePayAvailable ? "fast-pay-apple fast-pay-wallet" : "fast-pay-apple fast-pay-wallet fast-pay-apple--hidden"}>
-            <div ref={expressRef} />
+          <div className="fast-pay-apple fast-pay-wallet">
+            <div ref={applePayRef} />
+            {!applePayAvailable ? (
+              <div className="apple-pay-unavailable" aria-label="Apple Pay is available on supported Apple browsers and devices">
+                <span className="apple-pay-brand"><b></b> Pay</span>
+                <small>Safari / Apple device</small>
+              </div>
+            ) : null}
           </div>
 
           <button
@@ -349,10 +399,39 @@ export function CheckoutForm() {
           </div>
         ) : null}
 
+        <form className="selected-payment-form selected-payment-form--card" onSubmit={submitCard}>
+          <div className="card-payment-heading">
+            <span>CARD</span>
+            <strong>Enter card details</strong>
+          </div>
+
+          <div className="site-payment-element-wrap">
+            {!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}
+            <div ref={cardRef} />
+          </div>
+
+          {error ? <p className="site-payment-error" role="alert">{error}</p> : null}
+
+          <button
+            type="submit"
+            disabled={busy || !cardReady}
+            className="site-payment-submit"
+          >
+            <LockKeyhole size={16} />
+            <span>{busy ? "Processing…" : "Pay $97"}</span>
+            {!busy ? <ArrowRight size={17} /> : null}
+          </button>
+
+          <div className="site-payment-security">
+            <LockKeyhole size={14} />
+            <span>Secure payment powered by Stripe</span>
+          </div>
+        </form>
+
         <button
           type="button"
           className={moreOpen ? "more-payment-toggle more-payment-toggle--open" : "more-payment-toggle"}
-          onClick={() => setMoreOpen((value) => !value)}
+          onClick={toggleMoreOptions}
           aria-expanded={moreOpen}
         >
           <span>More payment options</span>
@@ -361,83 +440,41 @@ export function CheckoutForm() {
 
         {moreOpen ? (
           <div className="more-payment-panel">
-            <strong className="more-payment-title">Pay another way</strong>
+            {moreLoading ? <div className="more-payment-loading">Checking available payment methods…</div> : null}
 
-            <div className="payment-choice-grid">
-              <button
-                type="button"
-                className={payChoice === "card" ? "payment-choice payment-choice--active" : "payment-choice"}
-                onClick={() => choosePayment("card")}
-              >
-                <CreditCard size={20} />
-                <span>Card</span>
-              </button>
+            <div className="more-google-pay" ref={moreExpressRef} />
 
-              <button
-                type="button"
-                className="payment-choice payment-choice--disabled"
-                disabled
-                title="Bank transfer is not enabled on this Stripe account."
-              >
-                <Building2 size={20} />
-                <span>Bank transfer</span>
-                <small>Unavailable</small>
-              </button>
+            <button
+              type="button"
+              className={bnplOpen ? "pay-later-button pay-later-button--open" : "pay-later-button"}
+              onClick={openBnpl}
+              aria-expanded={bnplOpen}
+            >
+              <Clock3 size={19} />
+              <span>
+                <strong>Buy now, pay later</strong>
+                <small>See available installment options</small>
+              </span>
+              <ChevronDown size={16} />
+            </button>
 
-              <button
-                type="button"
-                className={payChoice === "bnpl" ? "payment-choice payment-choice--active" : "payment-choice"}
-                onClick={() => choosePayment("bnpl")}
-              >
-                <Clock3 size={20} />
-                <span>Buy now, pay later</span>
-              </button>
-            </div>
-
-            <form className="selected-payment-form" onSubmit={submitSelected}>
-              {payChoice === "card" ? (
-                <>
-                  <div className="card-payment-heading">
-                    <span>CARD</span>
-                    <strong>Enter card details</strong>
-                  </div>
-                  <div className="site-payment-element-wrap">
-                    {!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}
-                    <div ref={cardRef} />
-                  </div>
-                </>
-              ) : null}
-
-              {payChoice === "bnpl" ? (
-                <>
-                  <div className="card-payment-heading">
-                    <span>PAY OVER TIME</span>
-                    <strong>Choose an available installment option</strong>
-                  </div>
-                  <div className="site-payment-element-wrap site-payment-element-wrap--bnpl">
-                    {bnplLoading ? <div className="site-payment-loading">Loading secure installment options…</div> : null}
-                    <div ref={bnplRef} />
-                  </div>
-                </>
-              ) : null}
-
-              {error ? <p className="site-payment-error" role="alert">{error}</p> : null}
-
-              <button
-                type="submit"
-                disabled={busy || (payChoice === "card" ? !cardReady : !bnplReady)}
-                className="site-payment-submit"
-              >
-                <LockKeyhole size={16} />
-                <span>{busy ? "Processing…" : payChoice === "card" ? "Pay $97" : "Continue securely"}</span>
-                {!busy ? <ArrowRight size={17} /> : null}
-              </button>
-
-              <div className="site-payment-security">
-                <LockKeyhole size={14} />
-                <span>Secure payment powered by Stripe</span>
+            {bnplOpen ? (
+              <div className="bnpl-panel">
+                {bnplLoading ? <div className="site-payment-loading">Loading installment options…</div> : null}
+                <div ref={bnplRef} />
+                {bnplReady ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    className="bnpl-confirm"
+                    onClick={() => confirmPayment(bnplElementsRef.current, "bnpl")}
+                  >
+                    {busy ? "Processing…" : "Continue with pay later"}
+                    {!busy ? <ArrowRight size={16} /> : null}
+                  </button>
+                ) : null}
               </div>
-            </form>
+            ) : null}
           </div>
         ) : null}
       </div>
