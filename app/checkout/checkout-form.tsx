@@ -2,7 +2,7 @@
 
 import Script from "next/script"
 import { useEffect, useRef, useState } from "react"
-import { ArrowRight, Check, LockKeyhole } from "lucide-react"
+import { ArrowRight, Check, ChevronDown, LockKeyhole } from "lucide-react"
 
 declare global {
   interface Window {
@@ -35,10 +35,13 @@ export function CheckoutForm() {
   const cardRef = useRef<HTMLDivElement>(null)
   const expressRef = useRef<HTMLDivElement>(null)
   const cashAppRef = useRef<HTMLDivElement>(null)
+  const moreExpressRef = useRef<HTMLDivElement>(null)
+  const morePaymentRef = useRef<HTMLDivElement>(null)
 
   const stripeRef = useRef<any>(null)
   const cardElementsRef = useRef<any>(null)
   const cashAppElementsRef = useRef<any>(null)
+  const moreElementsRef = useRef<any>(null)
   const busyRef = useRef(false)
 
   const [scriptReady, setScriptReady] = useState(false)
@@ -46,6 +49,9 @@ export function CheckoutForm() {
   const [applePayAvailable, setApplePayAvailable] = useState(false)
   const [cashAppOpen, setCashAppOpen] = useState(false)
   const [cashAppReady, setCashAppReady] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [moreLoading, setMoreLoading] = useState(false)
+  const [moreReady, setMoreReady] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
 
@@ -71,7 +77,7 @@ export function CheckoutForm() {
             theme: "stripe",
             variables: {
               colorPrimary: "#ef6238",
-              colorBackground: "#ffffff",
+              colorBackground: "#fffdf8",
               colorText: "#102630",
               colorDanger: "#b42318",
               fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
@@ -131,7 +137,7 @@ export function CheckoutForm() {
                 klarna: "never",
               },
               layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-              buttonHeight: 55,
+              buttonHeight: 56,
               buttonTheme: { applePay: "black" },
               buttonType: { applePay: "buy" },
               billingAddressRequired: false,
@@ -152,12 +158,11 @@ export function CheckoutForm() {
             })
 
             expressElement.on("confirm", async () => {
-              await confirmCardPayment()
+              await confirmElementsPayment(elements)
             })
 
             expressElement.mount(expressRef.current)
           } catch {
-            // Fast-pay wallets are optional. Never let a wallet-rendering issue block card checkout.
             setApplePayAvailable(false)
           }
         }
@@ -166,9 +171,8 @@ export function CheckoutForm() {
       }
     })()
 
-    async function confirmCardPayment() {
+    async function confirmElementsPayment(elements: any) {
       const stripe = stripeRef.current
-      const elements = cardElementsRef.current
       if (!stripe || !elements || busyRef.current) return
 
       busyRef.current = true
@@ -219,7 +223,7 @@ export function CheckoutForm() {
       }
     }
 
-    ;(window as any).__websiteConfirmCard = confirmCardPayment
+    ;(window as any).__websiteConfirmCard = () => confirmElementsPayment(cardElementsRef.current)
 
     return () => {
       cancelled = true
@@ -245,7 +249,7 @@ export function CheckoutForm() {
           theme: "stripe",
           variables: {
             colorPrimary: "#00d64f",
-            colorBackground: "#ffffff",
+            colorBackground: "#fffdf8",
             colorText: "#102630",
             colorDanger: "#b42318",
             fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
@@ -336,6 +340,144 @@ export function CheckoutForm() {
     }
   }
 
+  async function openMorePaymentOptions() {
+    const nextOpen = !moreOpen
+    setMoreOpen(nextOpen)
+    setError("")
+
+    if (!nextOpen || moreElementsRef.current || moreLoading) return
+
+    setMoreLoading(true)
+    try {
+      const stripe = stripeRef.current
+      if (!stripe) throw new Error("Secure checkout is still loading.")
+
+      const { clientSecret } = await createIntent("card")
+      const elements = stripe.elements({
+        clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: {
+            colorPrimary: "#ef6238",
+            colorBackground: "#fffdf8",
+            colorText: "#102630",
+            colorDanger: "#b42318",
+            fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+            borderRadius: "14px",
+            spacingUnit: "5px",
+          },
+        },
+      })
+
+      moreElementsRef.current = elements
+
+      if (moreExpressRef.current) {
+        try {
+          const express = elements.create("expressCheckout", {
+            paymentMethods: {
+              applePay: "never",
+              googlePay: "always",
+              link: "never",
+              amazonPay: "never",
+              paypal: "never",
+              klarna: "never",
+            },
+            layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
+            buttonHeight: 52,
+            buttonTheme: { googlePay: "black" },
+            billingAddressRequired: false,
+            emailRequired: false,
+            phoneNumberRequired: false,
+          })
+
+          express.on("confirm", async () => {
+            await confirmMorePayment()
+          })
+          express.mount(moreExpressRef.current)
+        } catch {
+          // Google Pay is device/browser dependent. Other Stripe methods can still load below.
+        }
+      }
+
+      if (morePaymentRef.current) {
+        const paymentElement = elements.create("payment", {
+          fields: { billingDetails: "never" },
+          layout: {
+            type: "accordion",
+            defaultCollapsed: true,
+            radios: true,
+            spacedAccordionItems: false,
+          },
+          paymentMethodOrder: ["link", "us_bank_account", "cashapp", "card"],
+          defaultValues: {
+            billingDetails: {
+              address: { country: "US" },
+            },
+          },
+        })
+        paymentElement.on("ready", () => setMoreReady(true))
+        paymentElement.mount(morePaymentRef.current)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "More payment options could not load.")
+    } finally {
+      setMoreLoading(false)
+    }
+  }
+
+  async function confirmMorePayment() {
+    const stripe = stripeRef.current
+    const elements = moreElementsRef.current
+    if (!stripe || !elements || busyRef.current) return
+
+    busyRef.current = true
+    setBusy(true)
+    setError("")
+
+    try {
+      const submitResult = await elements.submit?.()
+      if (submitResult?.error) {
+        setError(submitResult.error.message || "Check your payment details.")
+        busyRef.current = false
+        setBusy(false)
+        return
+      }
+
+      const result = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/payment/success`,
+          payment_method_data: {
+            billing_details: {
+              address: { country: "US" },
+            },
+          },
+        },
+        redirect: "if_required",
+      })
+
+      if (result?.error) {
+        setError(result.error.message || "Payment could not be completed.")
+        busyRef.current = false
+        setBusy(false)
+        return
+      }
+
+      const intent = result?.paymentIntent
+      if (intent?.status === "succeeded" || intent?.status === "processing") {
+        window.location.assign(`/payment/success?payment_intent=${encodeURIComponent(intent.id)}`)
+        return
+      }
+
+      busyRef.current = false
+      setBusy(false)
+    } catch {
+      setError("Payment could not be completed. Please try again.")
+      busyRef.current = false
+      setBusy(false)
+    }
+  }
+
   async function submitCard(event: React.FormEvent) {
     event.preventDefault()
     const fn = (window as any).__websiteConfirmCard
@@ -353,9 +495,16 @@ export function CheckoutForm() {
 
       <div className="fast-pay-block">
         <div className="fast-pay-label">FAST PAY</div>
-        <div className={applePayAvailable ? "fast-pay-grid" : "fast-pay-grid fast-pay-grid--single"}>
-          <div className={applePayAvailable ? "fast-pay-apple fast-pay-wallet" : "fast-pay-apple fast-pay-wallet fast-pay-apple--hidden"}>
+
+        <div className="fast-pay-grid">
+          <div className={applePayAvailable ? "fast-pay-apple fast-pay-wallet" : "fast-pay-apple fast-pay-wallet fast-pay-apple--waiting"}>
             <div ref={expressRef} />
+            {!applePayAvailable ? (
+              <div className="apple-pay-fallback" aria-hidden="true">
+                <span className="apple-mark">●</span>
+                <span>Apple Pay</span>
+              </div>
+            ) : null}
           </div>
 
           <button
@@ -381,6 +530,41 @@ export function CheckoutForm() {
             >
               {busy ? "Processing…" : "Continue with Cash App Pay"}
             </button>
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          className={moreOpen ? "more-payment-toggle more-payment-toggle--open" : "more-payment-toggle"}
+          onClick={openMorePaymentOptions}
+          aria-expanded={moreOpen}
+        >
+          <span>More payment options</span>
+          <ChevronDown size={16} />
+        </button>
+
+        {moreOpen ? (
+          <div className="more-payment-panel">
+            <div className="more-payment-copy">
+              <strong>Pay another way</strong>
+              <span>Stripe will show only methods available for your device and account.</span>
+            </div>
+
+            {moreLoading ? <div className="more-payment-loading">Loading secure payment options…</div> : null}
+            <div className="more-google-pay" ref={moreExpressRef} />
+            <div className="more-payment-element" ref={morePaymentRef} />
+
+            {moreReady ? (
+              <button
+                type="button"
+                disabled={busy}
+                className="more-payment-confirm"
+                onClick={confirmMorePayment}
+              >
+                {busy ? "Processing…" : "Continue with selected method"}
+                {!busy ? <ArrowRight size={16} /> : null}
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>
