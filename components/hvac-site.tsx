@@ -23,7 +23,7 @@ type Page = "home" | "services" | "quote"
 
 const hasPhone = Boolean(siteConfig.brand.phoneHref.trim())
 const hasEmail = siteConfig.brand.email.includes("@")
-const checkoutUrl = "https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00"
+const checkoutUrl = "/checkout"
 
 function Photo({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   return (
@@ -94,7 +94,7 @@ function Header({ currentPage }: { currentPage: Page }) {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ef7046]">
           <div className="truncate text-[17px] font-black tracking-[-.035em] text-[#102630] sm:text-xl">Comfort at home.</div>
-          <div className="mt-0.5 hidden text-[10px] font-bold uppercase tracking-[.15em] text-[#60727a] sm:block">Heating · Cooling · Indoor Comfort</div>
+          <div className="mt-0.5 hidden text-[10px] font-bold uppercase tracking-[.12em] text-[#60727a] sm:block">One place for the work your home needs.</div>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-bold text-[#546970] lg:flex" aria-label="Primary navigation">
           <Link href="/" className={currentPage === "home" ? "text-[#102630]" : "transition hover:text-[#e55e37]"}>Home</Link>
@@ -565,8 +565,8 @@ function OwnerOffer() {
     "More customer inquiries",
     "Your branding + contact info",
     "Your services + service area",
-    "Reviews + trust proof",
-    "Mobile-first + domain launch",
+    "Reviews from your customers",
+    "Your domain + launch",
   ] as const
 
   const flow = ["Reserve", "Customize", "Approve", "Launch"] as const
@@ -587,7 +587,13 @@ function OwnerOffer() {
             <div className="section-kicker">For the business owner</div>
             <h2 className="mt-3 max-w-3xl text-4xl font-black leading-[.94] tracking-[-.055em] text-[#102630] sm:text-5xl">
               The website is built.
-              <span className="mt-2 block text-[#e7613b]">Add your details. Go live.</span>
+              <motion.span
+                className="owner-live-line mt-2 block text-[#e7613b]"
+                animate={reduceMotion ? undefined : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                transition={reduceMotion ? undefined : { duration: 7, repeat: Infinity, ease: "linear" }}
+              >
+                Add your details. Go live.
+              </motion.span>
             </h2>
 
             <div className="owner-benefit-grid mt-7">
@@ -690,11 +696,11 @@ function OwnerFloatingClaimBar() {
         className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-[20px] border border-white/10 bg-[#102630]/96 px-4 py-3.5 text-white shadow-[0_22px_60px_rgba(4,18,24,.35)] backdrop-blur-xl sm:px-5"
       >
         <div className="min-w-0">
-          <div className="truncate text-sm font-black sm:text-base">Start for $97 today</div>
-          <div className="mt-0.5 truncate text-xs font-bold text-white/64">Remaining $500 only after you approve changes</div>
+          <div className="truncate text-sm font-black sm:text-base">Get more customers & visibility</div>
+          <div className="mt-0.5 truncate text-xs font-bold text-white/64">$97 today · Remaining $500 only after approval</div>
         </div>
         <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#e7613b] px-4 py-2.5 text-xs font-black text-white sm:px-5 sm:text-sm">
-          Start <ArrowRight size={15} />
+          Start for $97 <ArrowRight size={15} />
         </span>
       </a>
     </motion.div>
