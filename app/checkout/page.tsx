@@ -27,7 +27,6 @@ const outcomes = [
   { icon: Tag, title: "Your branding", copy: "A site that looks like you." },
   { icon: Settings2, title: "Your services", copy: "Show what you do best." },
   { icon: Star, title: "Best reviews", copy: "Build trust and credibility." },
-  { icon: BadgeCheck, title: "Trusted by 8,500+", copy: "HVAC pros nationwide." },
 ] as const
 
 export default function CheckoutPage() {
@@ -53,11 +52,8 @@ export default function CheckoutPage() {
           </p>
 
           <div className="checkout-outcome-grid" aria-label="What your finished site includes">
-            {outcomes.map(({ icon: Icon, title, copy }, index) => (
-              <div
-                key={title}
-                className={index === outcomes.length - 1 ? "checkout-outcome-card checkout-outcome-card--proof" : "checkout-outcome-card"}
-              >
+            {outcomes.map(({ icon: Icon, title, copy }) => (
+              <div key={title} className="checkout-outcome-card">
                 <div className="checkout-outcome-icon"><Icon size={21} strokeWidth={2.1} /></div>
                 <div className="checkout-outcome-copy">
                   <strong>{title}</strong>
@@ -65,6 +61,18 @@ export default function CheckoutPage() {
                 </div>
               </div>
             ))}
+
+            <div className="checkout-outcome-card checkout-outcome-card--proof">
+              <div className="checkout-proof-visuals" aria-hidden="true">
+                <span className="checkout-proof-avatar checkout-proof-avatar--one" />
+                <span className="checkout-proof-avatar checkout-proof-avatar--two" />
+                <span className="checkout-proof-avatar checkout-proof-avatar--three" />
+              </div>
+              <div className="checkout-outcome-copy">
+                <strong>Trusted by 8,500+</strong>
+                <span>HVAC pros nationwide.</span>
+              </div>
+            </div>
           </div>
 
           <div className="site-checkout-trust">
@@ -93,12 +101,6 @@ export default function CheckoutPage() {
           </div>
 
           <CheckoutForm />
-
-          <div className="checkout-security-row" aria-label="Checkout protections">
-            <span><ShieldCheck size={16} /> Encrypted checkout</span>
-            <span><CheckCircle2 size={16} /> Your information is secure</span>
-            <span><BadgeCheck size={16} /> No hidden fees</span>
-          </div>
         </section>
       </div>
     </main>
