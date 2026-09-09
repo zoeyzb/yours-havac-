@@ -180,7 +180,7 @@
 .fast-pay-apple > div,
 .fast-pay-apple iframe {
   width: 100% !important;
-  min-height: 56px;
+  min-height: 55px;
 }
 
 .fast-pay-apple {
@@ -191,7 +191,7 @@
 
 .cashapp-fast-button {
   display: flex;
-  min-height: 56px;
+  min-height: 55px;
   align-items: center;
   justify-content: center;
   gap: .55rem;

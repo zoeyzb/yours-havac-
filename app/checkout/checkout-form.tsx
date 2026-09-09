@@ -97,44 +97,6 @@ export function CheckoutForm() {
 
         cardElementsRef.current = elements
 
-        if (expressRef.current) {
-          expressElement = elements.create("expressCheckout", {
-            paymentMethods: {
-              applePay: "always",
-              googlePay: "never",
-              link: "never",
-              amazonPay: "never",
-              paypal: "never",
-              klarna: "never",
-            },
-            layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-            buttonHeight: 56,
-            buttonTheme: { applePay: "black" },
-            buttonType: { applePay: "buy" },
-            billingAddressRequired: false,
-            emailRequired: false,
-            phoneNumberRequired: false,
-          })
-
-          expressElement.on("ready", (event: any) => {
-            if (cancelled) return
-            const methods = event?.availablePaymentMethods || event?.available_payment_methods
-            setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
-          })
-
-          expressElement.on("availablepaymentmethodschange", (event: any) => {
-            if (cancelled) return
-            const methods = event?.availablePaymentMethods || event?.available_payment_methods
-            setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
-          })
-
-          expressElement.on("confirm", async () => {
-            await confirmCardPayment()
-          })
-
-          expressElement.mount(expressRef.current)
-        }
-
         cardElement = elements.create("payment", {
           fields: { billingDetails: "never" },
           wallets: { link: "never" },
@@ -156,6 +118,49 @@ export function CheckoutForm() {
           if (!cancelled) setCardReady(true)
         })
         cardElement.mount(cardRef.current)
+
+        if (expressRef.current) {
+          try {
+            expressElement = elements.create("expressCheckout", {
+              paymentMethods: {
+                applePay: "always",
+                googlePay: "never",
+                link: "never",
+                amazonPay: "never",
+                paypal: "never",
+                klarna: "never",
+              },
+              layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
+              buttonHeight: 55,
+              buttonTheme: { applePay: "black" },
+              buttonType: { applePay: "buy" },
+              billingAddressRequired: false,
+              emailRequired: false,
+              phoneNumberRequired: false,
+            })
+
+            expressElement.on("ready", (event: any) => {
+              if (cancelled) return
+              const methods = event?.availablePaymentMethods || event?.available_payment_methods
+              setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
+            })
+
+            expressElement.on("availablepaymentmethodschange", (event: any) => {
+              if (cancelled) return
+              const methods = event?.availablePaymentMethods || event?.available_payment_methods
+              setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
+            })
+
+            expressElement.on("confirm", async () => {
+              await confirmCardPayment()
+            })
+
+            expressElement.mount(expressRef.current)
+          } catch {
+            // Fast-pay wallets are optional. Never let a wallet-rendering issue block card checkout.
+            setApplePayAvailable(false)
+          }
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Secure checkout could not load.")
       }
