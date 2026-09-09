@@ -145,7 +145,6 @@ export function CheckoutForm() {
         if (submitResult?.error) {
           setError(submitResult.error.message || "Check your payment details.")
           busyRef.current = false
-          busyRef.current = false
           setBusy(false)
           return
         }
@@ -163,6 +162,7 @@ export function CheckoutForm() {
 
         if (result?.error) {
           setError(result.error.message || "Payment could not be completed.")
+          busyRef.current = false
           setBusy(false)
           return
         }
