@@ -42,7 +42,7 @@ async function createIntent(method: IntentMethod) {
 const appearance = {
   theme: "stripe" as const,
   variables: {
-    colorPrimary: "#0f5e4f",
+    colorPrimary: "#ef6238",
     colorBackground: "#fffdfa",
     colorText: "#102630",
     colorDanger: "#b42318",
@@ -56,8 +56,8 @@ const appearance = {
       boxShadow: "0 7px 22px rgba(16,38,48,.03)",
     },
     ".Input:focus": {
-      border: "1px solid #0f7a62",
-      boxShadow: "0 0 0 3px rgba(15,122,98,.10)",
+      border: "1px solid #ef6238",
+      boxShadow: "0 0 0 3px rgba(239,98,56,.10)",
     },
     ".Label": {
       fontWeight: "800",
@@ -290,7 +290,7 @@ export function CheckoutForm() {
               klarna: "never",
             },
             layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-            buttonHeight: 52,
+            buttonHeight: 50,
             buttonTheme: { googlePay: "black" },
             billingAddressRequired: false,
             emailRequired: false,
@@ -300,7 +300,7 @@ export function CheckoutForm() {
           googlePayElement.on("confirm", async () => confirmPayment(moreElementsRef.current, "card"))
           googlePayElement.mount(moreExpressRef.current)
         } catch {
-          // Google Pay is device/browser dependent. Do not block the checkout if it is unavailable.
+          // Google Pay only appears on supported devices/browsers.
         }
       }
     } catch (err) {
@@ -328,10 +328,8 @@ export function CheckoutForm() {
 
       const paymentElement = elements.create("payment", {
         layout: {
-          type: "accordion",
+          type: "tabs",
           defaultCollapsed: false,
-          radios: false,
-          spacedAccordionItems: false,
         },
         paymentMethodOrder: ["affirm", "klarna"],
       })
@@ -362,13 +360,14 @@ export function CheckoutForm() {
 
       <div className="checkout-payment-card">
         <div className="fast-pay-label">FAST PAY</div>
+
         <div className="fast-pay-grid">
           <div className="fast-pay-apple fast-pay-wallet">
             <div ref={applePayRef} />
             {!applePayAvailable ? (
-              <div className="apple-pay-unavailable" aria-label="Apple Pay is available on supported Apple browsers and devices">
-                <span className="apple-pay-brand"><b></b> Pay</span>
-                <small>Safari / Apple device</small>
+              <div className="apple-pay-unavailable" aria-label="Apple Pay is available in Safari on eligible Apple devices">
+                <span className="apple-pay-brand"><b></b>Pay</span>
+                <small>Available in Safari</small>
               </div>
             ) : null}
           </div>
@@ -441,7 +440,6 @@ export function CheckoutForm() {
         {moreOpen ? (
           <div className="more-payment-panel">
             {moreLoading ? <div className="more-payment-loading">Checking available payment methods…</div> : null}
-
             <div className="more-google-pay" ref={moreExpressRef} />
 
             <button
@@ -450,17 +448,17 @@ export function CheckoutForm() {
               onClick={openBnpl}
               aria-expanded={bnplOpen}
             >
-              <Clock3 size={19} />
+              <div className="pay-later-icon"><Clock3 size={18} /></div>
               <span>
-                <strong>Buy now, pay later</strong>
-                <small>See available installment options</small>
+                <strong>Pay over time</strong>
+                <small>Affirm or Klarna when available</small>
               </span>
               <ChevronDown size={16} />
             </button>
 
             {bnplOpen ? (
               <div className="bnpl-panel">
-                {bnplLoading ? <div className="site-payment-loading">Loading installment options…</div> : null}
+                {bnplLoading ? <div className="bnpl-loading">Loading installment options…</div> : null}
                 <div ref={bnplRef} />
                 {bnplReady ? (
                   <button
@@ -469,7 +467,7 @@ export function CheckoutForm() {
                     className="bnpl-confirm"
                     onClick={() => confirmPayment(bnplElementsRef.current, "bnpl")}
                   >
-                    {busy ? "Processing…" : "Continue with pay later"}
+                    {busy ? "Processing…" : "Continue with selected option"}
                     {!busy ? <ArrowRight size={16} /> : null}
                   </button>
                 ) : null}
