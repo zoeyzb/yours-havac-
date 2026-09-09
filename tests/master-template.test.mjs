@@ -248,7 +248,7 @@ test('checkout payment hierarchy keeps wallets first, card open, and optional me
 
   assert.ok(checkoutForm.includes('applePay: "always"'), 'Apple Pay should remain a real Stripe Express Checkout option')
   assert.ok(checkoutForm.includes('Cash App Pay'), 'Cash App Pay should remain beside Apple Pay')
-  assert.equal(checkoutForm.includes('Bank transfer'), false, 'disabled bank transfer should not be shown')
+  assert.ok(checkoutForm.includes('Bank transfer'), 'bank transfer should be a real hosted Stripe option')
   assert.equal(checkoutForm.includes('Pay another way'), false, 'card should not be nested behind a duplicate pay-another-way chooser')
 
   const cardHeading = checkoutForm.indexOf('Enter card details')
@@ -257,7 +257,7 @@ test('checkout payment hierarchy keeps wallets first, card open, and optional me
 
   assert.equal(checkoutPage.includes('Encrypted checkout'), false, 'avoid fear-triggering checkout reassurance copy')
   assert.equal(checkoutPage.includes('Your information is secure'), false, 'avoid introducing security anxiety')
-  assert.ok(checkoutPage.includes('checkout-outcome-icon--proof'), 'trusted-by proof should use a clean non-pixelated trust treatment')
+  assert.ok(checkoutPage.includes('checkout-proof-visuals'), 'trusted-by proof should use real face imagery')
 })
 
 
@@ -271,11 +271,11 @@ test('checkout visual polish keeps proof people, four-step flow, and orange CTA'
   }
 
   assert.ok(checkoutStyles.includes('.checkout-process'), 'four-step checkout flow should have dedicated styling')
-  assert.ok(checkoutStyles.includes('.checkout-outcome-icon--proof'), 'trusted proof should avoid low-resolution avatar crops')
+  assert.ok(checkoutStyles.includes('.checkout-proof-avatar'), 'trusted proof should include clear profile avatars')
   assert.ok(checkoutStyles.includes('linear-gradient(135deg, #f05d34, #ff6f43)'), 'Pay $97 CTA should stay orange')
   assert.ok(checkoutStyles.includes('pointer-events: none'), 'unsupported Apple Pay fallback must not be clickable')
   assert.ok(checkoutForm.includes('Available in Safari'), 'unsupported Apple Pay state should explain the browser requirement')
-  assert.ok(checkoutForm.includes('type: "tabs"'), 'BNPL should use a cleaner Stripe tab layout')
+  assert.ok(checkoutForm.includes('createHostedSession'), 'pay-later should use hosted Stripe checkout instead of a bulky embedded panel')
 })
 
 
@@ -285,8 +285,25 @@ test('checkout optional payments are one layer and process sits beside the purch
   const checkoutStyles = readFileSync(new URL('../app/checkout/checkout.css', import.meta.url), 'utf8')
 
   assert.equal(checkoutForm.includes('FAST PAY'), false, 'redundant fast-pay label should be removed')
-  assert.equal(checkoutForm.includes('Pay over time</strong>'), false, 'optional payments should not add a second nested pay-over-time toggle')
-  assert.ok(checkoutForm.includes('defaultCollapsed: true'), 'BNPL choices should stay compact until the provider is selected')
+  assert.ok(checkoutForm.includes('Pay over time'), 'optional payments should include one compact pay-over-time action')
+  assert.equal(checkoutForm.includes('After submission, you will be redirected'), false, 'embedded redirect helper copy should not appear in the checkout UI')
   assert.ok(checkoutPage.includes('checkout-process--payment'), 'Reserve → Customize → Approve → Launch belongs next to Start for $97')
   assert.ok(checkoutStyles.includes('checkoutProgressSweep'), 'purchase process should have a restrained moving progress line')
+})
+
+
+test('checkout speed and depth pass keep the payment surface fast and dimensional', () => {
+  const checkoutPage = readFileSync(new URL('../app/checkout/page.tsx', import.meta.url), 'utf8')
+  const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
+  const checkoutStyles = readFileSync(new URL('../app/checkout/checkout.css', import.meta.url), 'utf8')
+  const sessionProxy = readFileSync(new URL('../app/api/checkout/session/route.ts', import.meta.url), 'utf8')
+
+  assert.ok(checkoutForm.includes('initialCardIntentRef.current = createIntent("card")'), 'card intent should preload in parallel with Stripe.js')
+  assert.ok(checkoutForm.includes('Bank transfer'), 'compact hosted bank payment should be available')
+  assert.ok(checkoutForm.includes('Pay over time'), 'compact hosted pay-later option should be available')
+  assert.ok(sessionProxy.includes('website-build/checkout-session'), 'alternate payments should proxy to the hosted Stripe-session backend')
+  assert.ok(checkoutPage.includes('checkout-depth-scene'), 'left panel should include a dedicated 3D depth scene')
+  assert.ok(checkoutStyles.includes('.checkout-depth-box'), 'left panel should use box geometry rather than a decorative circle')
+  assert.ok(checkoutStyles.includes('.checkout-depth-particles'), 'left panel should include subtle CSS-only particles')
+  assert.ok(checkoutStyles.includes('1.8s linear infinite'), 'progress tracer should move immediately and visibly')
 })
