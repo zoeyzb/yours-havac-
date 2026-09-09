@@ -561,12 +561,12 @@ function MobileServiceBar() {
 function OwnerOffer() {
   const reduceMotion = useReducedMotion()
   const benefits = [
+    "More customers",
     "More visibility",
-    "More inquiries",
     "Your branding",
     "Your services",
-    "Real reviews",
-    "Trusted by 500+",
+    "Best reviews",
+    "Trusted by 8,500+",
   ] as const
 
   const flow = ["Reserve", "Customize", "Approve", "Launch"] as const
