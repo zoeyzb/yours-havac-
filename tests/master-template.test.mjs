@@ -125,15 +125,17 @@ test('aggressive contractor redesign uses bold industrial hierarchy instead of s
 })
 
 
-test('owner conversion layer stays visible and sends every owner CTA straight to Stripe', () => {
+test('owner conversion layer uses one fixed lower CTA and keeps the top strip non-sticky', () => {
   const header = component.match(/function Header[\s\S]*?function Hero/)?.[0] ?? ''
   assert.equal(header.includes('<PhoneAction'), false, 'placeholder phone action should not appear in the main homeowner header')
-  assert.ok(component.includes('Your website preview is ready.'), 'sticky owner preview bar should remain the dominant owner control')
+  assert.ok(component.includes('Your website preview is ready.'), 'top preview strip should remain visible at page start')
   assert.ok(component.includes('Start for $97'), 'owner CTA should be short and priced')
-  assert.ok(component.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'owner CTAs should go straight to Stripe')
+  assert.ok(component.includes('const checkoutUrl = "/checkout"'), 'owner CTAs should use the custom onsite checkout')
+  assert.equal(component.includes('https://buy.stripe.com/'), false, 'hosted payment link should not be used from the preview')
   assert.equal(component.includes('href="/claim"'), false, 'owner CTAs should not add an intermediate claim page')
-  assert.ok(styles.includes('.owner-preview-bar') && styles.includes('position: sticky'), 'preview bar should stay visible while scrolling')
-  assert.ok(component.includes('function OwnerFloatingClaimBar'), 'desktop and mobile should have a persistent lower owner CTA')
+  assert.ok(styles.includes('.owner-preview-bar') && styles.includes('position: relative'), 'top preview strip should scroll away normally')
+  assert.ok(component.includes('function OwnerFloatingClaimBar'), 'desktop and mobile should have one persistent lower CTA')
+  assert.ok(component.includes('Get more customers & visibility'), 'floating CTA should lead with the customer outcome')
 })
 
 test('owner offer is compact, punchy, and keeps the four-step motion inside the price card', () => {
@@ -145,8 +147,8 @@ test('owner offer is compact, punchy, and keeps the four-step motion inside the 
     'More customer inquiries',
     'Your branding + contact info',
     'Your services + service area',
-    'Reviews + trust proof',
-    'Mobile-first + domain launch',
+    'Reviews from your customers',
+    'Your domain + launch',
         'Start with $97 today',
     'owner-card-flow',
     'owner-card-flow__line',
@@ -170,18 +172,26 @@ test('owner offer is compact, punchy, and keeps the four-step motion inside the 
 })
 
 
-test('claim flow goes straight to live Stripe and preserves the post-payment handoff', () => {
-  const claimUrl = new URL('../app/claim/page.tsx', import.meta.url)
-  const successUrl = new URL('../app/claim/success/page.tsx', import.meta.url)
-  assert.ok(existsSync(claimUrl), 'legacy claim route should remain as a redirect')
-  assert.ok(existsSync(successUrl), 'post-payment success page should exist')
-  if (!existsSync(claimUrl) || !existsSync(successUrl)) return
+test('checkout stays onsite and uses a custom Stripe Elements handoff', () => {
+  const checkoutUrl = new URL('../app/checkout/page.tsx', import.meta.url)
+  const formUrl = new URL('../app/checkout/checkout-form.tsx', import.meta.url)
+  const proxyUrl = new URL('../app/api/checkout/intent/route.ts', import.meta.url)
+  const successUrl = new URL('../app/payment/success/page.tsx', import.meta.url)
+  for (const file of [checkoutUrl, formUrl, proxyUrl, successUrl]) assert.ok(existsSync(file), `missing custom checkout file: ${file.pathname}`)
 
-  const claimPage = readFileSync(claimUrl, 'utf8')
+  const checkoutPage = readFileSync(checkoutUrl, 'utf8')
+  const checkoutForm = readFileSync(formUrl, 'utf8')
+  const proxy = readFileSync(proxyUrl, 'utf8')
   const successPage = readFileSync(successUrl, 'utf8')
-  assert.ok(claimPage.includes('redirect('), 'claim route should immediately hand off to Stripe')
-  assert.ok(claimPage.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'claim redirect should use the live Stripe payment link')
-  assert.ok(successPage.includes('Payment received'), 'success page should confirm the deposit and explain next steps')
+
+  assert.ok(checkoutPage.includes('Your site is built.'), 'checkout should preserve offer continuity')
+  assert.ok(checkoutPage.includes('USD only.'), 'checkout should clearly lock the purchase to USD')
+  assert.ok(checkoutForm.includes('paymentMethodOrder: ["card", "cashapp"]'), 'card should be first and Cash App available')
+  assert.ok(checkoutForm.includes('applePay: "auto"'), 'Apple Pay should appear when eligible')
+  assert.ok(checkoutForm.includes('link: "never"') && checkoutForm.includes('amazonPay: "never"'), 'Link and Amazon Pay should be disabled')
+  assert.ok(checkoutForm.includes('Where should we send the finished site?'), 'only one necessary contact field should be collected')
+  assert.ok(proxy.includes('recoverrevenue.company/api/public/website-build/intent'), 'site should create payment state through the Recover payment backend')
+  assert.ok(successPage.includes('Your build is reserved.'), 'post-payment handoff should explain the next step')
 })
 
 
@@ -212,9 +222,9 @@ test('owner price card keeps the approval-first risk reversal without repeated p
   assert.equal(source.includes('We replace the preview details with yours.'), false)
 })
 
-test('legacy claim route redirects immediately to Stripe', () => {
+test('legacy claim route redirects to the custom onsite checkout', () => {
   const claimPage = readFileSync(new URL('../app/claim/page.tsx', import.meta.url), 'utf8')
-  assert.ok(claimPage.includes('redirect('), 'legacy claim route should redirect instead of rendering another sales page')
-  assert.ok(claimPage.includes('https://buy.stripe.com/dRm00ia7agwLdrX6JzeEo00'), 'legacy claim route should redirect to the live Stripe checkout')
-  assert.equal(claimPage.includes('Make this website yours.'), false, 'intermediate claim page should be removed')
+  assert.ok(claimPage.includes('redirect('), 'legacy claim route should remain a redirect')
+  assert.ok(claimPage.includes('"/checkout"'), 'legacy claim route should use the custom onsite checkout')
+  assert.equal(claimPage.includes('buy.stripe.com'), false, 'legacy claim route should not use the hosted Stripe payment link')
 })
