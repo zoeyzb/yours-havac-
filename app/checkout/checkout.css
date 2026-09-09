@@ -1142,3 +1142,291 @@
     font-size: .58rem;
   }
 }
+
+
+/* Depth + trust pass */
+.site-checkout-summary::after {
+  display: none;
+}
+
+.checkout-depth-scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.checkout-depth-box {
+  position: absolute;
+  width: 180px;
+  height: 120px;
+  border: 1px solid rgba(113,239,200,.13);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    24px 28px 46px rgba(0,0,0,.10),
+    -18px -18px 38px rgba(31,166,139,.025);
+  transform-style: preserve-3d;
+  backdrop-filter: blur(1px);
+}
+
+.checkout-depth-box::before,
+.checkout-depth-box::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(113,239,200,.10);
+  border-radius: inherit;
+  background: rgba(5,42,50,.28);
+}
+
+.checkout-depth-box::before {
+  inset: 13px -15px -13px 15px;
+  transform: translateZ(-28px);
+}
+
+.checkout-depth-box::after {
+  inset: 26px -28px -26px 28px;
+  opacity: .55;
+  transform: translateZ(-56px);
+}
+
+.checkout-depth-box--one {
+  top: 15%;
+  right: -42px;
+  transform: rotateY(-18deg) rotateX(8deg) translateZ(10px);
+}
+
+.checkout-depth-box--two {
+  top: 47%;
+  left: -72px;
+  width: 150px;
+  height: 98px;
+  transform: rotateY(22deg) rotateX(-8deg) translateZ(-10px);
+}
+
+.checkout-depth-box--three {
+  right: 8%;
+  bottom: 18%;
+  width: 138px;
+  height: 92px;
+  transform: rotateY(-24deg) rotateX(12deg) translateZ(-26px);
+}
+
+.checkout-depth-box--four {
+  left: 34%;
+  bottom: 5%;
+  width: 112px;
+  height: 76px;
+  opacity: .62;
+  transform: rotateY(18deg) rotateX(10deg) translateZ(-60px);
+}
+
+.checkout-depth-particles {
+  position: absolute;
+  left: 12%;
+  top: 14%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(120,255,230,.32);
+  box-shadow:
+    74px 38px rgba(120,255,230,.18),
+    186px 12px rgba(255,138,99,.18),
+    308px 64px rgba(120,255,230,.20),
+    430px 28px rgba(255,255,255,.13),
+    510px 118px rgba(120,255,230,.16),
+    52px 224px rgba(255,255,255,.12),
+    246px 188px rgba(120,255,230,.16),
+    398px 264px rgba(255,138,99,.12),
+    560px 322px rgba(120,255,230,.15),
+    124px 392px rgba(120,255,230,.14),
+    318px 446px rgba(255,255,255,.11),
+    486px 510px rgba(255,138,99,.10);
+  animation: checkoutParticleDrift 8s ease-in-out infinite alternate;
+}
+
+@keyframes checkoutParticleDrift {
+  from { transform: translate3d(0,0,0); opacity: .45; }
+  to { transform: translate3d(8px,-10px,0); opacity: .85; }
+}
+
+.checkout-outcome-card--proof {
+  grid-template-columns: 112px minmax(0, 1fr);
+}
+
+.checkout-proof-visuals {
+  min-width: 112px;
+  display: flex;
+  align-items: center;
+}
+
+.checkout-proof-avatar {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  margin-left: -13px;
+  border: 3px solid rgba(255,255,255,.96);
+  border-radius: 50%;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat;
+  image-rendering: auto;
+  box-shadow: 0 8px 18px rgba(0,0,0,.24), 0 0 0 1px rgba(13,52,62,.25);
+}
+
+.checkout-proof-avatar:first-child {
+  margin-left: 0;
+}
+
+/* Stronger 3D purchase path: visible immediately and always in motion */
+.checkout-process--payment {
+  perspective: 700px;
+}
+
+.checkout-process--payment::before {
+  top: 17px;
+  height: 5px;
+  border: 1px solid rgba(184,88,57,.16);
+  background: linear-gradient(180deg, #f9d7ca 0%, #eab39f 48%, #cf8d76 52%, #f9d7ca 100%);
+  box-shadow:
+    0 2px 0 rgba(120,56,36,.08),
+    0 8px 16px rgba(239,98,56,.10);
+  transform: rotateX(48deg);
+  transform-origin: center;
+}
+
+.checkout-process--payment::after {
+  top: 17px;
+  width: 18%;
+  height: 5px;
+  background: linear-gradient(90deg, transparent 0%, #ff7b54 35%, #fff1eb 50%, #ff6237 68%, transparent 100%);
+  box-shadow: 0 0 12px rgba(255,99,55,.55);
+  animation: checkoutProgressSweep 1.8s linear infinite;
+}
+
+.checkout-process--payment .checkout-process-number {
+  transform: translateZ(12px);
+  box-shadow:
+    0 0 0 1px #d9dfdc,
+    0 8px 0 #0d2931,
+    0 13px 22px rgba(16,38,48,.18);
+}
+
+.checkout-process--payment .checkout-process-step:first-child .checkout-process-number {
+  box-shadow:
+    0 0 0 1px #f2633b,
+    0 8px 0 #c84b27,
+    0 14px 24px rgba(242,99,59,.24);
+}
+
+@keyframes checkoutProgressSweep {
+  from { transform: translateX(0) rotateX(48deg); opacity: .55; }
+  to { transform: translateX(455%) rotateX(48deg); opacity: .95; }
+}
+
+.more-payment-panel--compact {
+  margin-top: .62rem;
+  border: 1px solid #e4e7e2;
+  border-radius: 14px;
+  background: #fffdfa;
+  padding: .65rem;
+}
+
+.more-payment-panel--compact .more-payment-loading {
+  min-height: 34px;
+  margin-bottom: .5rem;
+  border: 0;
+  background: transparent;
+  font-size: .68rem;
+}
+
+.alt-payment-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem;
+}
+
+.alt-payment-option {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 16px;
+  gap: .55rem;
+  align-items: center;
+  min-height: 58px;
+  border: 1px solid #dde3df;
+  border-radius: 11px;
+  background: #fff;
+  padding: .62rem .72rem;
+  color: #183640;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(16,38,48,.025);
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.alt-payment-option:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #c2cec8;
+  box-shadow: 0 11px 22px rgba(16,38,48,.05);
+}
+
+.alt-payment-option:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.alt-payment-option > svg:first-child {
+  color: #e55d37;
+}
+
+.alt-payment-option span {
+  display: grid;
+  gap: .08rem;
+}
+
+.alt-payment-option strong {
+  font-size: .75rem;
+  font-weight: 900;
+}
+
+.alt-payment-option small {
+  color: #839197;
+  font-size: .59rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-depth-particles,
+  .checkout-process--payment::after {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .checkout-depth-box {
+    opacity: .55;
+  }
+
+  .checkout-outcome-card--proof {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .checkout-proof-visuals {
+    min-width: 92px;
+  }
+
+  .checkout-proof-avatar {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    margin-left: -11px;
+  }
+
+  .alt-payment-row {
+    grid-template-columns: 1fr;
+  }
+}
