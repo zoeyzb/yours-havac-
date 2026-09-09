@@ -348,7 +348,7 @@ export function CheckoutForm() {
       <div className="fast-pay-block">
         <div className="fast-pay-label">FAST PAY</div>
         <div className={applePayAvailable ? "fast-pay-grid" : "fast-pay-grid fast-pay-grid--single"}>
-          <div className={applePayAvailable ? "fast-pay-apple" : "fast-pay-apple fast-pay-apple--hidden"}>
+          <div className={applePayAvailable ? "fast-pay-apple fast-pay-wallet" : "fast-pay-apple fast-pay-wallet fast-pay-apple--hidden"}>
             <div ref={expressRef} />
           </div>
 
@@ -387,7 +387,6 @@ export function CheckoutForm() {
             <span>CARD</span>
             <strong>Enter card details</strong>
           </div>
-          <div className="usa-only-badge">US checkout</div>
         </div>
 
         <div className="site-payment-element-wrap">
@@ -404,7 +403,7 @@ export function CheckoutForm() {
 
         <div className="site-payment-security">
           <LockKeyhole size={14} />
-          <span>Secure payment powered by Stripe.</span>
+          <span>Secure payment powered by Stripe</span>
         </div>
       </form>
     </>
