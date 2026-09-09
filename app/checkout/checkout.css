@@ -180,12 +180,18 @@
 .fast-pay-apple > div,
 .fast-pay-apple iframe {
   width: 100% !important;
-  min-height: 54px;
+  min-height: 56px;
+}
+
+.fast-pay-apple {
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 7px 18px rgba(16,38,48,.045);
 }
 
 .cashapp-fast-button {
   display: flex;
-  min-height: 54px;
+  min-height: 56px;
   align-items: center;
   justify-content: center;
   gap: .55rem;
@@ -366,5 +372,5 @@
   .checkout-outcome-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .site-checkout-payment-head h2 { font-size:2.65rem; }
   .card-payment-heading { align-items:center; }
-  .cashapp-fast-button { min-height:52px; font-size:.76rem; }
+  .cashapp-fast-button { min-height:54px; font-size:.76rem; }
 }
