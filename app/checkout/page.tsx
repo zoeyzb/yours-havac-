@@ -2,8 +2,10 @@ import Link from "next/link"
 import {
   ArrowLeft,
   BarChart3,
+  CheckCircle2,
   LockKeyhole,
   Settings2,
+  ShieldCheck,
   Sparkles,
   PhoneCall,
   Star,
@@ -50,15 +52,6 @@ export default function CheckoutPage() {
             </Link>
             <span className="checkout-brand-divider" />
             <span className="checkout-brand-context">WEBSITES FOR HVAC COMPANIES</span>
-
-            <div className="checkout-top-trust" aria-label="Trusted by 8,500 plus">
-              <div className="checkout-proof-visuals checkout-proof-visuals--top" aria-hidden="true">
-                <span className="checkout-proof-avatar checkout-proof-avatar--one" />
-                <span className="checkout-proof-avatar checkout-proof-avatar--two" />
-                <span className="checkout-proof-avatar checkout-proof-avatar--three" />
-              </div>
-              <strong>Trusted by 8,500+</strong>
-            </div>
           </div>
 
           <Link href="/" className="site-checkout-back"><ArrowLeft size={15} /> Back to preview</Link>
@@ -66,7 +59,7 @@ export default function CheckoutPage() {
           <div className="site-checkout-kicker"><Sparkles size={14} /> WEBSITE BUILD</div>
           <h1>Your site is built.<br /><span>Finish it your way.</span></h1>
           <p className="checkout-summary-subtitle">
-            A high-converting website for your HVAC business, ready to make yours.
+            A high-converting website for your HVAC business.
           </p>
 
           <div className="checkout-outcome-grid" aria-label="What your finished site includes">
@@ -81,6 +74,19 @@ export default function CheckoutPage() {
             ))}
           </div>
 
+          <div className="checkout-approve-card">
+            <div className="checkout-approve-icon"><ShieldCheck size={30} /></div>
+            <div className="checkout-approve-copy">
+              <strong>Approve first</strong>
+              <span>Approve the finished site, then pay the remaining $500.</span>
+            </div>
+            <div className="checkout-approve-points">
+              <span><CheckCircle2 size={15} /> No risk</span>
+              <span><CheckCircle2 size={15} /> No long-term contracts</span>
+              <span><CheckCircle2 size={15} /> Cancel anytime</span>
+            </div>
+          </div>
+
           <div className="checkout-process checkout-process--summary" aria-label="Website launch process">
             {steps.map((step, index) => (
               <div className="checkout-process-step" key={step}>
@@ -92,6 +98,15 @@ export default function CheckoutPage() {
         </aside>
 
         <section className="site-checkout-payment">
+          <div className="checkout-payment-trust" aria-label="Trusted by 8,500 plus">
+            <span>Trusted by 8,500+ contractors</span>
+            <div className="checkout-proof-visuals checkout-proof-visuals--payment" aria-hidden="true">
+              <span className="checkout-proof-avatar checkout-proof-avatar--one" />
+              <span className="checkout-proof-avatar checkout-proof-avatar--two" />
+              <span className="checkout-proof-avatar checkout-proof-avatar--three" />
+            </div>
+          </div>
+
           <div className="checkout-payment-topline">
             <div className="checkout-payment-secure"><LockKeyhole size={16} /> Secure payment</div>
             <div className="checkout-payment-step"><span>Step 1 of 2</span><i /><i /></div>
