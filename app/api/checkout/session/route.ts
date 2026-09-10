@@ -4,7 +4,11 @@ const PAYMENT_BACKEND = "https://recoverrevenue.company/api/public/website-build
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({})) as { method?: unknown }
-  const method = body.method === "bank" ? "bank" : body.method === "bnpl" ? "bnpl" : null
+  const method =
+    body.method === "bank" ? "bank" :
+    body.method === "affirm" ? "affirm" :
+    body.method === "klarna" ? "klarna" :
+    null
 
   if (!method) {
     return NextResponse.json(
