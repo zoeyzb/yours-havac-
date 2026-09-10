@@ -6,7 +6,6 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
-  Clock3,
   Landmark,
   LockKeyhole,
 } from "lucide-react"
@@ -26,7 +25,7 @@ type CheckoutPayload = {
 }
 
 type IntentMethod = "card" | "cashapp"
-type HostedMethod = "bank" | "bnpl"
+type HostedMethod = "bank" | "affirm" | "klarna"
 
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
@@ -103,6 +102,7 @@ export function CheckoutForm() {
   const [scriptReady, setScriptReady] = useState(false)
   const [cardReady, setCardReady] = useState(false)
   const [applePayAvailable, setApplePayAvailable] = useState(false)
+  const [googlePayAvailable, setGooglePayAvailable] = useState(false)
   const [cashAppOpen, setCashAppOpen] = useState(false)
   const [cashAppReady, setCashAppReady] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
@@ -112,7 +112,6 @@ export function CheckoutForm() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    // Start the network request immediately so Stripe.js and the PaymentIntent load in parallel.
     initialCardIntentRef.current = createIntent("card")
   }, [])
 
@@ -304,17 +303,24 @@ export function CheckoutForm() {
           klarna: "never",
         },
         layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-        buttonHeight: 48,
+        buttonHeight: 46,
         buttonTheme: { googlePay: "black" },
         billingAddressRequired: false,
         emailRequired: false,
         phoneNumberRequired: false,
       })
 
+      const syncAvailability = (event: any) => {
+        const methods = event?.availablePaymentMethods || event?.available_payment_methods
+        setGooglePayAvailable(Boolean(methods?.googlePay || methods?.google_pay))
+      }
+
+      googlePayElement.on("ready", syncAvailability)
+      googlePayElement.on("availablepaymentmethodschange", syncAvailability)
       googlePayElement.on("confirm", async () => confirmElementsPayment(googlePayElementsRef.current))
       googlePayElement.mount(googlePayRef.current)
     } catch {
-      // Google Pay is browser/device dependent; bank and pay-later remain available below.
+      setGooglePayAvailable(false)
     }
   }
 
@@ -436,38 +442,53 @@ export function CheckoutForm() {
         </button>
 
         {moreOpen ? (
-          <div className="more-payment-panel more-payment-panel--compact">
-            {moreLoading ? <div className="more-payment-loading">Checking Google Pay…</div> : null}
-            <div className="more-google-pay" ref={googlePayRef} />
+          <div className="more-payment-panel more-payment-panel--strips">
+            {moreLoading ? <div className="more-payment-loading">Checking payment options…</div> : null}
 
-            <div className="alt-payment-row">
+            <div className="payment-strip-list">
               <button
                 type="button"
-                className="alt-payment-option"
+                className="payment-strip"
                 disabled={hostedBusy !== null}
                 onClick={() => openHosted("bank")}
               >
-                <Landmark size={18} />
-                <span>
-                  <strong>{hostedBusy === "bank" ? "Opening…" : "Bank transfer"}</strong>
-                  <small>Pay from a U.S. bank account</small>
-                </span>
+                <Landmark size={17} />
+                <strong>{hostedBusy === "bank" ? "Opening…" : "Bank transfer"}</strong>
                 <ArrowRight size={15} />
               </button>
 
               <button
                 type="button"
-                className="alt-payment-option"
+                className="payment-strip"
                 disabled={hostedBusy !== null}
-                onClick={() => openHosted("bnpl")}
+                onClick={() => openHosted("affirm")}
               >
-                <Clock3 size={18} />
-                <span>
-                  <strong>{hostedBusy === "bnpl" ? "Opening…" : "Pay over time"}</strong>
-                  <small>Affirm or Klarna when eligible</small>
-                </span>
+                <span className="payment-brand-mark payment-brand-mark--affirm">a</span>
+                <strong>{hostedBusy === "affirm" ? "Opening…" : "Affirm"}</strong>
                 <ArrowRight size={15} />
               </button>
+
+              <button
+                type="button"
+                className="payment-strip"
+                disabled={hostedBusy !== null}
+                onClick={() => openHosted("klarna")}
+              >
+                <span className="payment-brand-mark payment-brand-mark--klarna">K</span>
+                <strong>{hostedBusy === "klarna" ? "Opening…" : "Klarna"}</strong>
+                <ArrowRight size={15} />
+              </button>
+
+              <div className={googlePayAvailable ? "payment-strip payment-strip--google" : "payment-strip payment-strip--google payment-strip--unavailable"}>
+                <div className="google-pay-native" ref={googlePayRef} />
+                {!googlePayAvailable ? (
+                  <>
+                    <span className="payment-brand-mark payment-brand-mark--google">G</span>
+                    <strong>Google Pay</strong>
+                    <small>Supported devices</small>
+                  </>
+                ) : null}
+              </div>
             </div>
           </div>
         ) : null}
