@@ -2018,3 +2018,55 @@ button.payment-strip:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Make payment-side trust proof more visible */
+.checkout-payment-trust {
+  gap: 12px;
+  margin-bottom: 16px;
+  color: #314c55;
+  font-size: .86rem;
+  font-weight: 900;
+}
+
+.checkout-payment-trust > span {
+  letter-spacing: -.012em;
+}
+
+.checkout-proof-visuals--payment {
+  min-width: 88px;
+  width: 88px;
+}
+
+.checkout-proof-visuals--payment .checkout-proof-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  margin-left: -9px;
+  border-width: 2.5px;
+  box-shadow:
+    0 6px 14px rgba(16,38,48,.15),
+    0 0 0 1px rgba(16,38,48,.05);
+}
+
+.checkout-proof-visuals--payment .checkout-proof-avatar:first-child {
+  margin-left: 0;
+}
+
+@media (max-width: 620px) {
+  .checkout-payment-trust {
+    font-size: .76rem;
+    margin-bottom: 14px;
+  }
+
+  .checkout-proof-visuals--payment {
+    min-width: 78px;
+    width: 78px;
+  }
+
+  .checkout-proof-visuals--payment .checkout-proof-avatar {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+}
