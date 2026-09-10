@@ -5,6 +5,7 @@ import {
   LockKeyhole,
   Settings2,
   Sparkles,
+  PhoneCall,
   Star,
   Tag,
   Users,
@@ -24,6 +25,7 @@ const outcomes = [
   { icon: Tag, title: "Your branding", copy: "A site that looks like you." },
   { icon: Settings2, title: "Your services", copy: "Show what you do best." },
   { icon: Star, title: "Best reviews", copy: "Build trust and credibility." },
+  { icon: PhoneCall, title: "More calls", copy: "Make it easier to reach you." },
 ] as const
 
 const steps = ["Reserve", "Customize", "Approve", "Launch"] as const
@@ -48,6 +50,15 @@ export default function CheckoutPage() {
             </Link>
             <span className="checkout-brand-divider" />
             <span className="checkout-brand-context">WEBSITES FOR HVAC COMPANIES</span>
+
+            <div className="checkout-top-trust" aria-label="Trusted by 8,500 plus">
+              <div className="checkout-proof-visuals checkout-proof-visuals--top" aria-hidden="true">
+                <span className="checkout-proof-avatar checkout-proof-avatar--one" />
+                <span className="checkout-proof-avatar checkout-proof-avatar--two" />
+                <span className="checkout-proof-avatar checkout-proof-avatar--three" />
+              </div>
+              <strong>Trusted by 8,500+</strong>
+            </div>
           </div>
 
           <Link href="/" className="site-checkout-back"><ArrowLeft size={15} /> Back to preview</Link>
@@ -68,18 +79,15 @@ export default function CheckoutPage() {
                 </div>
               </div>
             ))}
+          </div>
 
-            <div className="checkout-outcome-card checkout-outcome-card--proof">
-              <div className="checkout-proof-visuals" aria-hidden="true">
-                <span className="checkout-proof-avatar checkout-proof-avatar--one" />
-                <span className="checkout-proof-avatar checkout-proof-avatar--two" />
-                <span className="checkout-proof-avatar checkout-proof-avatar--three" />
+          <div className="checkout-process checkout-process--summary" aria-label="Website launch process">
+            {steps.map((step, index) => (
+              <div className="checkout-process-step" key={step}>
+                <span className="checkout-process-number">{index + 1}</span>
+                <strong>{step}</strong>
               </div>
-              <div className="checkout-outcome-copy">
-                <strong>Trusted by 8,500+</strong>
-                <span>HVAC pros nationwide.</span>
-              </div>
-            </div>
+            ))}
           </div>
         </aside>
 
@@ -91,15 +99,6 @@ export default function CheckoutPage() {
 
           <div className="site-checkout-payment-head">
             <h2>Start for $97</h2>
-          </div>
-
-          <div className="checkout-process checkout-process--payment" aria-label="Website launch process">
-            {steps.map((step, index) => (
-              <div className="checkout-process-step" key={step}>
-                <span className="checkout-process-number">{index + 1}</span>
-                <strong>{step}</strong>
-              </div>
-            ))}
           </div>
 
           <CheckoutForm />
