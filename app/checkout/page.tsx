@@ -99,7 +99,7 @@ export default function CheckoutPage() {
 
         <section className="site-checkout-payment">
           <div className="checkout-payment-trust" aria-label="Trusted by 8,500 plus">
-            <span>Trusted by 8,500+ contractors</span>
+            <span>Trusted by 8,500+ businesses</span>
             <div className="checkout-proof-visuals checkout-proof-visuals--payment" aria-hidden="true">
               <span className="checkout-proof-avatar checkout-proof-avatar--one" />
               <span className="checkout-proof-avatar checkout-proof-avatar--two" />
