@@ -279,16 +279,16 @@ test('checkout visual polish keeps proof people, four-step flow, and orange CTA'
 })
 
 
-test('checkout optional payments are one layer and process sits beside the purchase', () => {
+test('checkout optional payments are thin strips and process sits under the value cards', () => {
   const checkoutPage = readFileSync(new URL('../app/checkout/page.tsx', import.meta.url), 'utf8')
   const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
   const checkoutStyles = readFileSync(new URL('../app/checkout/checkout.css', import.meta.url), 'utf8')
 
   assert.equal(checkoutForm.includes('FAST PAY'), false, 'redundant fast-pay label should be removed')
-  assert.ok(checkoutForm.includes('Pay over time'), 'optional payments should include one compact pay-over-time action')
+  assert.equal(checkoutForm.includes('Pay over time'), false, 'generic pay-over-time label should be replaced by provider names')
   assert.equal(checkoutForm.includes('After submission, you will be redirected'), false, 'embedded redirect helper copy should not appear in the checkout UI')
-  assert.ok(checkoutPage.includes('checkout-process--payment'), 'Reserve → Customize → Approve → Launch belongs next to Start for $97')
-  assert.ok(checkoutStyles.includes('checkoutProgressSweep'), 'purchase process should have a restrained moving progress line')
+  assert.ok(checkoutPage.includes('checkout-process--summary'), 'Reserve → Customize → Approve → Launch belongs under the six value cards')
+  assert.ok(checkoutStyles.includes('checkoutSummarySweep'), 'summary process should have a visible moving 3D tracer')
 })
 
 
@@ -300,10 +300,26 @@ test('checkout speed and depth pass keep the payment surface fast and dimensiona
 
   assert.ok(checkoutForm.includes('initialCardIntentRef.current = createIntent("card")'), 'card intent should preload in parallel with Stripe.js')
   assert.ok(checkoutForm.includes('Bank transfer'), 'compact hosted bank payment should be available')
-  assert.ok(checkoutForm.includes('Pay over time'), 'compact hosted pay-later option should be available')
+  assert.ok(checkoutForm.includes('Affirm') && checkoutForm.includes('Klarna'), 'Affirm and Klarna should be separate compact hosted options')
   assert.ok(sessionProxy.includes('website-build/checkout-session'), 'alternate payments should proxy to the hosted Stripe-session backend')
   assert.ok(checkoutPage.includes('checkout-depth-scene'), 'left panel should include a dedicated 3D depth scene')
   assert.ok(checkoutStyles.includes('.checkout-depth-box'), 'left panel should use box geometry rather than a decorative circle')
   assert.ok(checkoutStyles.includes('.checkout-depth-particles'), 'left panel should include subtle CSS-only particles')
-  assert.ok(checkoutStyles.includes('1.8s linear infinite'), 'progress tracer should move immediately and visibly')
+  assert.ok(checkoutStyles.includes('1.45s linear infinite'), 'progress tracer should move immediately and visibly')
+})
+
+
+test('checkout trust and alternate-payment placement match the final hierarchy', () => {
+  const checkoutPage = readFileSync(new URL('../app/checkout/page.tsx', import.meta.url), 'utf8')
+  const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
+  const checkoutStyles = readFileSync(new URL('../app/checkout/checkout.css', import.meta.url), 'utf8')
+
+  assert.ok(checkoutPage.includes('checkout-top-trust'), 'Trusted by 8,500+ should live in the top corner of the left panel')
+  assert.ok(checkoutPage.includes('More calls'), 'sixth value card should be More calls')
+  assert.equal(checkoutPage.includes('HVAC pros nationwide.</span>'), false, 'top trust should not carry extra nationwide copy')
+  assert.equal(checkoutPage.includes('checkout-process--payment'), false, 'process strip should not sit under Start for $97')
+  assert.ok(checkoutStyles.includes('.payment-strip-list'), 'alternate payment options should render as thin strips')
+  for (const method of ['Bank transfer', 'Affirm', 'Klarna', 'Google Pay']) {
+    assert.ok(checkoutForm.includes(method), `missing alternate payment strip: ${method}`)
+  }
 })
