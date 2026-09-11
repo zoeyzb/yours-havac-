@@ -17,7 +17,7 @@ import "./checkout.css"
 
 export const metadata = {
   title: "Secure Website Checkout",
-  description: "Start your website build with a secure $97 deposit.",
+  description: "Start your website build with a temporary $1 test payment.",
   robots: { index: false, follow: false },
 }
 
@@ -113,7 +113,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="site-checkout-payment-head">
-            <h2>Start for $97</h2>
+            <h2>Start for $1</h2>
           </div>
 
           <CheckoutForm />
