@@ -421,7 +421,7 @@ export function CheckoutForm() {
             className="site-payment-submit"
           >
             <LockKeyhole size={16} />
-            <span>{busy ? "Processing…" : "Pay $97"}</span>
+            <span>{busy ? "Processing…" : "Pay $1"}</span>
             {!busy ? <ArrowRight size={17} /> : null}
           </button>
 
