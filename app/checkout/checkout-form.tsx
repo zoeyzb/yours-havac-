@@ -135,7 +135,6 @@ export function CheckoutForm() {
         cardElementsRef.current = elements
 
         cardElement = elements.create("payment", {
-          fields: { billingDetails: "never" },
           wallets: { link: "never" },
           layout: {
             type: "accordion",
@@ -144,7 +143,6 @@ export function CheckoutForm() {
             spacedAccordionItems: false,
           },
           paymentMethodOrder: ["card"],
-          defaultValues: { billingDetails: { address: { country: "US" } } },
         })
 
         cardElement.on("ready", () => {
@@ -217,9 +215,6 @@ export function CheckoutForm() {
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/payment/success`,
-          payment_method_data: {
-            billing_details: { address: { country: "US" } },
-          },
         },
         redirect: "if_required",
       })
@@ -233,8 +228,9 @@ export function CheckoutForm() {
       if (intent?.status === "succeeded" || intent?.status === "processing") {
         window.location.assign(`/payment/success?payment_intent=${encodeURIComponent(intent.id)}`)
       }
-    } catch {
-      setError("Payment could not be completed. Please try again.")
+    } catch (err) {
+      console.error("Stripe confirmation failed", err)
+      setError(err instanceof Error ? err.message : "Payment could not be completed. Please try again.")
     } finally {
       busyRef.current = false
       setBusy(false)
@@ -267,11 +263,9 @@ export function CheckoutForm() {
       cashAppElementsRef.current = elements
 
       const paymentElement = elements.create("payment", {
-        fields: { billingDetails: "never" },
         wallets: { link: "never" },
         layout: { type: "accordion", defaultCollapsed: false, radios: false, spacedAccordionItems: false },
         paymentMethodOrder: ["cashapp"],
-        defaultValues: { billingDetails: { address: { country: "US" } } },
       })
       paymentElement.on("ready", () => setCashAppReady(true))
       paymentElement.mount(cashAppRef.current!)
