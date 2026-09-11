@@ -2070,3 +2070,91 @@ button.payment-strip:disabled {
     flex-basis: 32px;
   }
 }
+
+/* Keep the green presentation visually alive through the full checkout height. */
+.site-checkout-shell {
+  min-height: calc(100vh - clamp(36px, 6vw, 68px));
+  align-items: stretch;
+}
+
+.site-checkout-summary {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 16% 16%, rgba(17,155,127,.20), transparent 22rem),
+    radial-gradient(circle at 84% 42%, rgba(74,219,177,.07), transparent 20rem),
+    radial-gradient(circle at 58% 82%, rgba(255,116,77,.10), transparent 24rem),
+    linear-gradient(160deg, #072a33 0%, #0a3941 48%, #082a32 100%);
+}
+
+.checkout-depth-scene::before {
+  content: "";
+  position: absolute;
+  left: -18%;
+  right: -18%;
+  bottom: -15%;
+  height: 46%;
+  opacity: .34;
+  background-image:
+    linear-gradient(rgba(120,255,230,.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120,255,230,.10) 1px, transparent 1px);
+  background-size: 42px 42px;
+  transform: perspective(760px) rotateX(66deg) translateY(8%);
+  transform-origin: center bottom;
+  mask-image: linear-gradient(to top, #000 18%, rgba(0,0,0,.82) 48%, transparent 100%);
+}
+
+.checkout-depth-scene::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 8%;
+  bottom: 2.5%;
+  height: 24%;
+  border-radius: 28px;
+  border: 1px solid rgba(121,244,207,.10);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.008)),
+    rgba(4,33,40,.18);
+  box-shadow:
+    22px 20px 0 -1px rgba(4,31,38,.22),
+    42px 40px 0 -2px rgba(4,28,34,.14),
+    0 34px 70px rgba(0,0,0,.12);
+  transform: perspective(900px) rotateX(9deg) rotateY(-4deg) translateZ(-52px);
+  transform-origin: center bottom;
+  opacity: .72;
+}
+
+.checkout-depth-particles {
+  box-shadow:
+    74px 38px rgba(120,255,230,.18),
+    186px 12px rgba(255,138,99,.18),
+    308px 64px rgba(120,255,230,.20),
+    430px 28px rgba(255,255,255,.13),
+    510px 118px rgba(120,255,230,.16),
+    52px 224px rgba(255,255,255,.12),
+    246px 188px rgba(120,255,230,.16),
+    398px 264px rgba(255,138,99,.12),
+    560px 322px rgba(120,255,230,.15),
+    124px 392px rgba(120,255,230,.14),
+    318px 446px rgba(255,255,255,.11),
+    486px 510px rgba(255,138,99,.10),
+    40px 610px rgba(120,255,230,.15),
+    210px 680px rgba(255,255,255,.10),
+    390px 740px rgba(120,255,230,.13),
+    548px 820px rgba(255,138,99,.10),
+    116px 900px rgba(120,255,230,.12);
+}
+
+.checkout-process--summary {
+  margin-bottom: 26px;
+}
+
+@media (max-width: 1020px) {
+  .site-checkout-summary {
+    min-height: auto;
+  }
+
+  .checkout-depth-scene::after {
+    height: 18%;
+  }
+}
