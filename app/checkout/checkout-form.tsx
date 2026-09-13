@@ -360,14 +360,8 @@ export function CheckoutForm() {
 
       <div className="checkout-payment-card">
         <div className="fast-pay-grid">
-          <div className="fast-pay-apple fast-pay-wallet">
+          <div className={applePayAvailable ? "fast-pay-apple fast-pay-wallet" : "fast-pay-apple fast-pay-wallet fast-pay-apple--hidden"}>
             <div ref={applePayRef} />
-            {!applePayAvailable ? (
-              <div className="apple-pay-unavailable" aria-label="Apple Pay is available in Safari on eligible Apple devices">
-                <span className="apple-pay-brand"><b></b>Pay</span>
-                <small>Available in Safari</small>
-              </div>
-            ) : null}
           </div>
 
           <button
@@ -415,7 +409,7 @@ export function CheckoutForm() {
             className="site-payment-submit"
           >
             <LockKeyhole size={16} />
-            <span>{busy ? "Processing…" : "Pay $1"}</span>
+            <span>{busy ? "Processing…" : "Pay $97"}</span>
             {!busy ? <ArrowRight size={17} /> : null}
           </button>
 
@@ -473,15 +467,8 @@ export function CheckoutForm() {
                 <ArrowRight size={15} />
               </button>
 
-              <div className={googlePayAvailable ? "payment-strip payment-strip--google" : "payment-strip payment-strip--google payment-strip--unavailable"}>
+              <div className={googlePayAvailable ? "payment-strip payment-strip--google" : "payment-strip payment-strip--google payment-strip--google-hidden"}>
                 <div className="google-pay-native" ref={googlePayRef} />
-                {!googlePayAvailable ? (
-                  <>
-                    <span className="payment-brand-mark payment-brand-mark--google">G</span>
-                    <strong>Google Pay</strong>
-                    <small>Supported devices</small>
-                  </>
-                ) : null}
               </div>
             </div>
           </div>
