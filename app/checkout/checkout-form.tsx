@@ -25,7 +25,7 @@ type CheckoutPayload = {
 }
 
 type IntentMethod = "card" | "cashapp"
-type HostedMethod = "bank" | "affirm" | "klarna" | "wallet"
+type HostedMethod = "bank" | "affirm" | "klarna"
 
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
@@ -98,7 +98,6 @@ export function CheckoutForm() {
 
   const [scriptReady, setScriptReady] = useState(false)
   const [cardReady, setCardReady] = useState(false)
-  const [walletAvailable, setWalletAvailable] = useState(false)
   const [cashAppOpen, setCashAppOpen] = useState(false)
   const [cashAppReady, setCashAppReady] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
@@ -165,21 +164,9 @@ export function CheckoutForm() {
               phoneNumberRequired: false,
             })
 
-            const syncAvailability = (event: any) => {
-              if (cancelled) return
-              const methods = event?.availablePaymentMethods || event?.available_payment_methods
-              setWalletAvailable(Boolean(
-                methods?.applePay || methods?.apple_pay || methods?.googlePay || methods?.google_pay,
-              ))
-            }
-
-            walletElement.on("ready", syncAvailability)
-            walletElement.on("availablepaymentmethodschange", syncAvailability)
             walletElement.on("confirm", async () => confirmElementsPayment(cardElementsRef.current))
             walletElement.mount(walletRef.current)
-          } catch {
-            setWalletAvailable(false)
-          }
+          } catch {}
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Secure checkout could not load.")
@@ -307,20 +294,9 @@ export function CheckoutForm() {
 
       <div className="checkout-payment-card">
         <div className="fast-pay-grid">
-          <div className={walletAvailable ? "fast-pay-apple fast-pay-wallet" : "fast-pay-apple fast-pay-wallet fast-pay-apple--hidden"}>
+          <div className="fast-pay-apple fast-pay-wallet fast-pay-wallets">
             <div ref={walletRef} />
           </div>
-
-          {!walletAvailable ? (
-            <div className="wallet-checkout-fallback" aria-label="Wallet payment options">
-              <button type="button" className="wallet-checkout-button wallet-checkout-button--apple" onClick={() => openHosted("wallet")} disabled={hostedBusy !== null}>
-                <span aria-hidden="true"></span> Pay
-              </button>
-              <button type="button" className="wallet-checkout-button wallet-checkout-button--google" onClick={() => openHosted("wallet")} disabled={hostedBusy !== null}>
-                <span className="google-g" aria-hidden="true">G</span> Pay
-              </button>
-            </div>
-          ) : null}
 
           <button
             type="button"
