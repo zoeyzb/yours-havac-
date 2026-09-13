@@ -189,8 +189,9 @@ test('checkout stays onsite and uses a custom Stripe Elements handoff', () => {
   assert.ok(checkoutForm.includes('paymentMethodOrder: ["card"]'), 'main card form should stay open and focused')
   assert.ok(checkoutForm.includes('paymentMethodOrder: ["cashapp"]'), 'Cash App should use its own focused payment flow')
   assert.ok(checkoutForm.includes('applePay: "always"'), 'Apple Pay should be requested aggressively when the device supports it')
+  assert.ok(checkoutForm.includes('googlePay: "always"'), 'Google Pay should share the native Express Checkout wallet block')
   assert.ok(checkoutForm.includes('buttonHeight: 55'), 'Express Checkout wallet height must stay within Stripe\'s 40-55px limit')
-  assert.ok(checkoutForm.includes('buttonType: { applePay: "plain" }'), 'Apple Pay should use Stripe\'s native Apple Pay branding')
+  assert.ok(checkoutForm.includes('applePay: "plain", googlePay: "pay"'), 'wallets should use Stripe\'s native Apple Pay and Google Pay branding')
   assert.equal(checkoutForm.includes('apple-pay-fallback'), false, 'checkout must never fake an Apple Pay button')
   assert.ok(checkoutForm.includes('createHostedSession'), 'BNPL should use a real hosted Stripe session instead of a decorative button')
   assert.ok(checkoutForm.includes('openHosted("klarna")'), 'Klarna should open its real hosted payment session')
@@ -308,6 +309,14 @@ test('checkout speed and depth pass keep the payment surface fast and dimensiona
   assert.ok(checkoutStyles.includes('1.45s linear infinite'), 'progress tracer should move immediately and visibly')
 })
 
+test('post-payment page explains the done-for-you handoff and avoids mobile overflow', () => {
+  const successPage = readFileSync(new URL('../app/payment/success/page.tsx', import.meta.url), 'utf8')
+
+  assert.ok(successPage.includes('We’ll contact you next'), 'buyer should know the team will initiate the details handoff')
+  assert.ok(successPage.includes('add everything to your website'), 'buyer should know their details will be added for them')
+  assert.ok(successPage.includes('min-h-[100svh]'), 'success layout should use the mobile-safe viewport height')
+})
+
 
 test('checkout trust and alternate-payment placement match the final hierarchy', () => {
   const checkoutPage = readFileSync(new URL('../app/checkout/page.tsx', import.meta.url), 'utf8')
@@ -319,16 +328,7 @@ test('checkout trust and alternate-payment placement match the final hierarchy',
   assert.equal(checkoutPage.includes('HVAC pros nationwide.</span>'), false, 'top trust should not carry extra nationwide copy')
   assert.equal(checkoutPage.includes('checkout-process--payment'), false, 'process strip should not sit under Start for $97')
   assert.ok(checkoutStyles.includes('.payment-strip-list'), 'alternate payment options should render as thin strips')
-  for (const method of ['Bank transfer', 'Affirm', 'Klarna', 'googlePay: "always"']) {
+  for (const method of ['Bank transfer', 'Affirm', 'Klarna']) {
     assert.ok(checkoutForm.includes(method), `missing alternate payment strip: ${method}`)
   }
-})
-
-
-test('post-payment page explains the done-for-you handoff and avoids mobile overflow', () => {
-  const successPage = readFileSync(new URL('../app/payment/success/page.tsx', import.meta.url), 'utf8')
-
-  assert.ok(successPage.includes('We’ll contact you next'), 'buyer should know the team will initiate the details handoff')
-  assert.ok(successPage.includes('add everything to your website'), 'buyer should know their details will be added for them')
-  assert.ok(successPage.includes('min-h-[100svh]'), 'success layout should use the mobile-safe viewport height')
 })
