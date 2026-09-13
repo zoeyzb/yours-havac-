@@ -658,8 +658,8 @@
 }
 
 @media (max-width: 720px) {
-  .site-checkout-page { padding: 0; background: #fffdfa; }
-  .site-checkout-shell { border: 0; border-radius: 0; box-shadow: none; }
+  .site-checkout-page { min-height: 0; padding: 0; background: #fffdfa; }
+  .site-checkout-shell { min-height: 0; border: 0; border-radius: 0; box-shadow: none; }
   .site-checkout-summary { padding: 24px 18px 28px; }
   .checkout-brand-context, .checkout-brand-divider { display: none; }
   .site-checkout-summary h1 { font-size: clamp(3rem, 14vw, 4.3rem); }
@@ -679,7 +679,7 @@
     padding: .8rem 0 0;
   }
   .checkout-trust-points span { justify-content: center; text-align: center; }
-  .site-checkout-payment { padding: 28px 16px 34px; }
+  .site-checkout-payment { padding: 28px 16px 16px; }
   .site-checkout-payment-head h2 { font-size: 3rem; }
   .site-checkout-payment-head p { font-size: .9rem; }
   .checkout-security-row { gap: .5rem; }
@@ -1721,6 +1721,18 @@ button.payment-strip:disabled {
 .payment-strip--google {
   min-height: 46px;
   overflow: hidden;
+}
+
+.payment-strip--google-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .google-pay-native {
