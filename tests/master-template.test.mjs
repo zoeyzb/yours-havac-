@@ -192,12 +192,12 @@ test('checkout stays onsite and uses a custom Stripe Elements handoff', () => {
   assert.ok(checkoutForm.includes('buttonHeight: 55'), 'Express Checkout wallet height must stay within Stripe\'s 40-55px limit')
   assert.ok(checkoutForm.includes('buttonType: { applePay: "plain" }'), 'Apple Pay should use Stripe\'s native Apple Pay branding')
   assert.equal(checkoutForm.includes('apple-pay-fallback'), false, 'checkout must never fake an Apple Pay button')
-  assert.ok(checkoutForm.includes('createIntent("bnpl")'), 'BNPL should use a real Stripe intent instead of a decorative button')
-  assert.ok(proxy.includes('body.method === "bnpl"'), 'checkout proxy should pass BNPL through to the payment backend')
+  assert.ok(checkoutForm.includes('createHostedSession'), 'BNPL should use a real hosted Stripe session instead of a decorative button')
+  assert.ok(checkoutForm.includes('openHosted("klarna")'), 'Klarna should open its real hosted payment session')
   assert.ok(checkoutForm.indexOf('cardElement.mount(cardRef.current)') < checkoutForm.indexOf('elements.create("expressCheckout"'), 'card checkout should mount before optional wallet UI')
   assert.ok(checkoutForm.includes('wallets: { link: "never" }'), 'Link should be disabled in each Payment Element instance')
-  assert.ok(checkoutForm.includes('fields: { billingDetails: "never" }'), 'visible billing/contact fields should be suppressed')
-  assert.ok(checkoutForm.includes('address: { country: "US" }'), 'the hidden billing country should remain fixed to the US')
+  assert.equal(checkoutForm.includes('fields: { billingDetails: "never" }'), false, 'Stripe should collect the billing details required to authorize real payments')
+  assert.equal(checkoutForm.includes('address: { country: "US" }'), false, 'real payments must accept the buyer’s actual billing country')
   assert.equal(checkoutForm.includes('US checkout'), false, 'checkout should not show a redundant US checkout badge')
   assert.equal(checkoutForm.includes('Where should we send the finished site?'), false, 'checkout should not collect an extra email before payment')
   assert.ok(proxy.includes('recoverrevenue.company/api/public/website-build/intent'), 'site should create payment state through the Recover payment backend')
@@ -274,7 +274,7 @@ test('checkout visual polish keeps proof people, four-step flow, and orange CTA'
   assert.ok(checkoutStyles.includes('.checkout-proof-avatar'), 'trusted proof should include clear profile avatars')
   assert.ok(checkoutStyles.includes('linear-gradient(135deg, #f05d34, #ff6f43)'), 'Pay $97 CTA should stay orange')
   assert.ok(checkoutStyles.includes('pointer-events: none'), 'unsupported Apple Pay fallback must not be clickable')
-  assert.ok(checkoutForm.includes('Available in Safari'), 'unsupported Apple Pay state should explain the browser requirement')
+  assert.ok(checkoutForm.includes('fast-pay-apple--hidden'), 'Apple Pay should only display when Stripe reports a real eligible wallet')
   assert.ok(checkoutForm.includes('createHostedSession'), 'pay-later should use hosted Stripe checkout instead of a bulky embedded panel')
 })
 
@@ -314,12 +314,21 @@ test('checkout trust and alternate-payment placement match the final hierarchy',
   const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
   const checkoutStyles = readFileSync(new URL('../app/checkout/checkout.css', import.meta.url), 'utf8')
 
-  assert.ok(checkoutPage.includes('checkout-top-trust'), 'Trusted by 8,500+ should live in the top corner of the left panel')
+  assert.ok(checkoutPage.includes('checkout-payment-trust'), 'Trusted by 8,500+ should sit directly above the payment progress')
   assert.ok(checkoutPage.includes('More calls'), 'sixth value card should be More calls')
   assert.equal(checkoutPage.includes('HVAC pros nationwide.</span>'), false, 'top trust should not carry extra nationwide copy')
   assert.equal(checkoutPage.includes('checkout-process--payment'), false, 'process strip should not sit under Start for $97')
   assert.ok(checkoutStyles.includes('.payment-strip-list'), 'alternate payment options should render as thin strips')
-  for (const method of ['Bank transfer', 'Affirm', 'Klarna', 'Google Pay']) {
+  for (const method of ['Bank transfer', 'Affirm', 'Klarna', 'googlePay: "always"']) {
     assert.ok(checkoutForm.includes(method), `missing alternate payment strip: ${method}`)
   }
+})
+
+
+test('post-payment page explains the done-for-you handoff and avoids mobile overflow', () => {
+  const successPage = readFileSync(new URL('../app/payment/success/page.tsx', import.meta.url), 'utf8')
+
+  assert.ok(successPage.includes('We’ll contact you next'), 'buyer should know the team will initiate the details handoff')
+  assert.ok(successPage.includes('add everything to your website'), 'buyer should know their details will be added for them')
+  assert.ok(successPage.includes('min-h-[100svh]'), 'success layout should use the mobile-safe viewport height')
 })
