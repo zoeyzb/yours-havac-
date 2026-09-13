@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     body.method === "bank" ? "bank" :
     body.method === "affirm" ? "affirm" :
     body.method === "klarna" ? "klarna" :
+    body.method === "wallet" ? "wallet" :
     null
 
   if (!method) {
