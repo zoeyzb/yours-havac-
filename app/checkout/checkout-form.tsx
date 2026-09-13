@@ -25,7 +25,7 @@ type CheckoutPayload = {
 }
 
 type IntentMethod = "card" | "cashapp"
-type HostedMethod = "bank" | "affirm" | "klarna"
+type HostedMethod = "bank" | "affirm" | "klarna" | "wallet"
 
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
@@ -310,6 +310,17 @@ export function CheckoutForm() {
           <div className={walletAvailable ? "fast-pay-apple fast-pay-wallet" : "fast-pay-apple fast-pay-wallet fast-pay-apple--hidden"}>
             <div ref={walletRef} />
           </div>
+
+          {!walletAvailable ? (
+            <div className="wallet-checkout-fallback" aria-label="Wallet payment options">
+              <button type="button" className="wallet-checkout-button wallet-checkout-button--apple" onClick={() => openHosted("wallet")} disabled={hostedBusy !== null}>
+                <span aria-hidden="true"></span> Pay
+              </button>
+              <button type="button" className="wallet-checkout-button wallet-checkout-button--google" onClick={() => openHosted("wallet")} disabled={hostedBusy !== null}>
+                <span className="google-g" aria-hidden="true">G</span> Pay
+              </button>
+            </div>
+          ) : null}
 
           <button
             type="button"
