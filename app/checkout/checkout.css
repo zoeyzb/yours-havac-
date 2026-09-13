@@ -391,49 +391,8 @@
   min-height: 55px;
 }
 
-.fast-pay-apple--hidden { display: none; }
-.fast-pay-apple--hidden + .cashapp-fast-button { grid-column: 1 / -1; }
-
-.wallet-checkout-fallback {
-  display: grid;
+.fast-pay-wallets {
   grid-column: 1 / -1;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .6rem;
-}
-
-.wallet-checkout-button {
-  display: flex;
-  min-height: 55px;
-  align-items: center;
-  justify-content: center;
-  gap: .25rem;
-  border: 0;
-  border-radius: 13px;
-  font-size: 1rem;
-  font-weight: 850;
-  cursor: pointer;
-}
-
-.wallet-checkout-button--apple {
-  background: #000;
-  color: #fff;
-}
-
-.wallet-checkout-button--apple span {
-  font-size: 1.25rem;
-}
-
-.wallet-checkout-button--google {
-  border: 1px solid #d8e0dc;
-  background: #fff;
-  color: #202124;
-}
-
-.google-g { color: #4285f4; }
-
-.wallet-checkout-button:disabled {
-  cursor: wait;
-  opacity: .55;
 }
 
 .cashapp-fast-button {
