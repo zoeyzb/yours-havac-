@@ -26,13 +26,14 @@ type CheckoutPayload = {
 
 type IntentMethod = "card" | "cashapp"
 type HostedMethod = "bank" | "affirm" | "klarna"
+type WalletAvailability = boolean | { available?: boolean } | null | undefined
 
 type WalletMethods = {
-  applePay?: boolean
-  apple_pay?: boolean
-  googlePay?: boolean
-  google_pay?: boolean
-} | null
+  applePay?: WalletAvailability
+  apple_pay?: WalletAvailability
+  googlePay?: WalletAvailability
+  google_pay?: WalletAvailability
+} | null | undefined
 
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
@@ -67,11 +68,16 @@ async function createHostedSession(method: HostedMethod) {
   return payload.data.url
 }
 
-function eventPaymentMethods(event: any): WalletMethods | undefined {
-  if (event?.paymentMethods !== undefined) return event.paymentMethods
-  if (event?.availablePaymentMethods !== undefined) return event.availablePaymentMethods
-  if (event?.available_payment_methods !== undefined) return event.available_payment_methods
+function eventPaymentMethods(event: any): WalletMethods {
+  if ("paymentMethods" in (event || {})) return event.paymentMethods
+  if ("availablePaymentMethods" in (event || {})) return event.availablePaymentMethods
+  if ("available_payment_methods" in (event || {})) return event.available_payment_methods
   return undefined
+}
+
+function walletIsAvailable(value: WalletAvailability) {
+  if (typeof value === "boolean") return value
+  return value?.available === true
 }
 
 const appearance = {
@@ -109,7 +115,6 @@ export function CheckoutForm() {
 
   const stripeRef = useRef<any>(null)
   const cardElementsRef = useRef<any>(null)
-  const applePayElementsRef = useRef<any>(null)
   const cashAppElementsRef = useRef<any>(null)
   const googlePayElementsRef = useRef<any>(null)
   const initialCardIntentRef = useRef<Promise<{ clientSecret: string; publishableKey: string }> | null>(null)
@@ -148,10 +153,12 @@ export function CheckoutForm() {
 
         stripeRef.current = stripe
 
-        const cardElements = stripe.elements({ clientSecret, appearance })
-        cardElementsRef.current = cardElements
+        // One PaymentIntent / one Elements instance for the card and the top Apple Pay button.
+        // This avoids duplicate payment state and makes the wallet and card initialize together.
+        const elements = stripe.elements({ clientSecret, appearance })
+        cardElementsRef.current = elements
 
-        cardElement = cardElements.create("payment", {
+        cardElement = elements.create("payment", {
           wallets: { applePay: "never", googlePay: "never", link: "never" },
           layout: {
             type: "accordion",
@@ -169,16 +176,7 @@ export function CheckoutForm() {
 
         if (!applePayRef.current) return
 
-        const applePayIntent = await createIntent("card")
-        if (cancelled) return
-
-        const applePayElements = stripe.elements({
-          clientSecret: applePayIntent.clientSecret,
-          appearance,
-        })
-        applePayElementsRef.current = applePayElements
-
-        applePayElement = applePayElements.create("expressCheckout", {
+        applePayElement = elements.create("expressCheckout", {
           paymentMethods: {
             applePay: "always",
             googlePay: "never",
@@ -199,10 +197,15 @@ export function CheckoutForm() {
         applePayElement.on("availablepaymentmethodschange", (event: any) => {
           if (cancelled) return
           const methods = eventPaymentMethods(event)
-          if (methods === undefined) return
-          setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
+          if (!methods) {
+            setApplePayAvailable(false)
+            return
+          }
+          setApplePayAvailable(
+            walletIsAvailable(methods.applePay) || walletIsAvailable(methods.apple_pay),
+          )
         })
-        applePayElement.on("confirm", async () => confirmElementsPayment(applePayElementsRef.current))
+        applePayElement.on("confirm", async () => confirmElementsPayment(cardElementsRef.current))
         applePayElement.mount(applePayRef.current)
       } catch (err) {
         if (!cancelled) {
@@ -335,8 +338,13 @@ export function CheckoutForm() {
 
       googlePayElement.on("availablepaymentmethodschange", (event: any) => {
         const methods = eventPaymentMethods(event)
-        if (methods === undefined) return
-        setGooglePayAvailable(Boolean(methods?.googlePay || methods?.google_pay))
+        if (!methods) {
+          setGooglePayAvailable(false)
+          return
+        }
+        setGooglePayAvailable(
+          walletIsAvailable(methods.googlePay) || walletIsAvailable(methods.google_pay),
+        )
       })
       googlePayElement.on("confirm", async () => confirmElementsPayment(googlePayElementsRef.current))
       googlePayElement.mount(googlePayRef.current)
@@ -386,16 +394,21 @@ export function CheckoutForm() {
       />
 
       <div className="checkout-payment-card">
-        <div className="fast-pay-grid">
-          <div className="fast-pay-apple fast-pay-wallet">
+        <div className={applePayAvailable === false ? "fast-pay-grid fast-pay-grid--apple-unavailable" : "fast-pay-grid"}>
+          <div className={applePayAvailable === false ? "fast-pay-apple fast-pay-wallet fast-pay-wallet--unavailable" : "fast-pay-apple fast-pay-wallet"}>
             <div className="native-wallet-mount native-wallet-mount--visible" ref={applePayRef} />
             {applePayAvailable === false ? (
-              <div className="apple-pay-unavailable" aria-label="Apple Pay is unavailable on this browser or device">
+              <div className="apple-pay-unavailable" aria-label="Apple Pay is unavailable on this device">
                 <span className="apple-pay-brand"><b></b> Pay</span>
-                <small>Unavailable on this browser/device</small>
+                <small>Not available on this device</small>
               </div>
             ) : null}
-            {applePayAvailable === null ? <div className="wallet-loading-placeholder" aria-hidden="true" /> : null}
+            {applePayAvailable === null ? (
+              <div className="wallet-checking" aria-hidden="true">
+                <span className="apple-pay-brand"><b></b> Pay</span>
+                <small>Checking…</small>
+              </div>
+            ) : null}
           </div>
 
           <button
