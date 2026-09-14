@@ -1,0 +1,81 @@
+.fast-pay-apple.fast-pay-wallet {
+  position: relative;
+  min-height: 55px;
+  overflow: hidden;
+  border: 1px solid #d9e0dc;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.fast-pay-apple .native-wallet-mount {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  min-height: 55px;
+}
+
+.fast-pay-apple .wallet-checking,
+.fast-pay-apple .apple-pay-unavailable {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 55px;
+  padding: 0 12px;
+  background: #fff;
+  color: #102630;
+  pointer-events: none;
+}
+
+.fast-pay-apple .wallet-checking small,
+.fast-pay-apple .apple-pay-unavailable small {
+  color: #829196;
+  font-size: .58rem;
+  font-weight: 750;
+  line-height: 1.05;
+}
+
+.fast-pay-apple .apple-pay-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #111;
+  font-size: 1rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.fast-pay-apple .apple-pay-brand b {
+  font-size: 1.12rem;
+  line-height: 1;
+}
+
+.fast-pay-wallet--unavailable {
+  background: #fbfcfb !important;
+}
+
+.fast-pay-wallet--unavailable .apple-pay-brand,
+.fast-pay-wallet--unavailable small {
+  opacity: .72;
+}
+
+@media (max-width: 520px) {
+  .fast-pay-apple .wallet-checking,
+  .fast-pay-apple .apple-pay-unavailable {
+    flex-direction: column;
+    gap: 1px;
+    padding: 0 6px;
+  }
+
+  .fast-pay-apple .apple-pay-brand {
+    font-size: .86rem;
+  }
+
+  .fast-pay-apple .wallet-checking small,
+  .fast-pay-apple .apple-pay-unavailable small {
+    font-size: .5rem;
+  }
+}
