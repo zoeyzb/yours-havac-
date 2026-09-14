@@ -87,20 +87,26 @@ const appearance = {
 
 export function CheckoutForm() {
   const cardRef = useRef<HTMLDivElement>(null)
-  const walletRef = useRef<HTMLDivElement>(null)
+  const applePayRef = useRef<HTMLDivElement>(null)
   const cashAppRef = useRef<HTMLDivElement>(null)
+  const googlePayRef = useRef<HTMLDivElement>(null)
 
   const stripeRef = useRef<any>(null)
   const cardElementsRef = useRef<any>(null)
   const cashAppElementsRef = useRef<any>(null)
+  const googlePayElementsRef = useRef<any>(null)
   const initialCardIntentRef = useRef<Promise<{ clientSecret: string; publishableKey: string }> | null>(null)
+  const googlePayStartedRef = useRef(false)
   const busyRef = useRef(false)
 
   const [scriptReady, setScriptReady] = useState(false)
   const [cardReady, setCardReady] = useState(false)
+  const [applePayAvailable, setApplePayAvailable] = useState<boolean | null>(null)
+  const [googlePayAvailable, setGooglePayAvailable] = useState<boolean | null>(null)
   const [cashAppOpen, setCashAppOpen] = useState(false)
   const [cashAppReady, setCashAppReady] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
+  const [moreLoading, setMoreLoading] = useState(false)
   const [hostedBusy, setHostedBusy] = useState<HostedMethod | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
@@ -114,7 +120,7 @@ export function CheckoutForm() {
 
     let cancelled = false
     let cardElement: any = null
-    let walletElement: any = null
+    let applePayElement: any = null
 
     void (async () => {
       try {
@@ -144,29 +150,39 @@ export function CheckoutForm() {
         })
         cardElement.mount(cardRef.current)
 
-        if (walletRef.current) {
+        if (applePayRef.current) {
           try {
-            walletElement = elements.create("expressCheckout", {
+            applePayElement = elements.create("expressCheckout", {
               paymentMethods: {
                 applePay: "always",
-                googlePay: "always",
+                googlePay: "never",
                 link: "never",
                 amazonPay: "never",
                 paypal: "never",
                 klarna: "never",
               },
-              layout: { maxColumns: 2, maxRows: 1, overflow: "never" },
+              layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
               buttonHeight: 55,
-              buttonTheme: { applePay: "black", googlePay: "black" },
-              buttonType: { applePay: "plain", googlePay: "pay" },
+              buttonTheme: { applePay: "black" },
+              buttonType: { applePay: "plain" },
               billingAddressRequired: false,
               emailRequired: false,
               phoneNumberRequired: false,
             })
 
-            walletElement.on("confirm", async () => confirmElementsPayment(cardElementsRef.current))
-            walletElement.mount(walletRef.current)
-          } catch {}
+            const syncAvailability = (event: any) => {
+              if (cancelled) return
+              const methods = event?.availablePaymentMethods || event?.available_payment_methods
+              setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
+            }
+
+            applePayElement.on("ready", syncAvailability)
+            applePayElement.on("availablepaymentmethodschange", syncAvailability)
+            applePayElement.on("confirm", async () => confirmElementsPayment(cardElementsRef.current))
+            applePayElement.mount(applePayRef.current)
+          } catch {
+            setApplePayAvailable(false)
+          }
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Secure checkout could not load.")
@@ -176,7 +192,7 @@ export function CheckoutForm() {
     return () => {
       cancelled = true
       try { cardElement?.unmount?.() } catch {}
-      try { walletElement?.unmount?.() } catch {}
+      try { applePayElement?.unmount?.() } catch {}
     }
   }, [scriptReady])
 
@@ -259,9 +275,59 @@ export function CheckoutForm() {
     }
   }
 
-  function toggleMoreOptions() {
-    setMoreOpen((open) => !open)
+  async function initGooglePay() {
+    if (googlePayStartedRef.current || !googlePayRef.current) return
+    googlePayStartedRef.current = true
+
+    try {
+      const stripe = stripeRef.current
+      if (!stripe) throw new Error("Secure checkout is still loading.")
+      const { clientSecret } = await createIntent("card")
+      const elements = stripe.elements({ clientSecret, appearance })
+      googlePayElementsRef.current = elements
+
+      const googlePayElement = elements.create("expressCheckout", {
+        paymentMethods: {
+          applePay: "never",
+          googlePay: "always",
+          link: "never",
+          amazonPay: "never",
+          paypal: "never",
+          klarna: "never",
+        },
+        layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
+        buttonHeight: 46,
+        buttonTheme: { googlePay: "black" },
+        buttonType: { googlePay: "pay" },
+        billingAddressRequired: false,
+        emailRequired: false,
+        phoneNumberRequired: false,
+      })
+
+      const syncAvailability = (event: any) => {
+        const methods = event?.availablePaymentMethods || event?.available_payment_methods
+        setGooglePayAvailable(Boolean(methods?.googlePay || methods?.google_pay))
+      }
+
+      googlePayElement.on("ready", syncAvailability)
+      googlePayElement.on("availablepaymentmethodschange", syncAvailability)
+      googlePayElement.on("confirm", async () => confirmElementsPayment(googlePayElementsRef.current))
+      googlePayElement.mount(googlePayRef.current)
+    } catch {
+      setGooglePayAvailable(false)
+    }
+  }
+
+  async function toggleMoreOptions() {
+    const nextOpen = !moreOpen
+    setMoreOpen(nextOpen)
     setError("")
+
+    if (nextOpen) {
+      setMoreLoading(true)
+      await initGooglePay()
+      setMoreLoading(false)
+    }
   }
 
   async function openHosted(method: HostedMethod) {
@@ -294,8 +360,15 @@ export function CheckoutForm() {
 
       <div className="checkout-payment-card">
         <div className="fast-pay-grid">
-          <div className="fast-pay-apple fast-pay-wallet fast-pay-wallets">
-            <div ref={walletRef} />
+          <div className="fast-pay-apple fast-pay-wallet">
+            <div className={applePayAvailable ? "native-wallet-mount native-wallet-mount--visible" : "native-wallet-mount"} ref={applePayRef} />
+            {applePayAvailable === false ? (
+              <div className="apple-pay-unavailable" aria-label="Apple Pay is unavailable on this browser or device">
+                <span className="apple-pay-brand"><b></b> Pay</span>
+                <small>Use a supported Apple device/browser</small>
+              </div>
+            ) : null}
+            {applePayAvailable === null ? <div className="wallet-loading-placeholder" aria-hidden="true" /> : null}
           </div>
 
           <button
@@ -365,6 +438,7 @@ export function CheckoutForm() {
 
         {moreOpen ? (
           <div className="more-payment-panel more-payment-panel--strips">
+            {moreLoading ? <div className="more-payment-loading">Checking Google Pay…</div> : null}
             <div className="payment-strip-list">
               <button
                 type="button"
@@ -399,6 +473,23 @@ export function CheckoutForm() {
                 <ArrowRight size={15} />
               </button>
 
+              <div className={googlePayAvailable ? "payment-strip payment-strip--google" : "payment-strip payment-strip--google payment-strip--unavailable"}>
+                <div className={googlePayAvailable ? "google-pay-native google-pay-native--visible" : "google-pay-native"} ref={googlePayRef} />
+                {googlePayAvailable === false ? (
+                  <>
+                    <span className="payment-brand-mark payment-brand-mark--google">G</span>
+                    <strong>Google Pay</strong>
+                    <small>Unavailable on this device</small>
+                  </>
+                ) : null}
+                {googlePayAvailable === null && !moreLoading ? (
+                  <>
+                    <span className="payment-brand-mark payment-brand-mark--google">G</span>
+                    <strong>Google Pay</strong>
+                    <small>Checking availability…</small>
+                  </>
+                ) : null}
+              </div>
             </div>
           </div>
         ) : null}
