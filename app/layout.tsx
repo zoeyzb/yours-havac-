@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Script from "next/script"
 import { getSiteUrl } from "../lib/site-url"
 import { siteConfig } from "../lib/site-config"
 import "./globals.css"
@@ -30,7 +31,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Script src="https://js.stripe.com/dahlia/stripe.js" strategy="beforeInteractive" />
+        {children}
+      </body>
     </html>
   )
 }
