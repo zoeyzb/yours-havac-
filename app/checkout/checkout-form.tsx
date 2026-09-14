@@ -27,6 +27,13 @@ type CheckoutPayload = {
 type IntentMethod = "card" | "cashapp"
 type HostedMethod = "bank" | "affirm" | "klarna"
 
+type WalletMethods = {
+  applePay?: boolean
+  apple_pay?: boolean
+  googlePay?: boolean
+  google_pay?: boolean
+} | null
+
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
     method: "POST",
@@ -34,9 +41,11 @@ async function createIntent(method: IntentMethod) {
     body: JSON.stringify({ method }),
   })
   const payload = (await response.json().catch(() => null)) as CheckoutPayload | null
+
   if (!response.ok || !payload?.data?.clientSecret || !payload?.data?.publishableKey) {
     throw new Error(payload?.error?.message || "Secure checkout could not be prepared.")
   }
+
   return payload.data as { clientSecret: string; publishableKey: string }
 }
 
@@ -56,6 +65,13 @@ async function createHostedSession(method: HostedMethod) {
   }
 
   return payload.data.url
+}
+
+function eventPaymentMethods(event: any): WalletMethods | undefined {
+  if (event?.paymentMethods !== undefined) return event.paymentMethods
+  if (event?.availablePaymentMethods !== undefined) return event.availablePaymentMethods
+  if (event?.available_payment_methods !== undefined) return event.available_payment_methods
+  return undefined
 }
 
 const appearance = {
@@ -117,22 +133,6 @@ export function CheckoutForm() {
   }, [])
 
   useEffect(() => {
-    if (!scriptReady || applePayAvailable !== null) return
-    const timeout = window.setTimeout(() => {
-      setApplePayAvailable((current) => current === null ? false : current)
-    }, 4000)
-    return () => window.clearTimeout(timeout)
-  }, [scriptReady, applePayAvailable])
-
-  useEffect(() => {
-    if (!moreOpen || googlePayAvailable !== null) return
-    const timeout = window.setTimeout(() => {
-      setGooglePayAvailable((current) => current === null ? false : current)
-    }, 4000)
-    return () => window.clearTimeout(timeout)
-  }, [moreOpen, googlePayAvailable])
-
-  useEffect(() => {
     if (!scriptReady || !window.Stripe || !cardRef.current) return
 
     let cancelled = false
@@ -148,10 +148,10 @@ export function CheckoutForm() {
 
         stripeRef.current = stripe
 
-        const elements = stripe.elements({ clientSecret, appearance })
-        cardElementsRef.current = elements
+        const cardElements = stripe.elements({ clientSecret, appearance })
+        cardElementsRef.current = cardElements
 
-        cardElement = elements.create("payment", {
+        cardElement = cardElements.create("payment", {
           wallets: { applePay: "never", googlePay: "never", link: "never" },
           layout: {
             type: "accordion",
@@ -167,52 +167,48 @@ export function CheckoutForm() {
         })
         cardElement.mount(cardRef.current)
 
-        if (applePayRef.current) {
-          try {
-            const applePayIntent = await createIntent("card")
-            if (cancelled) return
+        if (!applePayRef.current) return
 
-            const applePayElements = stripe.elements({
-              clientSecret: applePayIntent.clientSecret,
-              appearance,
-            })
-            applePayElementsRef.current = applePayElements
+        const applePayIntent = await createIntent("card")
+        if (cancelled) return
 
-            applePayElement = applePayElements.create("expressCheckout", {
-              paymentMethods: {
-                applePay: "always",
-                googlePay: "never",
-                link: "never",
-                amazonPay: "never",
-                paypal: "never",
-                klarna: "never",
-              },
-              layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-              buttonHeight: 55,
-              buttonTheme: { applePay: "black" },
-              buttonType: { applePay: "plain" },
-              billingAddressRequired: false,
-              emailRequired: false,
-              phoneNumberRequired: false,
-            })
+        const applePayElements = stripe.elements({
+          clientSecret: applePayIntent.clientSecret,
+          appearance,
+        })
+        applePayElementsRef.current = applePayElements
 
-            const syncAvailability = (event: any) => {
-              if (cancelled) return
-              const methods = event?.availablePaymentMethods || event?.available_payment_methods
-              if (!methods) return
-              setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
-            }
+        applePayElement = applePayElements.create("expressCheckout", {
+          paymentMethods: {
+            applePay: "always",
+            googlePay: "never",
+            link: "never",
+            amazonPay: "never",
+            paypal: "never",
+            klarna: "never",
+          },
+          layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
+          buttonHeight: 55,
+          buttonTheme: { applePay: "black" },
+          buttonType: { applePay: "plain" },
+          billingAddressRequired: false,
+          emailRequired: false,
+          phoneNumberRequired: false,
+        })
 
-            applePayElement.on("ready", syncAvailability)
-            applePayElement.on("availablepaymentmethodschange", syncAvailability)
-            applePayElement.on("confirm", async () => confirmElementsPayment(applePayElementsRef.current))
-            applePayElement.mount(applePayRef.current)
-          } catch {
-            setApplePayAvailable(false)
-          }
-        }
+        applePayElement.on("availablepaymentmethodschange", (event: any) => {
+          if (cancelled) return
+          const methods = eventPaymentMethods(event)
+          if (methods === undefined) return
+          setApplePayAvailable(Boolean(methods?.applePay || methods?.apple_pay))
+        })
+        applePayElement.on("confirm", async () => confirmElementsPayment(applePayElementsRef.current))
+        applePayElement.mount(applePayRef.current)
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Secure checkout could not load.")
+        if (!cancelled) {
+          setApplePayAvailable(false)
+          setError(err instanceof Error ? err.message : "Secure checkout could not load.")
+        }
       }
     })()
 
@@ -291,7 +287,12 @@ export function CheckoutForm() {
 
       const paymentElement = elements.create("payment", {
         wallets: { link: "never" },
-        layout: { type: "accordion", defaultCollapsed: false, radios: false, spacedAccordionItems: false },
+        layout: {
+          type: "accordion",
+          defaultCollapsed: false,
+          radios: false,
+          spacedAccordionItems: false,
+        },
         paymentMethodOrder: ["cashapp"],
       })
       paymentElement.on("ready", () => setCashAppReady(true))
@@ -309,6 +310,7 @@ export function CheckoutForm() {
     try {
       const stripe = stripeRef.current
       if (!stripe) throw new Error("Secure checkout is still loading.")
+
       const { clientSecret } = await createIntent("card")
       const elements = stripe.elements({ clientSecret, appearance })
       googlePayElementsRef.current = elements
@@ -331,14 +333,11 @@ export function CheckoutForm() {
         phoneNumberRequired: false,
       })
 
-      const syncAvailability = (event: any) => {
-        const methods = event?.availablePaymentMethods || event?.available_payment_methods
-        if (!methods) return
+      googlePayElement.on("availablepaymentmethodschange", (event: any) => {
+        const methods = eventPaymentMethods(event)
+        if (methods === undefined) return
         setGooglePayAvailable(Boolean(methods?.googlePay || methods?.google_pay))
-      }
-
-      googlePayElement.on("ready", syncAvailability)
-      googlePayElement.on("availablepaymentmethodschange", syncAvailability)
+      })
       googlePayElement.on("confirm", async () => confirmElementsPayment(googlePayElementsRef.current))
       googlePayElement.mount(googlePayRef.current)
     } catch {
@@ -351,7 +350,7 @@ export function CheckoutForm() {
     setMoreOpen(nextOpen)
     setError("")
 
-    if (nextOpen) {
+    if (nextOpen && !googlePayStartedRef.current) {
       setMoreLoading(true)
       await initGooglePay()
       setMoreLoading(false)
@@ -389,7 +388,7 @@ export function CheckoutForm() {
       <div className="checkout-payment-card">
         <div className="fast-pay-grid">
           <div className="fast-pay-apple fast-pay-wallet">
-            <div className={applePayAvailable ? "native-wallet-mount native-wallet-mount--visible" : "native-wallet-mount"} ref={applePayRef} />
+            <div className="native-wallet-mount native-wallet-mount--visible" ref={applePayRef} />
             {applePayAvailable === false ? (
               <div className="apple-pay-unavailable" aria-label="Apple Pay is unavailable on this browser or device">
                 <span className="apple-pay-brand"><b></b> Pay</span>
@@ -502,7 +501,7 @@ export function CheckoutForm() {
               </button>
 
               <div className={googlePayAvailable ? "payment-strip payment-strip--google" : "payment-strip payment-strip--google payment-strip--unavailable"}>
-                <div className={googlePayAvailable ? "google-pay-native google-pay-native--visible" : "google-pay-native"} ref={googlePayRef} />
+                <div className="google-pay-native google-pay-native--visible" ref={googlePayRef} />
                 {googlePayAvailable === false ? (
                   <>
                     <span className="payment-brand-mark payment-brand-mark--google">G</span>
