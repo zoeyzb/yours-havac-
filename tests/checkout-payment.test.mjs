@@ -19,7 +19,7 @@ test('card confirmation lets Stripe collect billing details instead of forcing a
 
 test('unexpected Stripe confirmation exceptions surface their actual message during checkout testing', () => {
   assert.ok(
-    checkoutForm.includes('err instanceof Error ? err.message'),
+    checkoutForm.includes('e instanceof Error ? e.message'),
     'the checkout should expose the Stripe integration error instead of replacing it with a generic failure',
   )
 })

@@ -10,8 +10,12 @@
 .fast-pay-apple .native-wallet-mount {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 1;
   min-height: 55px;
+}
+
+.fast-pay-apple.fast-pay-wallet--available .native-wallet-mount {
+  z-index: 4;
 }
 
 .fast-pay-apple .wallet-checking,
@@ -28,13 +32,6 @@
   background: #fff;
   color: #102630;
   pointer-events: none;
-}
-
-/* Stripe can mount the native Apple Pay button before our availability state
-   resolves. Never let the custom loading/fallback layer cover a real wallet. */
-.fast-pay-apple:has(.native-wallet-mount:not(:empty)) .wallet-checking,
-.fast-pay-apple:has(.native-wallet-mount:not(:empty)) .apple-pay-unavailable {
-  display: none;
 }
 
 .fast-pay-apple .wallet-checking small,
