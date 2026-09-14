@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Check, ChevronDown, Landmark, LockKeyhole } from "lucide-react"
 
-declare global { interface Window { Stripe?: (key: string) => any } }
+declare global {
+  interface Window {
+    Stripe?: (key: string) => any
+    ApplePaySession?: { canMakePayments?: () => boolean }
+  }
+}
 
 type IntentMethod = "card" | "cashapp"
 type HostedMethod = "bank" | "affirm" | "klarna"
@@ -75,6 +80,7 @@ export function CheckoutForm() {
     let dead = false
     let card: any = null
     let apple: any = null
+    let appleTimeout: number | null = null
 
     void (async () => {
       try {
@@ -91,6 +97,7 @@ export function CheckoutForm() {
         const cardElements = stripe.elements({ clientSecret: cardIntent.clientSecret, appearance })
         cardElementsRef.current = cardElements
         card = cardElements.create("payment", {
+          fields: { billingDetails: { address: "never" } },
           wallets: { applePay: "never", googlePay: "never", link: "never" },
           layout: { type: "accordion", defaultCollapsed: false, radios: false, spacedAccordionItems: false },
           paymentMethodOrder: ["card"],
@@ -115,14 +122,23 @@ export function CheckoutForm() {
 
         apple.on("ready", (event: any) => {
           if (dead) return
-          setAppleAvailable(event?.availablePaymentMethods?.applePay === true)
+          const available = event?.availablePaymentMethods?.applePay === true
+          setAppleAvailable(available)
+          if (appleTimeout !== null) window.clearTimeout(appleTimeout)
         })
         apple.on("availablepaymentmethodschange", (event: any) => {
           if (dead) return
-          setAppleAvailable(event?.paymentMethods?.applePay?.available === true)
+          const available = event?.paymentMethods?.applePay?.available === true
+          setAppleAvailable(available)
+          if (appleTimeout !== null) window.clearTimeout(appleTimeout)
         })
         apple.on("confirm", () => confirm(appleElementsRef.current))
         apple.mount(appleRef.current)
+
+        appleTimeout = window.setTimeout(() => {
+          if (dead) return
+          setAppleAvailable(false)
+        }, 2500)
       } catch (e) {
         if (!dead) {
           setAppleAvailable(false)
@@ -133,6 +149,7 @@ export function CheckoutForm() {
 
     return () => {
       dead = true
+      if (appleTimeout !== null) window.clearTimeout(appleTimeout)
       try { card?.unmount?.() } catch {}
       try { apple?.unmount?.() } catch {}
     }
@@ -235,10 +252,16 @@ export function CheckoutForm() {
     <div className="fast-pay-grid">
       <div className="fast-pay-apple fast-pay-wallet">
         <div className="native-wallet-mount native-wallet-mount--visible" ref={appleRef} />
-        {appleAvailable !== true ? (
+        {appleAvailable === false ? (
           <div className="apple-pay-unavailable" aria-live="polite">
             <span className="apple-pay-brand"><b></b> Pay</span>
-            <small>{appleAvailable === null ? "Loading secure Apple Pay…" : "Unavailable on this browser/device"}</small>
+            <small>Open in Safari for Apple Pay</small>
+          </div>
+        ) : null}
+        {appleAvailable === null ? (
+          <div className="apple-pay-unavailable" aria-live="polite">
+            <span className="apple-pay-brand"><b></b> Pay</span>
+            <small>Loading Apple Pay…</small>
           </div>
         ) : null}
       </div>
