@@ -1,6 +1,5 @@
 "use client"
 
-import Script from "next/script"
 import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
@@ -17,23 +16,43 @@ declare global {
 }
 
 type CheckoutPayload = {
-  data?: {
-    clientSecret?: string
-    publishableKey?: string
-  }
+  data?: { clientSecret?: string; publishableKey?: string }
   error?: { message?: string }
 }
 
 type IntentMethod = "card" | "cashapp"
 type HostedMethod = "bank" | "affirm" | "klarna"
-type WalletAvailability = boolean | { available?: boolean } | null | undefined
 
-type WalletMethods = {
-  applePay?: WalletAvailability
-  apple_pay?: WalletAvailability
-  googlePay?: WalletAvailability
-  google_pay?: WalletAvailability
-} | null | undefined
+let stripeJsPromise: Promise<void> | null = null
+
+function ensureStripeJs() {
+  if (typeof window === "undefined") return Promise.reject(new Error("Stripe requires a browser."))
+  if (window.Stripe) return Promise.resolve()
+  if (stripeJsPromise) return stripeJsPromise
+
+  stripeJsPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>('script[src="https://js.stripe.com/v3/"]')
+    const script = existing ?? document.createElement("script")
+
+    const done = () => {
+      if (window.Stripe) resolve()
+      else reject(new Error("Stripe.js loaded but Stripe was not available."))
+    }
+
+    script.addEventListener("load", done, { once: true })
+    script.addEventListener("error", () => reject(new Error("Secure payment could not load.")), { once: true })
+
+    if (!existing) {
+      script.src = "https://js.stripe.com/v3/"
+      script.async = true
+      document.head.appendChild(script)
+    }
+
+    if (window.Stripe) resolve()
+  })
+
+  return stripeJsPromise
+}
 
 async function createIntent(method: IntentMethod) {
   const response = await fetch("/api/checkout/intent", {
@@ -68,26 +87,6 @@ async function createHostedSession(method: HostedMethod) {
   return payload.data.url
 }
 
-function eventPaymentMethods(event: any): WalletMethods {
-  if ("availablePaymentMethods" in (event || {})) return event.availablePaymentMethods
-  if ("paymentMethods" in (event || {})) return event.paymentMethods
-  if ("available_payment_methods" in (event || {})) return event.available_payment_methods
-  return undefined
-}
-
-function walletIsAvailable(value: WalletAvailability) {
-  if (typeof value === "boolean") return value
-  return value?.available === true
-}
-
-function walletAvailable(methods: WalletMethods, wallet: "apple" | "google") {
-  if (!methods) return false
-  if (wallet === "apple") {
-    return walletIsAvailable(methods.applePay) || walletIsAvailable(methods.apple_pay)
-  }
-  return walletIsAvailable(methods.googlePay) || walletIsAvailable(methods.google_pay)
-}
-
 const appearance = {
   theme: "stripe" as const,
   variables: {
@@ -108,10 +107,7 @@ const appearance = {
       border: "1px solid #ef6238",
       boxShadow: "0 0 0 3px rgba(239,98,56,.10)",
     },
-    ".Label": {
-      fontWeight: "800",
-      color: "#314d57",
-    },
+    ".Label": { fontWeight: "800", color: "#314d57" },
   },
 }
 
@@ -129,7 +125,6 @@ export function CheckoutForm() {
   const googlePayStartedRef = useRef(false)
   const busyRef = useRef(false)
 
-  const [scriptReady, setScriptReady] = useState(false)
   const [cardReady, setCardReady] = useState(false)
   const [applePayAvailable, setApplePayAvailable] = useState<boolean | null>(null)
   const [googlePayAvailable, setGooglePayAvailable] = useState<boolean | null>(null)
@@ -143,10 +138,6 @@ export function CheckoutForm() {
 
   useEffect(() => {
     initialCardIntentRef.current = createIntent("card")
-  }, [])
-
-  useEffect(() => {
-    if (!scriptReady || !window.Stripe || !cardRef.current) return
 
     let cancelled = false
     let cardElement: any = null
@@ -155,13 +146,17 @@ export function CheckoutForm() {
     void (async () => {
       try {
         setError("")
-        const { clientSecret, publishableKey } = await (initialCardIntentRef.current ?? createIntent("card"))
-        const stripe = window.Stripe?.(publishableKey)
-        if (!stripe || cancelled) return
+        const [, intent] = await Promise.all([
+          ensureStripeJs(),
+          initialCardIntentRef.current,
+        ])
 
+        if (cancelled || !window.Stripe || !cardRef.current) return
+
+        const stripe = window.Stripe(intent.publishableKey)
         stripeRef.current = stripe
 
-        const elements = stripe.elements({ clientSecret, appearance })
+        const elements = stripe.elements({ clientSecret: intent.clientSecret, appearance })
         cardElementsRef.current = elements
 
         cardElement = elements.create("payment", {
@@ -174,7 +169,6 @@ export function CheckoutForm() {
           },
           paymentMethodOrder: ["card"],
         })
-
         cardElement.on("ready", () => {
           if (!cancelled) setCardReady(true)
         })
@@ -200,14 +194,9 @@ export function CheckoutForm() {
           phoneNumberRequired: false,
         })
 
-        const syncApplePay = (event: any) => {
-          if (cancelled) return
-          setApplePayAvailable(walletAvailable(eventPaymentMethods(event), "apple"))
-        }
-
-        // Stripe's ready event is the initial availability signal. The change event is only for later changes.
-        applePayElement.on("ready", syncApplePay)
-        applePayElement.on("availablepaymentmethodschange", syncApplePay)
+        applePayElement.on("availablepaymentmethodschange", (event: any) => {
+          if (!cancelled) setApplePayAvailable(Boolean(event?.paymentMethods))
+        })
         applePayElement.on("confirm", async () => confirmElementsPayment(cardElementsRef.current))
         applePayElement.mount(applePayRef.current)
       } catch (err) {
@@ -223,7 +212,7 @@ export function CheckoutForm() {
       try { cardElement?.unmount?.() } catch {}
       try { applePayElement?.unmount?.() } catch {}
     }
-  }, [scriptReady])
+  }, [])
 
   async function confirmElementsPayment(elements: any) {
     const stripe = stripeRef.current
@@ -242,9 +231,7 @@ export function CheckoutForm() {
 
       const result = await stripe.confirmPayment({
         elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/payment/success`,
-        },
+        confirmParams: { return_url: `${window.location.origin}/payment/success` },
         redirect: "if_required",
       })
 
@@ -278,6 +265,7 @@ export function CheckoutForm() {
     if (cashAppElementsRef.current) return
 
     try {
+      await ensureStripeJs()
       const stripe = stripeRef.current
       if (!stripe) throw new Error("Secure checkout is still loading.")
       const { clientSecret } = await createIntent("cashapp")
@@ -314,6 +302,7 @@ export function CheckoutForm() {
     googlePayStartedRef.current = true
 
     try {
+      await ensureStripeJs()
       const stripe = stripeRef.current
       if (!stripe) throw new Error("Secure checkout is still loading.")
 
@@ -339,12 +328,9 @@ export function CheckoutForm() {
         phoneNumberRequired: false,
       })
 
-      const syncGooglePay = (event: any) => {
-        setGooglePayAvailable(walletAvailable(eventPaymentMethods(event), "google"))
-      }
-
-      googlePayElement.on("ready", syncGooglePay)
-      googlePayElement.on("availablepaymentmethodschange", syncGooglePay)
+      googlePayElement.on("availablepaymentmethodschange", (event: any) => {
+        setGooglePayAvailable(Boolean(event?.paymentMethods))
+      })
       googlePayElement.on("confirm", async () => confirmElementsPayment(googlePayElementsRef.current))
       googlePayElement.mount(googlePayRef.current)
     } catch {
@@ -384,155 +370,127 @@ export function CheckoutForm() {
   }
 
   return (
-    <>
-      <Script
-        src="https://js.stripe.com/v3/"
-        strategy="afterInteractive"
-        onReady={() => setScriptReady(true)}
-        onError={() => setError("Secure payment could not load.")}
-      />
-
-      <div className="checkout-payment-card">
-        <div className={applePayAvailable === false ? "fast-pay-grid fast-pay-grid--apple-unavailable" : "fast-pay-grid"}>
-          <div className={applePayAvailable === false ? "fast-pay-apple fast-pay-wallet fast-pay-wallet--unavailable" : "fast-pay-apple fast-pay-wallet"}>
-            <div className="native-wallet-mount native-wallet-mount--visible" ref={applePayRef} />
-            {applePayAvailable === false ? (
-              <div className="apple-pay-unavailable" aria-label="Apple Pay is unavailable on this device">
-                <span className="apple-pay-brand"><b></b> Pay</span>
-                <small>Not available on this device</small>
-              </div>
-            ) : null}
-            {applePayAvailable === null ? (
-              <div className="wallet-checking" aria-hidden="true">
-                <span className="apple-pay-brand"><b></b> Pay</span>
-                <small>Checking…</small>
-              </div>
-            ) : null}
-          </div>
-
-          <button
-            type="button"
-            className={cashAppOpen ? "cashapp-fast-button cashapp-fast-button--active" : "cashapp-fast-button"}
-            onClick={openCashApp}
-            aria-expanded={cashAppOpen}
-          >
-            <span className="cashapp-mark">$</span>
-            <span>Cash App Pay</span>
-            {cashAppOpen ? <Check size={16} /> : <ArrowRight size={16} />}
-          </button>
+    <div className="checkout-payment-card">
+      <div className={applePayAvailable === false ? "fast-pay-grid fast-pay-grid--apple-unavailable" : "fast-pay-grid"}>
+        <div className={applePayAvailable === false ? "fast-pay-apple fast-pay-wallet fast-pay-wallet--unavailable" : "fast-pay-apple fast-pay-wallet"}>
+          <div className="native-wallet-mount native-wallet-mount--visible" ref={applePayRef} />
+          {applePayAvailable === false ? (
+            <div className="apple-pay-unavailable" aria-label="Apple Pay is unavailable on this device">
+              <span className="apple-pay-brand"><b></b> Pay</span>
+              <small>Not available on this device</small>
+            </div>
+          ) : null}
+          {applePayAvailable === null ? (
+            <div className="wallet-checking" aria-hidden="true">
+              <span className="apple-pay-brand"><b></b> Pay</span>
+              <small>Checking…</small>
+            </div>
+          ) : null}
         </div>
-
-        {cashAppOpen ? (
-          <div className="cashapp-panel">
-            <div ref={cashAppRef} />
-            <button
-              type="button"
-              disabled={!cashAppReady || busy}
-              className="cashapp-confirm"
-              onClick={() => confirmElementsPayment(cashAppElementsRef.current)}
-            >
-              {busy ? "Processing…" : "Continue with Cash App Pay"}
-            </button>
-          </div>
-        ) : null}
-
-        <form className="selected-payment-form selected-payment-form--card" onSubmit={submitCard}>
-          <div className="card-payment-heading">
-            <span>CARD</span>
-            <strong>Enter card details</strong>
-          </div>
-
-          <div className="site-payment-element-wrap">
-            {!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}
-            <div ref={cardRef} />
-          </div>
-
-          {error ? <p className="site-payment-error" role="alert">{error}</p> : null}
-
-          <button
-            type="submit"
-            disabled={busy || !cardReady}
-            className="site-payment-submit"
-          >
-            <LockKeyhole size={16} />
-            <span>{busy ? "Processing…" : "Pay $97"}</span>
-            {!busy ? <ArrowRight size={17} /> : null}
-          </button>
-
-          <div className="site-payment-security">
-            <LockKeyhole size={14} />
-            <span>Secure payment powered by Stripe</span>
-          </div>
-        </form>
 
         <button
           type="button"
-          className={moreOpen ? "more-payment-toggle more-payment-toggle--open" : "more-payment-toggle"}
-          onClick={toggleMoreOptions}
-          aria-expanded={moreOpen}
+          className={cashAppOpen ? "cashapp-fast-button cashapp-fast-button--active" : "cashapp-fast-button"}
+          onClick={openCashApp}
+          aria-expanded={cashAppOpen}
         >
-          <span>More payment options</span>
-          <ChevronDown size={16} />
+          <span className="cashapp-mark">$</span>
+          <span>Cash App Pay</span>
+          {cashAppOpen ? <Check size={16} /> : <ArrowRight size={16} />}
+        </button>
+      </div>
+
+      {cashAppOpen ? (
+        <div className="cashapp-panel">
+          <div ref={cashAppRef} />
+          <button
+            type="button"
+            disabled={!cashAppReady || busy}
+            className="cashapp-confirm"
+            onClick={() => confirmElementsPayment(cashAppElementsRef.current)}
+          >
+            {busy ? "Processing…" : "Continue with Cash App Pay"}
+          </button>
+        </div>
+      ) : null}
+
+      <form className="selected-payment-form selected-payment-form--card" onSubmit={submitCard}>
+        <div className="card-payment-heading">
+          <span>CARD</span>
+          <strong>Enter card details</strong>
+        </div>
+
+        <div className="site-payment-element-wrap">
+          {!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}
+          <div ref={cardRef} />
+        </div>
+
+        {error ? <p className="site-payment-error" role="alert">{error}</p> : null}
+
+        <button type="submit" disabled={busy || !cardReady} className="site-payment-submit">
+          <LockKeyhole size={16} />
+          <span>{busy ? "Processing…" : "Pay $97"}</span>
+          {!busy ? <ArrowRight size={17} /> : null}
         </button>
 
-        {moreOpen ? (
-          <div className="more-payment-panel more-payment-panel--strips">
-            {moreLoading ? <div className="more-payment-loading">Checking Google Pay…</div> : null}
-            <div className="payment-strip-list">
-              <button
-                type="button"
-                className="payment-strip"
-                disabled={hostedBusy !== null}
-                onClick={() => openHosted("bank")}
-              >
-                <Landmark size={17} />
-                <strong>{hostedBusy === "bank" ? "Opening…" : "Bank transfer"}</strong>
-                <ArrowRight size={15} />
-              </button>
+        <div className="site-payment-security">
+          <LockKeyhole size={14} />
+          <span>Secure payment powered by Stripe</span>
+        </div>
+      </form>
 
-              <button
-                type="button"
-                className="payment-strip"
-                disabled={hostedBusy !== null}
-                onClick={() => openHosted("affirm")}
-              >
-                <span className="payment-brand-mark payment-brand-mark--affirm">a</span>
-                <strong>{hostedBusy === "affirm" ? "Opening…" : "Affirm"}</strong>
-                <ArrowRight size={15} />
-              </button>
+      <button
+        type="button"
+        className={moreOpen ? "more-payment-toggle more-payment-toggle--open" : "more-payment-toggle"}
+        onClick={toggleMoreOptions}
+        aria-expanded={moreOpen}
+      >
+        <span>More payment options</span>
+        <ChevronDown size={16} />
+      </button>
 
-              <button
-                type="button"
-                className="payment-strip"
-                disabled={hostedBusy !== null}
-                onClick={() => openHosted("klarna")}
-              >
-                <span className="payment-brand-mark payment-brand-mark--klarna">K</span>
-                <strong>{hostedBusy === "klarna" ? "Opening…" : "Klarna"}</strong>
-                <ArrowRight size={15} />
-              </button>
+      {moreOpen ? (
+        <div className="more-payment-panel more-payment-panel--strips">
+          {moreLoading ? <div className="more-payment-loading">Checking Google Pay…</div> : null}
+          <div className="payment-strip-list">
+            <button type="button" className="payment-strip" disabled={hostedBusy !== null} onClick={() => openHosted("bank")}>
+              <Landmark size={17} />
+              <strong>{hostedBusy === "bank" ? "Opening…" : "Bank transfer"}</strong>
+              <ArrowRight size={15} />
+            </button>
 
-              <div className={googlePayAvailable ? "payment-strip payment-strip--google" : "payment-strip payment-strip--google payment-strip--unavailable"}>
-                <div className="google-pay-native google-pay-native--visible" ref={googlePayRef} />
-                {googlePayAvailable === false ? (
-                  <>
-                    <span className="payment-brand-mark payment-brand-mark--google">G</span>
-                    <strong>Google Pay</strong>
-                    <small>Unavailable on this device</small>
-                  </>
-                ) : null}
-                {googlePayAvailable === null && !moreLoading ? (
-                  <>
-                    <span className="payment-brand-mark payment-brand-mark--google">G</span>
-                    <strong>Google Pay</strong>
-                    <small>Checking availability…</small>
-                  </>
-                ) : null}
-              </div>
+            <button type="button" className="payment-strip" disabled={hostedBusy !== null} onClick={() => openHosted("affirm")}>
+              <span className="payment-brand-mark payment-brand-mark--affirm">a</span>
+              <strong>{hostedBusy === "affirm" ? "Opening…" : "Affirm"}</strong>
+              <ArrowRight size={15} />
+            </button>
+
+            <button type="button" className="payment-strip" disabled={hostedBusy !== null} onClick={() => openHosted("klarna")}>
+              <span className="payment-brand-mark payment-brand-mark--klarna">K</span>
+              <strong>{hostedBusy === "klarna" ? "Opening…" : "Klarna"}</strong>
+              <ArrowRight size={15} />
+            </button>
+
+            <div className={googlePayAvailable ? "payment-strip payment-strip--google" : "payment-strip payment-strip--google payment-strip--unavailable"}>
+              <div className="google-pay-native google-pay-native--visible" ref={googlePayRef} />
+              {googlePayAvailable === false ? (
+                <>
+                  <span className="payment-brand-mark payment-brand-mark--google">G</span>
+                  <strong>Google Pay</strong>
+                  <small>Unavailable on this device</small>
+                </>
+              ) : null}
+              {googlePayAvailable === null && !moreLoading ? (
+                <>
+                  <span className="payment-brand-mark payment-brand-mark--google">G</span>
+                  <strong>Google Pay</strong>
+                  <small>Checking availability…</small>
+                </>
+              ) : null}
             </div>
           </div>
-        ) : null}
-      </div>
-    </>
+        </div>
+      ) : null}
+    </div>
   )
 }
