@@ -90,6 +90,9 @@ export function CheckoutForm() {
 
         if (!appleRef.current) return
         apple = elements.create("expressCheckout", { paymentMethods: { applePay: "always", googlePay: "never", link: "never", amazonPay: "never", paypal: "never", klarna: "never" }, layout: { maxColumns: 1, maxRows: 1, overflow: "never" }, buttonHeight: 55, buttonTheme: { applePay: "black" }, buttonType: { applePay: "plain" } })
+        apple.on("ready", (e: any) => {
+          if (!dead) setAppleAvailable(e?.availablePaymentMethods?.applePay === true)
+        })
         apple.on("availablepaymentmethodschange", (e: any) => {
           if (!dead) setAppleAvailable(e?.paymentMethods?.applePay?.available === true)
         })
@@ -144,6 +147,9 @@ export function CheckoutForm() {
       const elements = stripe.elements({ clientSecret, appearance })
       googleElementsRef.current = elements
       const el = elements.create("expressCheckout", { paymentMethods: { applePay: "never", googlePay: "always", link: "never", amazonPay: "never", paypal: "never", klarna: "never" }, layout: { maxColumns: 1, maxRows: 1, overflow: "never" }, buttonHeight: 46, buttonTheme: { googlePay: "black" }, buttonType: { googlePay: "pay" } })
+      el.on("ready", (e: any) => {
+        setGoogleAvailable(e?.availablePaymentMethods?.googlePay === true)
+      })
       el.on("availablepaymentmethodschange", (e: any) => {
         setGoogleAvailable(e?.paymentMethods?.googlePay?.available === true)
       })
