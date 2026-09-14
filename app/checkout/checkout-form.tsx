@@ -64,7 +64,6 @@ export function CheckoutForm() {
   const busyRef = useRef(false)
 
   const [cardReady, setCardReady] = useState(false)
-  const [appleAvailable, setAppleAvailable] = useState<boolean | null>(null)
   const [googleAvailable, setGoogleAvailable] = useState<boolean | null>(null)
   const [cashOpen, setCashOpen] = useState(false)
   const [cashReady, setCashReady] = useState(false)
@@ -119,16 +118,6 @@ export function CheckoutForm() {
           billingAddressRequired: false,
           emailRequired: false,
           phoneNumberRequired: false,
-        })
-        apple.on("ready", (event: any) => {
-          if (dead) return
-          const methods = event?.availablePaymentMethods || event?.available_payment_methods
-          setAppleAvailable(Boolean(methods?.applePay || methods?.apple_pay))
-        })
-        apple.on("availablepaymentmethodschange", (event: any) => {
-          if (dead) return
-          const methods = event?.availablePaymentMethods || event?.available_payment_methods || event?.paymentMethods
-          setAppleAvailable(Boolean(methods?.applePay?.available ?? methods?.applePay ?? methods?.apple_pay))
         })
         apple.on("confirm", () => confirm(cardElementsRef.current))
         apple.mount(appleRef.current)
@@ -249,7 +238,7 @@ export function CheckoutForm() {
     <form className="selected-payment-form selected-payment-form--card" onSubmit={e => { e.preventDefault(); void confirm(cardElementsRef.current) }}>
       <div className="card-payment-heading"><span>CARD</span><strong>Enter card details</strong></div>
       <div className="site-payment-element-wrap">{!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}<div ref={cardRef} /></div>
-      <div className="apple-pay-below-card" hidden={appleAvailable === false}>
+      <div className="apple-pay-below-card">
         <div ref={appleRef} />
       </div>
       {error ? <p className="site-payment-error" role="alert">{error}</p> : null}
