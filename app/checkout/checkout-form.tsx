@@ -116,6 +116,22 @@ export function CheckoutForm() {
   }, [])
 
   useEffect(() => {
+    if (!scriptReady || applePayAvailable !== null) return
+    const timeout = window.setTimeout(() => {
+      setApplePayAvailable((current) => current === null ? false : current)
+    }, 2500)
+    return () => window.clearTimeout(timeout)
+  }, [scriptReady, applePayAvailable])
+
+  useEffect(() => {
+    if (!moreOpen || googlePayAvailable !== null) return
+    const timeout = window.setTimeout(() => {
+      setGooglePayAvailable((current) => current === null ? false : current)
+    }, 2500)
+    return () => window.clearTimeout(timeout)
+  }, [moreOpen, googlePayAvailable])
+
+  useEffect(() => {
     if (!scriptReady || !window.Stripe || !cardRef.current) return
 
     let cancelled = false
@@ -365,7 +381,7 @@ export function CheckoutForm() {
             {applePayAvailable === false ? (
               <div className="apple-pay-unavailable" aria-label="Apple Pay is unavailable on this browser or device">
                 <span className="apple-pay-brand"><b></b> Pay</span>
-                <small>Use a supported Apple device/browser</small>
+                <small>Unavailable on this browser/device</small>
               </div>
             ) : null}
             {applePayAvailable === null ? <div className="wallet-loading-placeholder" aria-hidden="true" /> : null}
