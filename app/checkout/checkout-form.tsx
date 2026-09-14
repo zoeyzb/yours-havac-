@@ -211,8 +211,8 @@ export function CheckoutForm() {
     {cashOpen ? <div className="cashapp-panel"><div ref={cashRef} /><button type="button" disabled={!cashReady || busy} className="cashapp-confirm" onClick={() => confirm(cashElementsRef.current)}>{busy ? "Processing…" : "Continue with Cash App Pay"}</button></div> : null}
 
     <form className="selected-payment-form selected-payment-form--card" onSubmit={e => { e.preventDefault(); void confirm(cardElementsRef.current) }}>
-      <div className="card-payment-heading"><span>CARD / APPLE PAY</span><strong>Choose Apple Pay or enter card details</strong></div>
-      <div className="site-payment-element-wrap">{!cardReady && !error ? <div className="site-payment-loading">Preparing secure payment…</div> : null}<div ref={cardRef} /></div>
+      <div className="card-payment-heading"><span>CARD</span><strong>Enter card details</strong></div>
+      <div className="site-payment-element-wrap">{!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}<div ref={cardRef} /></div>
       {error ? <p className="site-payment-error" role="alert">{error}</p> : null}
       <button type="submit" disabled={busy || !cardReady} className="site-payment-submit"><LockKeyhole size={16} /><span>{busy ? "Processing…" : "Pay $97"}</span>{!busy ? <ArrowRight size={17} /> : null}</button>
       <div className="site-payment-security"><LockKeyhole size={14} /><span>Secure payment powered by Stripe</span></div>
