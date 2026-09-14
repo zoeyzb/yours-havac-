@@ -96,7 +96,7 @@ export function CheckoutForm() {
         card = cardElements.create("payment", {
           fields: { billingDetails: { address: "never" } },
           wallets: { applePay: "never", googlePay: "never", link: "never" },
-          layout: { type: "accordion", defaultCollapsed: false, radios: false, spacedAccordionItems: false },
+          layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
           paymentMethodOrder: ["card"],
         })
         card.on("ready", () => !dead && setCardReady(true))
@@ -175,7 +175,7 @@ export function CheckoutForm() {
       const { clientSecret } = await createIntent("cashapp")
       const elements = stripe.elements({ clientSecret, appearance: { ...appearance, variables: { ...appearance.variables, colorPrimary: "#00c94a" } } })
       cashElementsRef.current = elements
-      const el = elements.create("payment", { wallets: { link: "never" }, layout: { type: "accordion", defaultCollapsed: false, radios: false, spacedAccordionItems: false }, paymentMethodOrder: ["cashapp"] })
+      const el = elements.create("payment", { wallets: { link: "never" }, layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false }, paymentMethodOrder: ["cashapp"] })
       el.on("ready", () => setCashReady(true))
       el.mount(cashRef.current!)
     } catch (e) {
