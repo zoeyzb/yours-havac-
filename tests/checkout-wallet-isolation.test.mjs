@@ -4,9 +4,10 @@ import { readFileSync } from 'node:fs'
 
 const source = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
 
-test('Apple Pay uses a dedicated Stripe Elements instance and does not duplicate inside the card form', () => {
-  assert.ok(source.includes('appleElementsRef'), 'Apple Pay needs its own Elements instance')
-  assert.ok(source.includes('confirm(appleElementsRef.current)'), 'top Apple Pay must confirm its own intent')
+test('Apple Pay shares the working card Stripe Elements instance without duplicating inside the card form', () => {
+  assert.equal(source.includes('appleElementsRef'), false, 'Apple Pay must not create a second Elements instance')
+  assert.ok(source.includes('apple = cardElements.create("expressCheckout"'), 'top Apple Pay must bind to the same card Elements instance')
+  assert.ok(source.includes('confirm(cardElementsRef.current)'), 'top Apple Pay must confirm the same intent as the working card checkout')
 
   const cardStart = source.indexOf('card = cardElements.create("payment"')
   const cardEnd = source.indexOf('card.mount(cardRef.current)')
@@ -14,5 +15,5 @@ test('Apple Pay uses a dedicated Stripe Elements instance and does not duplicate
 
   assert.ok(cardBlock.includes('applePay: "never"'), 'card Payment Element must not render a second Apple Pay option')
   assert.ok(cardBlock.includes('googlePay: "never"'), 'card Payment Element must not render Google Pay inside the card form')
-  assert.ok(source.includes('stripe.elements({ clientSecret: appleIntent.clientSecret'), 'top Apple Pay must use a separate intent from the card form')
+  assert.equal(source.includes('createIntent("card"),\n          createIntent("card")'), false, 'checkout must not create a duplicate Apple Pay PaymentIntent on load')
 })
