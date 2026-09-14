@@ -6,7 +6,6 @@ import { ArrowRight, Check, ChevronDown, Landmark, LockKeyhole } from "lucide-re
 declare global {
   interface Window {
     Stripe?: (key: string) => any
-    ApplePaySession?: { canMakePayments?: () => boolean }
   }
 }
 
@@ -54,7 +53,6 @@ const appearance = {
 
 export function CheckoutForm() {
   const cardRef = useRef<HTMLDivElement>(null)
-  const appleRef = useRef<HTMLDivElement>(null)
   const cashRef = useRef<HTMLDivElement>(null)
   const googleRef = useRef<HTMLDivElement>(null)
   const stripeRef = useRef<any>(null)
@@ -77,7 +75,6 @@ export function CheckoutForm() {
   useEffect(() => {
     let dead = false
     let card: any = null
-    let apple: any = null
 
     void (async () => {
       try {
@@ -94,28 +91,12 @@ export function CheckoutForm() {
         cardElementsRef.current = cardElements
         card = cardElements.create("payment", {
           fields: { billingDetails: { address: "never" } },
-          wallets: { applePay: "never", googlePay: "never", link: "never" },
+          wallets: { applePay: "auto", googlePay: "never", link: "never" },
           layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
           paymentMethodOrder: ["card"],
         })
         card.on("ready", () => !dead && setCardReady(true))
         card.mount(cardRef.current)
-
-        if (!appleRef.current) return
-
-        apple = cardElements.create("expressCheckout", {
-          paymentMethods: { applePay: "always", googlePay: "never", link: "never", amazonPay: "never", paypal: "never", klarna: "never" },
-          layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-          buttonHeight: 55,
-          buttonTheme: { applePay: "black" },
-          buttonType: { applePay: "plain" },
-          billingAddressRequired: false,
-          emailRequired: false,
-          phoneNumberRequired: false,
-        })
-
-        apple.on("confirm", () => confirm(cardElementsRef.current))
-        apple.mount(appleRef.current)
       } catch (e) {
         if (!dead) setError(e instanceof Error ? e.message : "Secure checkout could not load.")
       }
@@ -124,7 +105,6 @@ export function CheckoutForm() {
     return () => {
       dead = true
       try { card?.unmount?.() } catch {}
-      try { apple?.unmount?.() } catch {}
     }
   }, [])
 
@@ -223,10 +203,6 @@ export function CheckoutForm() {
 
   return <div className="checkout-payment-card">
     <div className="fast-pay-grid">
-      <div className="fast-pay-apple fast-pay-wallet">
-        <div className="native-wallet-mount native-wallet-mount--visible" ref={appleRef} />
-      </div>
-
       <button type="button" className={cashOpen ? "cashapp-fast-button cashapp-fast-button--active" : "cashapp-fast-button"} onClick={toggleCash} aria-expanded={cashOpen}>
         <span className="cashapp-mark">$</span><span>Cash App Pay</span>{cashOpen ? <Check size={16} /> : <ArrowRight size={16} />}
       </button>
@@ -235,8 +211,8 @@ export function CheckoutForm() {
     {cashOpen ? <div className="cashapp-panel"><div ref={cashRef} /><button type="button" disabled={!cashReady || busy} className="cashapp-confirm" onClick={() => confirm(cashElementsRef.current)}>{busy ? "Processing…" : "Continue with Cash App Pay"}</button></div> : null}
 
     <form className="selected-payment-form selected-payment-form--card" onSubmit={e => { e.preventDefault(); void confirm(cardElementsRef.current) }}>
-      <div className="card-payment-heading"><span>CARD</span><strong>Enter card details</strong></div>
-      <div className="site-payment-element-wrap">{!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}<div ref={cardRef} /></div>
+      <div className="card-payment-heading"><span>CARD / APPLE PAY</span><strong>Choose Apple Pay or enter card details</strong></div>
+      <div className="site-payment-element-wrap">{!cardReady && !error ? <div className="site-payment-loading">Preparing secure payment…</div> : null}<div ref={cardRef} /></div>
       {error ? <p className="site-payment-error" role="alert">{error}</p> : null}
       <button type="submit" disabled={busy || !cardReady} className="site-payment-submit"><LockKeyhole size={16} /><span>{busy ? "Processing…" : "Pay $97"}</span>{!busy ? <ArrowRight size={17} /> : null}</button>
       <div className="site-payment-security"><LockKeyhole size={14} /><span>Secure payment powered by Stripe</span></div>
