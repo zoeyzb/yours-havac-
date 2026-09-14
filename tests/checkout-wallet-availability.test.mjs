@@ -2,12 +2,20 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 
-test('Stripe wallet availability uses the current Express Checkout event shape', () => {
+test('Stripe wallet availability is resolved from the initial Express Checkout ready event', () => {
   const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
 
   assert.ok(
-    checkoutForm.includes('event?.paymentMethods'),
-    'Express Checkout availability must read event.paymentMethods from availablepaymentmethodschange',
+    checkoutForm.includes('applePayElement.on("ready"'),
+    'Apple Pay availability must be resolved from the initial Express Checkout ready event',
+  )
+  assert.ok(
+    checkoutForm.includes('event?.availablePaymentMethods'),
+    'The ready event must read availablePaymentMethods from Stripe',
+  )
+  assert.ok(
+    checkoutForm.includes('googlePayElement.on("ready"'),
+    'Google Pay availability must also be resolved from the initial ready event',
   )
   assert.equal(
     checkoutForm.includes('setApplePayAvailable((current) => current === null ? false : current)'),
