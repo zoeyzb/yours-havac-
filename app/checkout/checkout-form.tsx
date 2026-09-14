@@ -132,13 +132,18 @@ export function CheckoutForm() {
           setAppleAvailable(available)
           if (appleTimeout !== null) window.clearTimeout(appleTimeout)
         })
-        apple.on("confirm", () => confirm(appleElementsRef.current))
-        apple.mount(appleRef.current)
-
         appleTimeout = window.setTimeout(() => {
           if (dead) return
           setAppleAvailable(false)
         }, 2500)
+
+        apple.on("loaderror", () => {
+          if (dead) return
+          setAppleAvailable(false)
+          if (appleTimeout !== null) window.clearTimeout(appleTimeout)
+        })
+        apple.on("confirm", () => confirm(appleElementsRef.current))
+        apple.mount(appleRef.current)
       } catch (e) {
         if (!dead) {
           setAppleAvailable(false)
@@ -250,7 +255,7 @@ export function CheckoutForm() {
 
   return <div className="checkout-payment-card">
     <div className="fast-pay-grid">
-      <div className="fast-pay-apple fast-pay-wallet">
+      <div className={`fast-pay-apple fast-pay-wallet${appleAvailable === true ? " fast-pay-wallet--available" : ""}`}>
         <div className="native-wallet-mount native-wallet-mount--visible" ref={appleRef} />
         {appleAvailable === false ? (
           <div className="apple-pay-unavailable" aria-live="polite">
