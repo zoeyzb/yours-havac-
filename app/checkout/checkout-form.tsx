@@ -59,7 +59,6 @@ export function CheckoutForm() {
   const googleRef = useRef<HTMLDivElement>(null)
   const stripeRef = useRef<any>(null)
   const cardElementsRef = useRef<any>(null)
-  const appleElementsRef = useRef<any>(null)
   const cashElementsRef = useRef<any>(null)
   const googleElementsRef = useRef<any>(null)
   const googleStarted = useRef(false)
@@ -80,13 +79,11 @@ export function CheckoutForm() {
     let dead = false
     let card: any = null
     let apple: any = null
-    let appleTimeout: number | null = null
 
     void (async () => {
       try {
-        const [, cardIntent, appleIntent] = await Promise.all([
+        const [, cardIntent] = await Promise.all([
           ensureStripeJs(),
-          createIntent("card"),
           createIntent("card"),
         ])
         if (dead || !window.Stripe || !cardRef.current) return
@@ -107,9 +104,7 @@ export function CheckoutForm() {
 
         if (!appleRef.current) return
 
-        const appleElements = stripe.elements({ clientSecret: appleIntent.clientSecret, appearance })
-        appleElementsRef.current = appleElements
-        apple = appleElements.create("expressCheckout", {
+        apple = cardElements.create("expressCheckout", {
           paymentMethods: { applePay: "always", googlePay: "never", link: "never", amazonPay: "never", paypal: "never", klarna: "never" },
           layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
           buttonHeight: 55,
@@ -120,29 +115,17 @@ export function CheckoutForm() {
           phoneNumberRequired: false,
         })
 
-        apple.on("ready", (event: any) => {
+        const syncAppleAvailability = (event: any) => {
           if (dead) return
-          const available = event?.availablePaymentMethods?.applePay === true
+          const available =
+            event?.availablePaymentMethods?.applePay === true ||
+            event?.paymentMethods?.applePay?.available === true
           setAppleAvailable(available)
-          if (appleTimeout !== null) window.clearTimeout(appleTimeout)
-        })
-        apple.on("availablepaymentmethodschange", (event: any) => {
-          if (dead) return
-          const available = event?.paymentMethods?.applePay?.available === true
-          setAppleAvailable(available)
-          if (appleTimeout !== null) window.clearTimeout(appleTimeout)
-        })
-        appleTimeout = window.setTimeout(() => {
-          if (dead) return
-          setAppleAvailable(false)
-        }, 2500)
-
-        apple.on("loaderror", () => {
-          if (dead) return
-          setAppleAvailable(false)
-          if (appleTimeout !== null) window.clearTimeout(appleTimeout)
-        })
-        apple.on("confirm", () => confirm(appleElementsRef.current))
+        }
+        apple.on("ready", syncAppleAvailability)
+        apple.on("availablepaymentmethodschange", syncAppleAvailability)
+        apple.on("loaderror", () => !dead && setAppleAvailable(false))
+        apple.on("confirm", () => confirm(cardElementsRef.current))
         apple.mount(appleRef.current)
       } catch (e) {
         if (!dead) {
@@ -154,7 +137,6 @@ export function CheckoutForm() {
 
     return () => {
       dead = true
-      if (appleTimeout !== null) window.clearTimeout(appleTimeout)
       try { card?.unmount?.() } catch {}
       try { apple?.unmount?.() } catch {}
     }
@@ -260,7 +242,7 @@ export function CheckoutForm() {
         {appleAvailable === false ? (
           <div className="apple-pay-unavailable" aria-live="polite">
             <span className="apple-pay-brand"><b></b> Pay</span>
-            <small>Open in Safari for Apple Pay</small>
+            <small>Apple Pay unavailable</small>
           </div>
         ) : null}
         {appleAvailable === null ? (
