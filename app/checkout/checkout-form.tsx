@@ -65,7 +65,6 @@ export function CheckoutForm() {
   const busyRef = useRef(false)
 
   const [cardReady, setCardReady] = useState(false)
-  const [appleAvailable, setAppleAvailable] = useState<boolean | null>(null)
   const [googleAvailable, setGoogleAvailable] = useState<boolean | null>(null)
   const [cashOpen, setCashOpen] = useState(false)
   const [cashReady, setCashReady] = useState(false)
@@ -115,23 +114,10 @@ export function CheckoutForm() {
           phoneNumberRequired: false,
         })
 
-        const syncAppleAvailability = (event: any) => {
-          if (dead) return
-          const available =
-            event?.availablePaymentMethods?.applePay === true ||
-            event?.paymentMethods?.applePay?.available === true
-          setAppleAvailable(available)
-        }
-        apple.on("ready", syncAppleAvailability)
-        apple.on("availablepaymentmethodschange", syncAppleAvailability)
-        apple.on("loaderror", () => !dead && setAppleAvailable(false))
         apple.on("confirm", () => confirm(cardElementsRef.current))
         apple.mount(appleRef.current)
       } catch (e) {
-        if (!dead) {
-          setAppleAvailable(false)
-          setError(e instanceof Error ? e.message : "Secure checkout could not load.")
-        }
+        if (!dead) setError(e instanceof Error ? e.message : "Secure checkout could not load.")
       }
     })()
 
@@ -237,20 +223,8 @@ export function CheckoutForm() {
 
   return <div className="checkout-payment-card">
     <div className="fast-pay-grid">
-      <div className={`fast-pay-apple fast-pay-wallet${appleAvailable === true ? " fast-pay-wallet--available" : ""}`}>
+      <div className="fast-pay-apple fast-pay-wallet">
         <div className="native-wallet-mount native-wallet-mount--visible" ref={appleRef} />
-        {appleAvailable === false ? (
-          <div className="apple-pay-unavailable" aria-live="polite">
-            <span className="apple-pay-brand"><b></b> Pay</span>
-            <small>Apple Pay unavailable</small>
-          </div>
-        ) : null}
-        {appleAvailable === null ? (
-          <div className="apple-pay-unavailable" aria-live="polite">
-            <span className="apple-pay-brand"><b></b> Pay</span>
-            <small>Loading Apple Pay…</small>
-          </div>
-        ) : null}
       </div>
 
       <button type="button" className={cashOpen ? "cashapp-fast-button cashapp-fast-button--active" : "cashapp-fast-button"} onClick={toggleCash} aria-expanded={cashOpen}>
