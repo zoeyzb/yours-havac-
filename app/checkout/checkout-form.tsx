@@ -148,7 +148,7 @@ export function CheckoutForm() {
         setError("")
         const [, intent] = await Promise.all([
           ensureStripeJs(),
-          initialCardIntentRef.current,
+          initialCardIntentRef.current ?? createIntent("card"),
         ])
 
         if (cancelled || !window.Stripe || !cardRef.current) return
