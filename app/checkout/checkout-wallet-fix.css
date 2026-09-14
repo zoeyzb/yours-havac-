@@ -7,15 +7,14 @@
   background: #fff;
 }
 
+/* The Stripe-native Express Checkout mount must always sit above our
+   non-interactive status copy. Availability state is advisory only; it must
+   never be able to cover or disable a wallet that Stripe has mounted. */
 .fast-pay-apple .native-wallet-mount {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  min-height: 55px;
-}
-
-.fast-pay-apple.fast-pay-wallet--available .native-wallet-mount {
   z-index: 4;
+  min-height: 55px;
 }
 
 .fast-pay-apple .wallet-checking,
