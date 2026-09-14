@@ -69,8 +69,8 @@ async function createHostedSession(method: HostedMethod) {
 }
 
 function eventPaymentMethods(event: any): WalletMethods {
-  if ("paymentMethods" in (event || {})) return event.paymentMethods
   if ("availablePaymentMethods" in (event || {})) return event.availablePaymentMethods
+  if ("paymentMethods" in (event || {})) return event.paymentMethods
   if ("available_payment_methods" in (event || {})) return event.available_payment_methods
   return undefined
 }
@@ -78,6 +78,14 @@ function eventPaymentMethods(event: any): WalletMethods {
 function walletIsAvailable(value: WalletAvailability) {
   if (typeof value === "boolean") return value
   return value?.available === true
+}
+
+function walletAvailable(methods: WalletMethods, wallet: "apple" | "google") {
+  if (!methods) return false
+  if (wallet === "apple") {
+    return walletIsAvailable(methods.applePay) || walletIsAvailable(methods.apple_pay)
+  }
+  return walletIsAvailable(methods.googlePay) || walletIsAvailable(methods.google_pay)
 }
 
 const appearance = {
@@ -153,8 +161,6 @@ export function CheckoutForm() {
 
         stripeRef.current = stripe
 
-        // One PaymentIntent / one Elements instance for the card and the top Apple Pay button.
-        // This avoids duplicate payment state and makes the wallet and card initialize together.
         const elements = stripe.elements({ clientSecret, appearance })
         cardElementsRef.current = elements
 
@@ -194,17 +200,14 @@ export function CheckoutForm() {
           phoneNumberRequired: false,
         })
 
-        applePayElement.on("availablepaymentmethodschange", (event: any) => {
+        const syncApplePay = (event: any) => {
           if (cancelled) return
-          const methods = eventPaymentMethods(event)
-          if (!methods) {
-            setApplePayAvailable(false)
-            return
-          }
-          setApplePayAvailable(
-            walletIsAvailable(methods.applePay) || walletIsAvailable(methods.apple_pay),
-          )
-        })
+          setApplePayAvailable(walletAvailable(eventPaymentMethods(event), "apple"))
+        }
+
+        // Stripe's ready event is the initial availability signal. The change event is only for later changes.
+        applePayElement.on("ready", syncApplePay)
+        applePayElement.on("availablepaymentmethodschange", syncApplePay)
         applePayElement.on("confirm", async () => confirmElementsPayment(cardElementsRef.current))
         applePayElement.mount(applePayRef.current)
       } catch (err) {
@@ -336,16 +339,12 @@ export function CheckoutForm() {
         phoneNumberRequired: false,
       })
 
-      googlePayElement.on("availablepaymentmethodschange", (event: any) => {
-        const methods = eventPaymentMethods(event)
-        if (!methods) {
-          setGooglePayAvailable(false)
-          return
-        }
-        setGooglePayAvailable(
-          walletIsAvailable(methods.googlePay) || walletIsAvailable(methods.google_pay),
-        )
-      })
+      const syncGooglePay = (event: any) => {
+        setGooglePayAvailable(walletAvailable(eventPaymentMethods(event), "google"))
+      }
+
+      googlePayElement.on("ready", syncGooglePay)
+      googlePayElement.on("availablepaymentmethodschange", syncGooglePay)
       googlePayElement.on("confirm", async () => confirmElementsPayment(googlePayElementsRef.current))
       googlePayElement.mount(googlePayRef.current)
     } catch {
