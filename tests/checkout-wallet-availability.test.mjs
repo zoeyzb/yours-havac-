@@ -2,20 +2,25 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 
-test('Stripe checkout boots independently and never covers the native Apple Pay button while checking', () => {
+test('Stripe wallet availability uses each wallet available flag and never covers native Apple Pay', () => {
   const checkoutForm = readFileSync(new URL('../app/checkout/checkout-form.tsx', import.meta.url), 'utf8')
 
   assert.equal(checkoutForm.includes('from "next/script"'), false)
   assert.ok(checkoutForm.includes('ensureStripeJs()'))
   assert.ok(checkoutForm.includes('availablepaymentmethodschange'))
-  assert.ok(checkoutForm.includes('Boolean(event?.paymentMethods)'))
-  assert.equal(
-    checkoutForm.includes('wallet-checking'),
-    false,
-    'a checking overlay must never sit on top of Stripe\'s native Apple Pay mount',
+  assert.ok(
+    checkoutForm.includes('e?.paymentMethods?.applePay?.available === true'),
+    'Apple Pay must use Stripe paymentMethods.applePay.available',
   )
   assert.ok(
-    checkoutForm.includes('native-wallet-mount native-wallet-mount--visible'),
-    'the native Stripe Apple Pay mount must stay visible while availability resolves',
+    checkoutForm.includes('e?.paymentMethods?.googlePay?.available === true'),
+    'Google Pay must use Stripe paymentMethods.googlePay.available',
   )
+  assert.equal(
+    checkoutForm.includes('Boolean(e?.paymentMethods)'),
+    false,
+    'the paymentMethods object can exist while a wallet is unavailable',
+  )
+  assert.equal(checkoutForm.includes('wallet-checking'), false)
+  assert.ok(checkoutForm.includes('native-wallet-mount native-wallet-mount--visible'))
 })
