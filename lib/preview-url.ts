@@ -1,10 +1,10 @@
-const MAX_BUSINESS_SLUG_LENGTH = 48
+const MAX_BUSINESS_SLUG_LENGTH = 64
 
 function normalizeWhitespace(value: string) {
   return value.trim().replace(/\s+/g, " ")
 }
 
-export function toPreviewSlug(businessName: string, leadId?: string) {
+export function toPreviewSlug(businessName: string, _leadId?: string) {
   const normalized = normalizeWhitespace(businessName)
     .toLowerCase()
     .replace(/&/g, " and ")
@@ -13,15 +13,14 @@ export function toPreviewSlug(businessName: string, leadId?: string) {
     .slice(0, MAX_BUSINESS_SLUG_LENGTH)
     .replace(/-+$/g, "")
 
-  const base = normalized || "website-preview"
-  const shortId = leadId?.replace(/[^a-zA-Z0-9]/g, "").slice(0, 6).toLowerCase()
-
-  return shortId ? `${base}-${shortId}` : base
+  return normalized || "website-preview"
 }
 
 export function businessNameFromPreviewSlug(slug: string) {
-  const withoutShortId = slug.replace(/-[a-f0-9]{6}$/i, "")
-  const words = withoutShortId.split("-").filter(Boolean)
+  // Keep compatibility with the older clean-link format that ended in a
+  // six-character lead-id suffix. New links no longer include that suffix.
+  const withoutLegacyShortId = slug.replace(/-[a-f0-9]{6}$/i, "")
+  const words = withoutLegacyShortId.split("-").filter(Boolean)
 
   if (!words.length) return "Website Preview"
 
