@@ -1,17 +1,15 @@
-const MAX_BUSINESS_SLUG_LENGTH = 64
-
 function normalizeWhitespace(value: string) {
   return value.trim().replace(/\s+/g, " ")
 }
 
 export function toPreviewSlug(businessName: string, _leadId?: string) {
+  // Keep every word of the business name in the clean URL. We only normalize
+  // punctuation/spacing so links stay readable and do not need IDs or queries.
   const normalized = normalizeWhitespace(businessName)
     .toLowerCase()
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, MAX_BUSINESS_SLUG_LENGTH)
-    .replace(/-+$/g, "")
 
   return normalized || "website-preview"
 }
