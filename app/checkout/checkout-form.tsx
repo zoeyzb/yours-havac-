@@ -128,7 +128,7 @@ export function CheckoutForm() {
             klarna: "never",
           },
           layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-          buttonHeight: 52,
+          buttonHeight: 55,
           buttonTheme: { applePay: "black" },
           buttonType: { applePay: "plain" },
           billingAddressRequired: false,
@@ -146,7 +146,6 @@ export function CheckoutForm() {
           wallets: { link: "never" },
           layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
           paymentMethodOrder: ["card"],
-          defaultValues: { billingDetails: { address: { country: "US" } } },
         })
         card.on("ready", () => !dead && setCardReady(true))
         card.mount(cardRef.current)
@@ -172,14 +171,7 @@ export function CheckoutForm() {
     try {
       const s = await elements.submit?.()
       if (s?.error) { setError(s.error.message || "Check your payment details."); return }
-      const r = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/payment/success`,
-          payment_method_data: { billing_details: { address: { country: "US" } } },
-        },
-        redirect: "if_required",
-      })
+      const r = await stripe.confirmPayment({ elements, confirmParams: { return_url: `${window.location.origin}/payment/success` }, redirect: "if_required" })
       if (r?.error) { setError(r.error.message || "Payment could not be completed."); return }
       const pi = r?.paymentIntent
       if (pi?.status === "succeeded" || pi?.status === "processing") window.location.assign(`/payment/success?payment_intent=${encodeURIComponent(pi.id)}`)
