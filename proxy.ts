@@ -12,13 +12,21 @@ export function proxy(request: NextRequest) {
   const personalizedMatch = canonicalUrl.pathname.match(/^\/p\/([^/]+)$/)
   if (personalizedMatch) {
     const business = canonicalUrl.searchParams.get("business")
-    const leadId = personalizedMatch[1]
 
     if (business) {
-      canonicalUrl.pathname = `/${toPreviewSlug(business, leadId)}`
+      canonicalUrl.pathname = `/${toPreviewSlug(business)}`
       canonicalUrl.search = ""
       return NextResponse.redirect(canonicalUrl, 308)
     }
+  }
+
+  // Redirect the previous clean-link format (business-name-abcdef) to the
+  // final business-name-only URL so the address bar stays clean.
+  const legacyPrettyMatch = canonicalUrl.pathname.match(/^\/([^/]+)-([a-f0-9]{6})$/i)
+  if (legacyPrettyMatch) {
+    canonicalUrl.pathname = `/${legacyPrettyMatch[1]}`
+    canonicalUrl.search = ""
+    return NextResponse.redirect(canonicalUrl, 308)
   }
 
   if (request.nextUrl.hostname === CHECKOUT_HOST) {
@@ -29,5 +37,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/checkout", "/p/:path*"],
+  matcher: ["/checkout", "/p/:path*", "/:previewSlug"],
 }
