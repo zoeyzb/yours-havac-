@@ -46,21 +46,6 @@ async function createHostedSession(method: HostedMethod) {
   return p.data.url as string
 }
 
-function getBillingCountry() {
-  if (typeof window === "undefined") return "US"
-  try {
-    if (Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Karachi") return "PK"
-  } catch {}
-  const locales = [navigator.language, ...(navigator.languages ?? [])].filter(Boolean)
-  for (const locale of locales) {
-    try {
-      const region = new Intl.Locale(locale).region
-      if (region && /^[A-Z]{2}$/.test(region)) return region
-    } catch {}
-  }
-  return "US"
-}
-
 function reportWalletDebug(stage: string, event?: any) {
   if (typeof window === "undefined") return
   let canMakePayments: boolean | null = null
@@ -133,7 +118,7 @@ export function CheckoutForm() {
         cardElementsRef.current = cardElements
 
         card = cardElements.create("payment", {
-          fields: { billingDetails: { address: "never" } },
+          fields: { billingDetails: { address: "if_required" } },
           wallets: { link: "never" },
           layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
           paymentMethodOrder: ["card"],
@@ -178,7 +163,7 @@ export function CheckoutForm() {
     }
   }, [])
 
-  async function confirm(elements: any, billingCountry?: string) {
+  async function confirm(elements: any) {
     const stripe = stripeRef.current
     if (!stripe || !elements || busyRef.current) return
     busyRef.current = true
@@ -187,9 +172,7 @@ export function CheckoutForm() {
     try {
       const s = await elements.submit?.()
       if (s?.error) { setError(s.error.message || "Check your payment details."); return }
-      const confirmParams: any = { return_url: `${window.location.origin}/payment/success` }
-      if (billingCountry) confirmParams.payment_method_data = { billing_details: { address: { country: billingCountry } } }
-      const r = await stripe.confirmPayment({ elements, confirmParams, redirect: "if_required" })
+      const r = await stripe.confirmPayment({ elements, confirmParams: { return_url: `${window.location.origin}/payment/success` }, redirect: "if_required" })
       if (r?.error) { setError(r.error.message || "Payment could not be completed."); return }
       const pi = r?.paymentIntent
       if (pi?.status === "succeeded" || pi?.status === "processing") window.location.assign(`/payment/success?payment_intent=${encodeURIComponent(pi.id)}`)
@@ -282,7 +265,7 @@ export function CheckoutForm() {
 
     {cashOpen ? <div className="cashapp-panel"><div ref={cashRef} /><button type="button" disabled={!cashReady || busy} className="cashapp-confirm" onClick={() => confirm(cashElementsRef.current)}>{busy ? "Processing…" : "Continue with Cash App Pay"}</button></div> : null}
 
-    <form className="selected-payment-form selected-payment-form--card" onSubmit={e => { e.preventDefault(); void confirm(cardElementsRef.current, getBillingCountry()) }}>
+    <form className="selected-payment-form selected-payment-form--card" onSubmit={e => { e.preventDefault(); void confirm(cardElementsRef.current) }}>
       <div className="card-payment-heading"><span>CARD</span><strong>Enter card details</strong></div>
       <div className="site-payment-element-wrap">{!cardReady && !error ? <div className="site-payment-loading">Preparing secure card payment…</div> : null}<div ref={cardRef} /></div>
       <div className="apple-pay-below-card"><div ref={appleRef} /></div>
