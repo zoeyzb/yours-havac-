@@ -58,7 +58,6 @@ export function CheckoutForm() {
   const googleRef = useRef<HTMLDivElement>(null)
   const stripeRef = useRef<any>(null)
   const cardElementsRef = useRef<any>(null)
-  const appleElementsRef = useRef<any>(null)
   const cashElementsRef = useRef<any>(null)
   const googleElementsRef = useRef<any>(null)
   const googleStarted = useRef(false)
@@ -81,32 +80,19 @@ export function CheckoutForm() {
 
     void (async () => {
       try {
-        const [, cardIntent, appleIntent] = await Promise.all([
+        const [, cardIntent] = await Promise.all([
           ensureStripeJs(),
           createIntent("card"),
-          createIntent("card"),
         ])
-        if (dead || !window.Stripe || !cardRef.current) return
+        if (dead || !window.Stripe || !cardRef.current || !appleRef.current) return
 
         const stripe = window.Stripe(cardIntent.publishableKey)
         stripeRef.current = stripe
 
         const cardElements = stripe.elements({ clientSecret: cardIntent.clientSecret, appearance })
         cardElementsRef.current = cardElements
-        card = cardElements.create("payment", {
-          fields: { billingDetails: { address: "never" } },
-          wallets: { applePay: "never", googlePay: "never", link: "never" },
-          layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
-          paymentMethodOrder: ["card"],
-        })
-        card.on("ready", () => !dead && setCardReady(true))
-        card.mount(cardRef.current)
 
-        if (!appleRef.current) return
-
-        const appleElements = stripe.elements({ clientSecret: appleIntent.clientSecret, appearance })
-        appleElementsRef.current = appleElements
-        apple = appleElements.create("expressCheckout", {
+        apple = cardElements.create("expressCheckout", {
           paymentMethods: {
             applePay: "always",
             googlePay: "never",
@@ -123,8 +109,17 @@ export function CheckoutForm() {
           emailRequired: false,
           phoneNumberRequired: false,
         })
-        apple.on("confirm", () => confirm(appleElementsRef.current))
+        apple.on("confirm", () => confirm(cardElementsRef.current))
         apple.mount(appleRef.current)
+
+        card = cardElements.create("payment", {
+          fields: { billingDetails: { address: "never" } },
+          wallets: { applePay: "auto", googlePay: "never", link: "never" },
+          layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
+          paymentMethodOrder: ["card"],
+        })
+        card.on("ready", () => !dead && setCardReady(true))
+        card.mount(cardRef.current)
       } catch (e) {
         if (!dead) setError(e instanceof Error ? e.message : "Secure checkout could not load.")
       }
