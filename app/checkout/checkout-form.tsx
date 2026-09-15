@@ -118,7 +118,6 @@ export function CheckoutForm() {
         cardElementsRef.current = cardElements
 
         card = cardElements.create("payment", {
-          fields: { billingDetails: { address: "never" } },
           wallets: { link: "never" },
           layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
           paymentMethodOrder: ["card"],
