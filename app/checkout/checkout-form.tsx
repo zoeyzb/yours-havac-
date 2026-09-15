@@ -117,8 +117,18 @@ export function CheckoutForm() {
         const cardElements = stripe.elements({ clientSecret: cardIntent.clientSecret, appearance })
         cardElementsRef.current = cardElements
 
+        card = cardElements.create("payment", {
+          fields: { billingDetails: { address: "never" } },
+          wallets: { link: "never" },
+          layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
+          paymentMethodOrder: ["card"],
+        })
+        card.on("ready", () => !dead && setCardReady(true))
+        card.mount(cardRef.current)
+
+        const appleElements = cardElements
         reportWalletDebug("before-mount")
-        apple = cardElements.create("expressCheckout", {
+        apple = appleElements.create("expressCheckout", {
           paymentMethods: {
             applePay: "always",
             googlePay: "never",
@@ -140,15 +150,6 @@ export function CheckoutForm() {
         apple.on("loaderror", (event: any) => reportWalletDebug("loaderror", event))
         apple.on("confirm", () => confirm(cardElementsRef.current))
         apple.mount(appleRef.current)
-
-        card = cardElements.create("payment", {
-          fields: { billingDetails: { address: "never" } },
-          wallets: { link: "never" },
-          layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
-          paymentMethodOrder: ["card"],
-        })
-        card.on("ready", () => !dead && setCardReady(true))
-        card.mount(cardRef.current)
       } catch (e) {
         reportWalletDebug("init-error", { error: e })
         if (!dead) setError(e instanceof Error ? e.message : "Secure checkout could not load.")
