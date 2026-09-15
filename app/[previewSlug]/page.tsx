@@ -10,8 +10,8 @@ type PrettyPreviewPageProps = {
 export async function generateMetadata({ params }: PrettyPreviewPageProps): Promise<Metadata> {
   const { previewSlug } = await params
   const businessName = businessNameFromPreviewSlug(previewSlug)
-  const title = `${businessName} — Website Preview`
-  const description = `A website preview prepared for ${businessName}.`
+  const title = `${businessName} Website`
+  const description = `Website prepared for ${businessName}.`
 
   return {
     title,
