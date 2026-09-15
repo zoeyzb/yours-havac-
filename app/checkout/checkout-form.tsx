@@ -6,6 +6,7 @@ import { ArrowRight, Check, ChevronDown, Landmark, LockKeyhole } from "lucide-re
 declare global {
   interface Window {
     Stripe?: (key: string) => any
+    ApplePaySession?: { canMakePayments?: () => boolean }
   }
 }
 
@@ -43,6 +44,30 @@ async function createHostedSession(method: HostedMethod) {
   const p = await r.json().catch(() => null)
   if (!r.ok || !p?.data?.url) throw new Error(p?.error?.message || "That payment option is not available right now.")
   return p.data.url as string
+}
+
+function reportWalletDebug(stage: string, event?: any) {
+  if (typeof window === "undefined") return
+  let canMakePayments: boolean | null = null
+  try { canMakePayments = window.ApplePaySession?.canMakePayments?.() ?? null } catch {}
+  const payload = {
+    stage,
+    hostname: window.location.hostname,
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    applePaySession: typeof window.ApplePaySession !== "undefined",
+    canMakePayments,
+    paymentRequest: typeof window.PaymentRequest !== "undefined",
+    availablePaymentMethods: event?.availablePaymentMethods ?? event?.available_payment_methods ?? null,
+    paymentMethods: event?.paymentMethods ?? null,
+    error: event?.error ? { type: event.error.type ?? null, message: event.error.message ?? null } : null,
+  }
+  void fetch("/api/checkout/wallet-debug", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => {})
 }
 
 const appearance = {
@@ -92,7 +117,18 @@ export function CheckoutForm() {
         const cardElements = stripe.elements({ clientSecret: cardIntent.clientSecret, appearance })
         cardElementsRef.current = cardElements
 
-        apple = cardElements.create("expressCheckout", {
+        card = cardElements.create("payment", {
+          fields: { billingDetails: { address: "never" } },
+          wallets: { link: "never" },
+          layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
+          paymentMethodOrder: ["card"],
+        })
+        card.on("ready", () => !dead && setCardReady(true))
+        card.mount(cardRef.current)
+
+        const appleElements = cardElements
+        reportWalletDebug("before-mount")
+        apple = appleElements.create("expressCheckout", {
           paymentMethods: {
             applePay: "always",
             googlePay: "never",
@@ -102,25 +138,20 @@ export function CheckoutForm() {
             klarna: "never",
           },
           layout: { maxColumns: 1, maxRows: 1, overflow: "never" },
-          buttonHeight: 52,
+          buttonHeight: 55,
           buttonTheme: { applePay: "black" },
           buttonType: { applePay: "plain" },
           billingAddressRequired: false,
           emailRequired: false,
           phoneNumberRequired: false,
         })
+        apple.on("ready", (event: any) => reportWalletDebug("ready", event))
+        apple.on("availablepaymentmethodschange", (event: any) => reportWalletDebug("availablepaymentmethodschange", event))
+        apple.on("loaderror", (event: any) => reportWalletDebug("loaderror", event))
         apple.on("confirm", () => confirm(cardElementsRef.current))
         apple.mount(appleRef.current)
-
-        card = cardElements.create("payment", {
-          fields: { billingDetails: { address: "never" } },
-          wallets: { applePay: "auto", googlePay: "never", link: "never" },
-          layout: { type: "accordion", defaultCollapsed: false, radios: "never", spacedAccordionItems: false },
-          paymentMethodOrder: ["card"],
-        })
-        card.on("ready", () => !dead && setCardReady(true))
-        card.mount(cardRef.current)
       } catch (e) {
+        reportWalletDebug("init-error", { error: e })
         if (!dead) setError(e instanceof Error ? e.message : "Secure checkout could not load.")
       }
     })()
