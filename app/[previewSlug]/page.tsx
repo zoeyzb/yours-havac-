@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import HVACSite from "../../components/hvac-site"
+import PersonalizedPreviewBrand from "../../components/personalized-preview-brand"
 import { businessNameFromPreviewSlug } from "../../lib/preview-url"
 
 type PrettyPreviewPageProps = {
@@ -29,6 +30,14 @@ export async function generateMetadata({ params }: PrettyPreviewPageProps): Prom
   }
 }
 
-export default function PrettyPreviewPage() {
-  return <HVACSite currentPage="home" />
+export default async function PrettyPreviewPage({ params }: PrettyPreviewPageProps) {
+  const { previewSlug } = await params
+  const businessName = businessNameFromPreviewSlug(previewSlug)
+
+  return (
+    <>
+      <PersonalizedPreviewBrand businessName={businessName} />
+      <HVACSite currentPage="home" />
+    </>
+  )
 }
