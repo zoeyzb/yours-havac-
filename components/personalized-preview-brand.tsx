@@ -7,105 +7,20 @@ type PersonalizedPreviewBrandProps = {
 }
 
 export default function PersonalizedPreviewBrand({ businessName }: PersonalizedPreviewBrandProps) {
+  const cleanName = businessName.trim()
+
   useEffect(() => {
-    const cleanName = businessName.trim()
     if (!cleanName) return
 
-    document.documentElement.classList.add("personalized-preview")
-
-    let styleTag = document.getElementById("personalized-preview-mobile-style") as HTMLStyleElement | null
-    if (!styleTag) {
-      styleTag = document.createElement("style")
-      styleTag.id = "personalized-preview-mobile-style"
-      styleTag.textContent = `
-        @media (max-width: 767px) {
-          .personalized-preview .owner-preview-bar > div {
-            min-height: 48px;
-            gap: 8px !important;
-            padding: 8px 12px !important;
-          }
-
-          .personalized-preview .owner-preview-bar span {
-            overflow: visible !important;
-            white-space: nowrap !important;
-            text-overflow: clip !important;
-            font-size: 12px !important;
-            line-height: 1.15 !important;
-          }
-
-          .personalized-preview .owner-preview-bar a {
-            padding: 8px 11px !important;
-            font-size: 11px !important;
-            line-height: 1 !important;
-          }
-
-          .personalized-preview header > div:first-child {
-            display: grid !important;
-            grid-template-columns: minmax(0, 1fr) !important;
-            gap: 7px !important;
-            padding: 10px 14px 7px !important;
-          }
-
-          .personalized-preview header > div:first-child > a:first-child {
-            display: block !important;
-            width: 100% !important;
-            max-width: none !important;
-            padding: 3px 2px 2px !important;
-            text-align: center !important;
-          }
-
-          .personalized-preview header > div:first-child > a:first-child > div:first-child {
-            width: 100% !important;
-            max-width: none !important;
-            overflow: visible !important;
-            white-space: normal !important;
-            text-overflow: clip !important;
-            font-size: clamp(18px, 5.2vw, 23px) !important;
-            line-height: 1.08 !important;
-            font-weight: 950 !important;
-            letter-spacing: -0.035em !important;
-          }
-
-          .personalized-preview header > div:first-child > div:last-child {
-            display: none !important;
-          }
-
-          .personalized-preview header nav[aria-label="Mobile navigation"] {
-            display: grid !important;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-            gap: 0 !important;
-            width: 100% !important;
-            padding: 8px 6px !important;
-            font-size: 11px !important;
-            text-align: center !important;
-          }
-
-          .personalized-preview header nav[aria-label="Mobile navigation"] a {
-            display: block !important;
-            padding: 3px 2px !important;
-          }
-        }
-      `
-      document.head.appendChild(styleTag)
-    }
-
-    const applyPersonalization = () => {
+    const applyDesktopPersonalization = () => {
       const brandTitle = document.querySelector<HTMLElement>("header a[href='/'] > div:first-child")
       const ownerCopy = document.querySelector<HTMLElement>(".owner-preview-bar span")
-      const ownerCta = document.querySelector<HTMLAnchorElement>(".owner-preview-bar a")
 
       if (ownerCopy) ownerCopy.textContent = "We put in the work for you."
-      if (ownerCta) {
-        ownerCta.textContent = "Website $597 →"
-        ownerCta.setAttribute("aria-label", "Get this website for $597")
-      }
-
       if (!brandTitle) return false
 
       brandTitle.textContent = cleanName
       brandTitle.setAttribute("data-personalized-business-name", cleanName)
-
-      // Keep the full business name visible and prominent on desktop while fitting long names.
       brandTitle.style.fontSize = cleanName.length > 42 ? "15px" : cleanName.length > 30 ? "17px" : "20px"
       brandTitle.style.lineHeight = "1.08"
       brandTitle.style.fontWeight = "950"
@@ -124,25 +39,125 @@ export default function PersonalizedPreviewBrand({ businessName }: PersonalizedP
       return true
     }
 
-    if (!applyPersonalization()) {
-      const observer = new MutationObserver(() => {
-        if (applyPersonalization()) observer.disconnect()
-      })
+    if (applyDesktopPersonalization()) return
 
-      observer.observe(document.documentElement, { childList: true, subtree: true })
-      const timeout = window.setTimeout(() => observer.disconnect(), 5000)
+    const observer = new MutationObserver(() => {
+      if (applyDesktopPersonalization()) observer.disconnect()
+    })
 
-      return () => {
-        window.clearTimeout(timeout)
-        observer.disconnect()
-        document.documentElement.classList.remove("personalized-preview")
-      }
-    }
+    observer.observe(document.documentElement, { childList: true, subtree: true })
+    const timeout = window.setTimeout(() => observer.disconnect(), 5000)
 
     return () => {
-      document.documentElement.classList.remove("personalized-preview")
+      window.clearTimeout(timeout)
+      observer.disconnect()
     }
-  }, [businessName])
+  }, [cleanName])
 
-  return null
+  if (!cleanName) return null
+
+  return (
+    <>
+      <style>{`
+        .personalized-mobile-header { display: none; }
+
+        @media (max-width: 767px) {
+          .personalized-mobile-header {
+            display: block;
+            position: relative;
+            z-index: 90;
+            background: #f7f8f5;
+            color: #102630;
+            border-bottom: 1px solid #dfe7e4;
+          }
+
+          .personalized-mobile-header + .owner-preview-bar,
+          .personalized-mobile-header + .owner-preview-bar + header {
+            display: none !important;
+          }
+
+          .personalized-mobile-offer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-height: 46px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eadfd7;
+            background: #fff8f3;
+          }
+
+          .personalized-mobile-offer__text {
+            min-width: 0;
+            font-size: 13px;
+            line-height: 1.15;
+            font-weight: 950;
+            letter-spacing: -0.015em;
+          }
+
+          .personalized-mobile-offer__price {
+            flex: none;
+            border-radius: 999px;
+            background: #e7613b;
+            padding: 8px 12px;
+            color: white;
+            font-size: 12px;
+            line-height: 1;
+            font-weight: 950;
+            box-shadow: 0 8px 20px rgba(231,97,59,.18);
+          }
+
+          .personalized-mobile-brand {
+            padding: 12px 14px 10px;
+            text-align: center;
+            border-bottom: 1px solid #e7ece9;
+          }
+
+          .personalized-mobile-brand__name {
+            margin: 0 auto;
+            max-width: 100%;
+            font-size: clamp(20px, 5.6vw, 25px);
+            line-height: 1.05;
+            font-weight: 950;
+            letter-spacing: -0.04em;
+            overflow-wrap: anywhere;
+          }
+
+          .personalized-mobile-nav {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            padding: 8px 6px;
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.1;
+            font-weight: 900;
+            color: #5f7279;
+          }
+
+          .personalized-mobile-nav a {
+            display: block;
+            padding: 5px 2px;
+          }
+        }
+      `}</style>
+
+      <div className="personalized-mobile-header" aria-label={`Website preview for ${cleanName}`}>
+        <div className="personalized-mobile-offer">
+          <div className="personalized-mobile-offer__text">We put in the work for you.</div>
+          <a href="/checkout" className="personalized-mobile-offer__price">$597</a>
+        </div>
+
+        <div className="personalized-mobile-brand">
+          <div className="personalized-mobile-brand__name">{cleanName}</div>
+        </div>
+
+        <nav className="personalized-mobile-nav" aria-label="Preview navigation">
+          <a href="/">Home</a>
+          <a href="/#reviews">Reviews</a>
+          <a href="/services">Services</a>
+          <a href="/quote">Contact</a>
+        </nav>
+      </div>
+    </>
+  )
 }
